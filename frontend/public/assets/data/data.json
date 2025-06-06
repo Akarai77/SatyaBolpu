@@ -1,0 +1,107 @@
+{
+    "cultures": [
+        {
+            "title" : "Daivaradhane",
+            "images" : [ "/assets/Home/swiper/daivaradhane1.webp" , "/assets/Home/swiper/daivaradhane2.jpeg" , "/assets/Home/swiper/daivaradhane3.jpg"],
+            "descr" : "Daivaradhane is a sacred ritual of Tulunadu where divine spirits (Daivas) are invoked, worshipped, and embodied through possessed oracles, serving as intermediaries between gods and devotees."
+        },
+        {
+            "title" : "Nagaradhane",
+            "images" : ["/assets/Home/swiper/nagaradhane1.webp", "/assets/Home/swiper/nagaradhane2.jpg", "/assets/Home/swiper/nagaradhane3.jpg"],
+            "descr" : "Nagaradhane is the sacred serpent worship of Tulunadu, where the Indian cobra (Nāga) is venerated as a divine protector, ensuring prosperity, fertility, and ancestral blessings."
+        },
+        {
+            "title" : "Daivaradhane",
+            "images" : [ "/assets/Home/swiper/daivaradhane1.webp" , "/assets/Home/swiper/daivaradhane2.jpeg" , "/assets/Home/swiper/daivaradhane3.jpg"],
+            "descr" : "Daivaradhane is a sacred ritual of Tulunadu where divine spirits (Daivas) are invoked, worshipped, and embodied through possessed oracles, serving as intermediaries between gods and devotees."
+        },
+        {
+            "title" : "Nagaradhane",
+            "images" : ["/assets/Home/swiper/nagaradhane1.webp", "/assets/Home/swiper/nagaradhane2.jpg", "/assets/Home/swiper/nagaradhane3.jpg"],
+            "descr" : "Nagaradhane is the sacred serpent worship of Tulunadu, where the Indian cobra (Nāga) is venerated as a divine protector, ensuring prosperity, fertility, and ancestral blessings."
+        }
+    ],
+
+    "recent": [
+
+        {
+            "title" : "Malaraya",
+            "descr" : "lorem ipsum dolor sit",
+            "image" : "/assets/Home/recent/malaraya.JPG"
+        },
+        {
+            "title" : "Jumadi",
+            "descr" : "lorem ipsum dolor sit",
+            "image" : "/assets/Home/recent/jumadi.jpg"
+        },
+        {
+            "title" : "Kodamandaya",
+            "descr" : "lorem ipsum dolor sit",
+            "image" : "/assets/Home/recent/kodamandaya.jpg"
+        },
+        {
+            "title" : "Panjurli",
+            "descr" : "lorem ipsum dolor sit",
+            "image" : "/assets/Home/recent/panjurli.jpg"
+        },
+        {
+            "title" : "Pilichamundi",
+            "descr" : "lorem ipsum dolor sit",
+            "image" : "/assets/Home/recent/pilchandi.jpg"
+        }
+    ],
+
+    "campaigns" : [
+        {
+            "title" : "Title1",
+            "descr" : "lorem ipsum dolor sit",
+            "image" : "/assets/Home/campaigns/campaign.png"
+        },
+        {
+            "title" : "Title2",
+            "descr" : "lorem ipsum dolor sit",
+            "image" : "/assets/Home/campaigns/campaign.png"
+        },
+        {
+            "title" : "Title3",
+            "descr" : "lorem ipsum dolor sit",
+            "image" : "/assets/Home/campaigns/campaign.png"
+        },
+        {
+            "title" : "Title4",
+            "descr" : "lorem ipsum dolor sit",
+            "image" : "/assets/Home/campaigns/campaign.png"
+        }
+    ],
+
+    "explore" : [
+        {
+            "title" : "Daivaradhane",
+            "descr" : "Daivaradhane is a sacred ritual of Tulunadu where divine spirits (Daivas) are invoked, worshipped, and embodied through possessed oracles, serving as intermediaries between gods and devotees.",
+            "image" : "/assets/Explore/daivaradhane.webp",
+            "initialClass" : "w-2/5 h-screen top-0 left-0 z-0 bg-right [clip-path:polygon(0%_0%,100%_50%,100%_50%,0%_100%)]",
+            "finalClass" : "w-full h-screen top-0 left-0 z-10 bg-right [clip-path:polygon(0%_0%,100%_0%,100%_100%,0%_100%)]"
+        },
+        {
+            "title" : "Nagaradhane",
+            "descr" :"Nagaradhane is the sacred serpent worship of Tulunadu, where the Indian cobra (Nāga) is venerated as a divine protector, ensuring prosperity, fertility, and ancestral blessings.",
+            "image" : "/assets/Explore/nagaradhane.webp",
+            "initialClass" : "w-2/5 h-screen top-0 right-0 z-0 bg-[40%] [clip-path:polygon(0%_50%,100%_0%,100%_100%,0%_50%)]",
+            "finalClass" : "w-full h-screen top-0 right-0 z-10 bg-[40%] [clip-path:polygon(0%_0%,100%_0%,100%_100%,0%_100%)]"
+        },
+        {
+            "title" : "Yakshagana",
+            "descr" :"lorem ipsum dolor sit",
+            "image" : "/assets/Explore/yakshagana.webp",
+            "initialClass" : "h-1/2 w-screen top-0 z-0 bg-[50%_30%] [clip-path:polygon(0%_0%,100%_0%,60%_100%,40%_100%)]",
+            "finalClass" : "h-screen w-screen top-0 z-10 bg-[50%_30%] [clip-path:polygon(0%_0%,100%_0%,100%_100%,0%_100%)]"
+        },
+        {
+            "title" : "Kambala",
+            "descr" : "lorem ipsum dolor sit",
+            "image" : "/assets/Explore/kambala.webp",
+            "initialClass" : "h-1/2 w-screen bottom-0 z-0 bg-[50%_35%] [clip-path:polygon(40%_0%,60%_0%,100%_100%,0%_100%)]",
+            "finalClass" : "h-screen w-screen bottom-0 z-10 bg-[50%_35%] [clip-path:polygon(0%_0%,100%_0%,100%_100%,0%_100%)]"
+        }
+    ]
+}

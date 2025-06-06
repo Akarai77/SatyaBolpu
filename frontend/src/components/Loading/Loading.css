@@ -1,0 +1,20 @@
+.flame{
+    animation: flicker 3s linear infinite;
+    transform-origin: center bottom;
+}
+
+@keyframes flicker {
+    0%, 100% {
+      transform: skew(0deg, 0deg);
+    }
+    15% {
+      transform: skew(20deg, 0deg);
+    }
+    40% {
+      transform: skew(10deg, 0deg);
+    }
+    65% {
+      transform: skew(25deg, 0deg);
+    }   
+  }
+  
