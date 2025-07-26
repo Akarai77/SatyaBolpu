@@ -14,7 +14,7 @@ import MapComponent from '../components/MapComponent';
 import { useAuth } from '../context/AuthContext';
 import { buildAnimationProps } from '../constants/Animations';
 import SVGHeader from '../constants/SVGHeader';
-import useScrollRestoration from '../components/useScrollRestoration';
+import { useNavigate } from 'react-router-dom';
 
 gsap.registerPlugin(useGSAP); 
 gsap.registerPlugin(ScrollTrigger);
@@ -50,7 +50,7 @@ const Home = () => {
   const [isHovering,setHovering] = useState<boolean>(false);
   const [openIndex,setOpenIndex] = useState<boolean[]>([]);
 
-  const navigate = useScrollRestoration();
+  const navigate = useNavigate();
   const {token} = useAuth();
 
   useEffect(() => {
@@ -84,26 +84,26 @@ const Home = () => {
 
   useLayoutEffect(() => {
 
-    let ctx = gsap.context(() => {
+      let ctx = gsap.context(() => {
 
-    const animations = buildAnimationProps(
-      scrollWatcherRef,
-      headingRefs,
-      overlayRef,
-      foliageRef,
-      layer2Ref,
-      layer3Ref,
-      svgRef,
-      mapRef,
-      swiperRef,
-      bgRefs,
-      recentRefs
-    );
+          const animations = buildAnimationProps(
+              scrollWatcherRef,
+              headingRefs,
+              overlayRef,
+              foliageRef,
+              layer2Ref,
+              layer3Ref,
+              svgRef,
+              mapRef,
+              swiperRef,
+              bgRefs,
+              recentRefs
+          );
 
-    animations.forEach(({ ref, fromVars, toVars }) => {
-      gsap.fromTo(ref, fromVars, toVars);
-    });
-    })
+          animations.forEach(({ ref, fromVars, toVars }) => {
+              gsap.fromTo(ref, fromVars, toVars);
+          });
+      })
 
     return () => ctx.revert();
 

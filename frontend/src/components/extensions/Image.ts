@@ -8,15 +8,49 @@ export const ResizableImage = Image.extend({
       ...this.parent?.(),
       width: {
         default: '300px',
-        parseHTML: (element) => element.getAttribute('width'),
+        parseHTML: (element: HTMLElement) => element.getAttribute('width') || '300px',
         renderHTML: (attributes) => ({ width: attributes.width }),
       },
       height: {
         default: 'auto',
-        parseHTML: (element) => element.getAttribute('height'),
+        parseHTML: (element) => element.getAttribute('height') || 'auto',
         renderHTML: (attributes) => ({ height: attributes.height }),
       },
+      align: {
+        default: 'center',
+        parseHTML: (element) => element.getAttribute('align') || 'center',
+        renderHTML: (attributes) => ({
+          'align': attributes.align,
+        }),
+      },
     };
+  },
+
+  renderHTML({ HTMLAttributes }) {
+    const { src, alt, width, height, align } = HTMLAttributes;
+
+    const tailwindAlignClass =
+      align === 'left' ? 'mr-auto' :
+      align === 'right' ? 'ml-auto' :
+      'mx-auto';
+
+    return [
+      'div',
+      {
+        class: `custom-image-wrapper w-fit ${tailwindAlignClass}`,
+        'data-align': align,
+      },
+      [
+        'img',
+        {
+          src,
+          alt,
+          width,
+          height,
+          style: 'max-width: 100%; display: block;',
+        },
+      ],
+    ];
   },
 
   addNodeView() {

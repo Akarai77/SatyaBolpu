@@ -16,7 +16,7 @@ interface ResizableImageProps {
   deleteNode: () => void;
 }
 
-const ResizableImageComponent = ({ node, updateAttributes, selected, deleteNode }: ResizableImageProps) => {
+const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ResizableImageProps) => {
   const imgRef = useRef<HTMLImageElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [showMenu, setShowMenu] = useState<boolean>(false);
@@ -164,4 +164,4 @@ const ResizableImageComponent = ({ node, updateAttributes, selected, deleteNode 
   );
 };
 
-export default ResizableImageComponent;
+export default ImageComponent;

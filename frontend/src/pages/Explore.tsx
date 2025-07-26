@@ -1,15 +1,17 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { MdCancel } from "react-icons/md";
 import Button from "../components/Button";
 import { useLoading } from "../context/LoadingContext";
 import LoadingPage from "../components/Loading/LoadingPage";
-import useScrollRestoration from "../components/useScrollRestoration";
+import { useNavigate } from "react-router-dom";
+import gsap from "gsap";
 
 interface dataType {
   title: string;
   descr: string;
   image: string;
   clipPathInitial: string;
+  clipPathNormal: string;
   clipPathFinal: string;
   position: string;
   placement: string;
@@ -18,8 +20,9 @@ interface dataType {
 const Explore = () => {
   const [active, setActive] = useState<number | null>(null);
   const [data, setData] = useState<dataType[]>([]);
+  const refs = useRef<HTMLDivElement[]>([]);
   const { isLoading, setLoading } = useLoading();
-  const navigate = useScrollRestoration();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -42,6 +45,29 @@ const Explore = () => {
     fetchData();
   }, []);
 
+  useLayoutEffect(() => {
+      let ctx = gsap.context(() => {
+          if(refs.current) {
+              refs.current.map((ref,index) => {
+                  gsap.fromTo(
+                      ref,
+                      {
+                          clipPath: data[index].clipPathInitial
+                      },
+                      {
+                          clipPath: data[index].clipPathNormal,
+                          ease: 'power4.inOut',
+                          duration: 0.4 * index + 0.1
+                      }
+                  )
+              })
+          }
+      });
+
+      return () => ctx.revert();
+
+  },[data])
+
   const handleClick = useCallback((index: number) => () => setActive(index), []);
   
   const handleCancelClick = useCallback((e: React.MouseEvent) => {
@@ -56,7 +82,7 @@ const Explore = () => {
       {data.map((item, index) => {
         const isActive = active === index;
         const style = {
-          clipPath: isActive ? item.clipPathFinal : item.clipPathInitial,
+          clipPath: isActive ? item.clipPathFinal : item.clipPathNormal,
           backgroundImage: `url('${item.image}')`,
           backgroundPosition: item.position,
           zIndex: isActive ? 50 : 10,
@@ -84,6 +110,9 @@ const Explore = () => {
           <div
             key={index}
             style={style}
+            ref={(el) => {
+                if(el) refs.current[index] = el;
+            }}
             className={`${baseClass + placement} ${isActive ? 'before:hidden w-full h-full' : 'before:visible' + dimensions}`}
             onClick={handleClick(index)}>
             <div className={`absolute w-screen h-screen transition-all duration-200 ${placement}

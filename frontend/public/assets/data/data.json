@@ -56,7 +56,8 @@
       "title": "Daivaradhane",
       "descr": "Daivaradhane is a sacred ritual of Tulunadu where divine spirits (Daivas) are invoked, worshipped, and embodied through possessed oracles, serving as intermediaries between gods and devotees.",
       "image": "/assets/Explore/daivaradhane.jpg",
-      "clipPathInitial": "polygon(0% 0%,100% 50%,100% 50%,0% 100%)",
+      "clipPathInitial": "polygon(0% 0%,0% 50%,0% 50%,0% 100%)",
+      "clipPathNormal" : "polygon(0% 0%,100% 50%,100% 50%,0% 100%)",
       "clipPathFinal": "polygon(0% 0%,100% 0%,100% 100%,0% 100%)",
       "position": "center center",
       "placement": "left"
@@ -65,7 +66,8 @@
       "title": "Nagaradhane",
       "descr": "Nagaradhane is the sacred serpent worship of Tulunadu, where the Indian cobra (Nāga) is venerated as a divine protector, ensuring prosperity, fertility, and ancestral blessings.",
       "image": "/assets/Explore/nagaradhane.webp",
-      "clipPathInitial": "polygon(0% 50%,100% 0%,100% 100%,0% 50%)",
+      "clipPathInitial": "polygon(100% 50%,100% 0%,100% 100%,100% 50%)",
+      "clipPathNormal": "polygon(0% 50%,100% 0%,100% 100%,0% 50%)",
       "clipPathFinal": "polygon(0% 0%,100% 0%,100% 100%,0% 100%)",
       "position": "center center",
       "placement": "right"
@@ -74,7 +76,8 @@
       "title": "Yakshagana",
       "descr": "lorem ipsum dolor sit",
       "image": "/assets/Explore/yakshagana.webp",
-      "clipPathInitial": "polygon(0% 0%,50% 100%,50% 100%,100% 0%)",
+      "clipPathInitial": "polygon(0% 0%,50% 0%,50% 0%,100% 0%)",
+      "clipPathNormal" : "polygon(0% 0%,50% 100%,50% 100%,100% 0%)",
       "clipPathFinal": "polygon(0% 0%,0% 100%,100% 100%,100% 0%)",
       "position": "center 20%",
       "placement": "top"
@@ -83,7 +86,8 @@
       "title": "Kambala",
       "descr": "lorem ipsum dolor sit",
       "image": "/assets/Explore/kambala.webp",
-      "clipPathInitial": "polygon(50% 0%,50% 0%,100% 100%,0% 100%)",
+      "clipPathInitial": "polygon(50% 100%,50% 100%,100% 100%,0% 100%)",
+      "clipPathNormal": "polygon(50% 0%,50% 0%,100% 100%,0% 100%)",
       "clipPathFinal": "polygon(0% 0%,100% 0%,100% 100%,0% 100%)",
       "position": "center 30%",
       "placement": "bottom"

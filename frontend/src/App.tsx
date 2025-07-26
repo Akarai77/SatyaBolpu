@@ -8,7 +8,6 @@ import Daivaradhane from './pages/Daivaradhane'
 import Editor from './components/Editor'
 
 function App() {
-
   return (
     <>
       <Routes>
