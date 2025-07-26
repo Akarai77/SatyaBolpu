@@ -51,57 +51,42 @@
         }
     ],
 
-    "campaigns" : [
-        {
-            "title" : "Title1",
-            "descr" : "lorem ipsum dolor sit",
-            "image" : "/assets/Home/campaigns/campaign.png"
-        },
-        {
-            "title" : "Title2",
-            "descr" : "lorem ipsum dolor sit",
-            "image" : "/assets/Home/campaigns/campaign.png"
-        },
-        {
-            "title" : "Title3",
-            "descr" : "lorem ipsum dolor sit",
-            "image" : "/assets/Home/campaigns/campaign.png"
-        },
-        {
-            "title" : "Title4",
-            "descr" : "lorem ipsum dolor sit",
-            "image" : "/assets/Home/campaigns/campaign.png"
-        }
-    ],
-
-    "explore" : [
-        {
-            "title" : "Daivaradhane",
-            "descr" : "Daivaradhane is a sacred ritual of Tulunadu where divine spirits (Daivas) are invoked, worshipped, and embodied through possessed oracles, serving as intermediaries between gods and devotees.",
-            "image" : "/assets/Explore/daivaradhane.webp",
-            "initialClass" : "w-2/5 h-screen top-0 left-0 z-0 bg-right [clip-path:polygon(0%_0%,100%_50%,100%_50%,0%_100%)]",
-            "finalClass" : "w-full h-screen top-0 left-0 z-10 bg-right [clip-path:polygon(0%_0%,100%_0%,100%_100%,0%_100%)]"
-        },
-        {
-            "title" : "Nagaradhane",
-            "descr" :"Nagaradhane is the sacred serpent worship of Tulunadu, where the Indian cobra (Nāga) is venerated as a divine protector, ensuring prosperity, fertility, and ancestral blessings.",
-            "image" : "/assets/Explore/nagaradhane.webp",
-            "initialClass" : "w-2/5 h-screen top-0 right-0 z-0 bg-[40%] [clip-path:polygon(0%_50%,100%_0%,100%_100%,0%_50%)]",
-            "finalClass" : "w-full h-screen top-0 right-0 z-10 bg-[40%] [clip-path:polygon(0%_0%,100%_0%,100%_100%,0%_100%)]"
-        },
-        {
-            "title" : "Yakshagana",
-            "descr" :"lorem ipsum dolor sit",
-            "image" : "/assets/Explore/yakshagana.webp",
-            "initialClass" : "h-1/2 w-screen top-0 z-0 bg-[50%_30%] [clip-path:polygon(0%_0%,100%_0%,60%_100%,40%_100%)]",
-            "finalClass" : "h-screen w-screen top-0 z-10 bg-[50%_30%] [clip-path:polygon(0%_0%,100%_0%,100%_100%,0%_100%)]"
-        },
-        {
-            "title" : "Kambala",
-            "descr" : "lorem ipsum dolor sit",
-            "image" : "/assets/Explore/kambala.webp",
-            "initialClass" : "h-1/2 w-screen bottom-0 z-0 bg-[50%_35%] [clip-path:polygon(40%_0%,60%_0%,100%_100%,0%_100%)]",
-            "finalClass" : "h-screen w-screen bottom-0 z-10 bg-[50%_35%] [clip-path:polygon(0%_0%,100%_0%,100%_100%,0%_100%)]"
-        }
-    ]
+  "explore": [
+    {
+      "title": "Daivaradhane",
+      "descr": "Daivaradhane is a sacred ritual of Tulunadu where divine spirits (Daivas) are invoked, worshipped, and embodied through possessed oracles, serving as intermediaries between gods and devotees.",
+      "image": "/assets/Explore/daivaradhane.jpg",
+      "clipPathInitial": "polygon(0% 0%,100% 50%,100% 50%,0% 100%)",
+      "clipPathFinal": "polygon(0% 0%,100% 0%,100% 100%,0% 100%)",
+      "position": "center center",
+      "placement": "left"
+    },
+    {
+      "title": "Nagaradhane",
+      "descr": "Nagaradhane is the sacred serpent worship of Tulunadu, where the Indian cobra (Nāga) is venerated as a divine protector, ensuring prosperity, fertility, and ancestral blessings.",
+      "image": "/assets/Explore/nagaradhane.webp",
+      "clipPathInitial": "polygon(0% 50%,100% 0%,100% 100%,0% 50%)",
+      "clipPathFinal": "polygon(0% 0%,100% 0%,100% 100%,0% 100%)",
+      "position": "center center",
+      "placement": "right"
+    },
+    {
+      "title": "Yakshagana",
+      "descr": "lorem ipsum dolor sit",
+      "image": "/assets/Explore/yakshagana.webp",
+      "clipPathInitial": "polygon(0% 0%,50% 100%,50% 100%,100% 0%)",
+      "clipPathFinal": "polygon(0% 0%,0% 100%,100% 100%,100% 0%)",
+      "position": "center 20%",
+      "placement": "top"
+    },
+    {
+      "title": "Kambala",
+      "descr": "lorem ipsum dolor sit",
+      "image": "/assets/Explore/kambala.webp",
+      "clipPathInitial": "polygon(50% 0%,50% 0%,100% 100%,0% 100%)",
+      "clipPathFinal": "polygon(0% 0%,100% 0%,100% 100%,0% 100%)",
+      "position": "center 30%",
+      "placement": "bottom"
+    }
+  ]
 }

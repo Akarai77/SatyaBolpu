@@ -14,38 +14,68 @@
     -moz-osx-font-smoothing: grayscale;
     interpolate-size: allow-keywords;
     --primary : #E87E36;
-  }
+}
 
 
-  *{
+*{
     padding: 0;
     margin: 0;
     border: none;
-  }
+}
 
-  body{
+body{
     overflow-x: hidden;
-  }
+}
+
+[contenteditable] {
+    outline: none;
+    border: none;
+}
+
+[contenteditable]:focus {
+    outline: none;
+    border: none;
+    box-shadow: none;
+}
+
 
 ::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
+    width: 8px;
+    height: 8px;
 }
 
 ::-webkit-scrollbar-track {
-  background: black;
+    background: black;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--primary);
-  border-radius: 10px;
+    background: var(--primary);
+    border-radius: 10px;
 }
-
+ 
 ::-webkit-scrollbar-thumb:hover {
-  background: #ff4d00;
-  cursor: grab;
+    background: #ff4d00;
+    cursor: grab;
 }
 
 ::-webkit-scrollbar-thumb:active{
-  cursor: grabbing;
+    cursor: grabbing;
 }
+
+.is-editor-empty::before {
+  content: attr(data-placeholder);
+  color: #aaa;
+  pointer-events: none;
+  height: 0;
+  font-style: italic;
+  position: absolute;
+}
+
+blockquote {
+  border-left: 4px solid #666;
+  margin-left: 1em;
+  padding-left: 1em;
+  font-style: italic;
+  color: #aaa;
+}
+

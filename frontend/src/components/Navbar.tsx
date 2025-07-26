@@ -28,7 +28,8 @@ const Navbar = () => {
 
   const NavLinks = () => {
     return (
-      <div className={`flex flex-col text-xl font-semibold absolute lg:relative top-0 lg:flex-row items-center justify-center h-screen lg:h-auto gap-5`}>
+      <div className={`flex flex-col text-xl font-semibold absolute lg:relative top-0 
+                       lg:flex-row items-center justify-center h-screen lg:h-auto gap-5`}>
         <NavLink
           style={{textShadow: '1px 1px 6px black'}}
           className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${location.pathname === '/' ? 'text-primary' : ''}`}
@@ -59,7 +60,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className={`navbar z-[9999] text-white w-screen flex p-7 items-center justify-between ${location.pathname === '/' ? 'absolute bg-transparent' : 'relative bg-black'}`}>
+      <nav className={`navbar z-[9998] text-white w-screen flex p-7 items-center justify-between ${location.pathname === '/' ? 'absolute bg-transparent' : 'relative bg-black'}`}>
         <div className="brand flex gap-2 items-center justify-center">
           <NavLink to="/">
             <img src="/assets/logoen.png" alt="logo" className="logo w-14 aspect-square" />
