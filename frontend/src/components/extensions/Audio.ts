@@ -1,8 +1,8 @@
 import { Node, ReactNodeViewRenderer } from '@tiptap/react';
-import VideoComponent from './VideoComponent';
+import AudioComponent from './AudioComponent';
 
-export const Video = Node.create({
-    name: "video",
+export const Audio = Node.create({
+    name: "audio",
 
     group: "block",
     selectable: true,
@@ -17,19 +17,6 @@ export const Video = Node.create({
             controls: {
                 default: true
             },
-            autoplay: {
-                defaut: false
-            },
-            width: {
-                default: '300px',
-                parseHTML: (element: HTMLElement) => element.getAttribute('width') || '300px',
-                    renderHTML: (attributes) => ({ width: attributes.width }),
-            },
-            height: {
-                default: 'auto',
-                parseHTML: (element) => element.getAttribute('height') || 'auto',
-                renderHTML: (attributes) => ({ height: attributes.height }),
-            },
             align: {
                 default: 'center',
                 parseHTML: (element) => element.getAttribute('align') || 'center',
@@ -41,7 +28,7 @@ export const Video = Node.create({
     },
 
     renderHTML({ HTMLAttributes }) {
-        const { src, type, width, height, align, controls, autoplay } = HTMLAttributes;
+        const { src, type, align, controls } = HTMLAttributes;
 
         const tailwindAlignClass =
             align === 'left' ? 'mr-auto' :
@@ -54,22 +41,20 @@ export const Video = Node.create({
                 class: `w-fit ${tailwindAlignClass}`,
             },
             [
-                'video',
+                'audio',
                 {
                     src,
                     type,
-                    width,
-                    height,
                     controls,
-                    autoplay,
-                    style: 'max-width: 100%; display: block;',
+                    style: 'width: 100%; display: block;',
                 },
             ],
         ];
     },
 
     addNodeView() {
-        return ReactNodeViewRenderer(VideoComponent);
+        return ReactNodeViewRenderer(AudioComponent);
     },
 });
+
 

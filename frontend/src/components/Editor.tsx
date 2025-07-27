@@ -11,6 +11,9 @@ import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo } from 'react-icons/fa';
 import { ResizableImage } from './extensions/Image';
 import { useLenis } from '../context/LenisContext';
 import { Video } from './extensions/Video';
+import { Audio } from './extensions/Audio';
+import Button from './Button';
+import { Iframe } from './extensions/Iframe';
 
 type clickedType = {
   bold: boolean;
@@ -30,7 +33,23 @@ const TiptapEditor = () => {
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [preview,setPreview] = useState<boolean>(false);
   const [body,setBody] = useState<string>('');
+  const [showAttachmentMenu,setShowAttachmentMenu] = useState<boolean>(false);
+  const [askEmbedUrl,setAskEmbedUrl] = useState<boolean>(false);
+  const [embedUrl,setEmbedUrl] = useState<string>('');
   const lenis = useLenis();
+
+  const attachmentRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const handleClick = (e: MouseEvent) => {
+        if(attachmentRef.current && !attachmentRef.current.contains(e.target as Node)) {
+            setShowAttachmentMenu(false);
+        }
+    }
+
+    window.addEventListener('mousedown',handleClick);
+    return () => window.removeEventListener('mousedown',handleClick);
+  },[])
 
   const editor = useEditor({
     extensions: [
@@ -39,6 +58,8 @@ const TiptapEditor = () => {
         FontSize,
         ResizableImage,
         Video,
+        Audio,
+        Iframe,
         Placeholder.configure({
             placeholder: '...',
             emptyEditorClass: 'is-editor-empty',
@@ -68,6 +89,11 @@ const TiptapEditor = () => {
           editor.chain().focus();
           let button = key === 'b' ? 'bold' : key === 'i' ? 'italic' : 'underline'
           handleClick(button)
+        }
+
+        if(key === 'p') {
+            e.preventDefault()
+            handlePreview()
         }
       }
     };
@@ -128,7 +154,27 @@ const TiptapEditor = () => {
                     controls: true
                 }
             })
+        } else if(type == 'audio') {
+            editor?.commands.insertContent({
+                type: "audio",
+                attrs : {
+                    src: url,
+                    controls: true
+                }
+            })
         }
+    }
+  }
+
+  const handleEmbedUrl = () => {
+    if(embedUrl) {
+        setAskEmbedUrl(false)
+        editor.commands.insertContent({
+            type: "iframeEmbed",
+            attrs: {
+                html: embedUrl
+            }
+        })
     }
   }
 
@@ -138,10 +184,16 @@ const TiptapEditor = () => {
       .replace(/(<br>\s*)+$/g, '');
   };
 
+  const decodeHtml = (html: string) => {
+      const txt = document.createElement('textarea')
+      txt.innerHTML = html
+      return txt.value
+  }
+
 
   const handlePreview = () => {
     if(editor) {
-        setPreview(!preview);
+        setPreview(prev => !prev);
         setBody(formatHtml(editor.getHTML()));
         console.log(editor.getHTML())
     }
@@ -158,18 +210,52 @@ const TiptapEditor = () => {
           vid.currentTime = 0;
       });
 
+      const audios = document.querySelectorAll('audio');
+      audios.forEach((aud) => {
+          aud.pause();
+          aud.currentTime = 0;
+      });
+
+      const iframes = document.querySelectorAll('iframe');
+      iframes.forEach((iframe) => {
+          const src = iframe.src;
+          iframe.src = '';
+          iframe.src = src;
+      });
+
       return () => {
           lenis.initLenis();
       };
   }, [preview]);
 
   return (
-    <div className="w-full">
-        <div className={`w-full relative flex-col items-center justify-center gap-10 py-20 bg-black ${preview ? 'hidden' : 'flex'}`}>
+    <div className="w-full relative">
+        <div className={`w-full relative flex-col items-center justify-center gap-10 py-20 bg-black
+               ${askEmbedUrl ? 'pointer-events-none' : ''} ${preview ? 'hidden' : 'flex'}`}>
+            <div className={`w-full h-full absolute top-0 z-10 bg-white bg-opacity-50 overflow-hidden
+                   pointer-events-none ${askEmbedUrl ? '' : 'hidden'}`}
+            ></div>
+            {
+                askEmbedUrl &&
+                <div className='fixed w-1/3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+                                 flex flex-col gap-5 items-center justify-center bg-black text-primary text-center p-5
+                                 rounded-xl pointer-events-auto z-50'>
+                    <label htmlFor="url" className='font-black text-[1.5rem]'>Enter Embed Url</label>
+                    <input 
+                      type="url" 
+                      name='url' 
+                      className='w-4/5 p-2 text-black' 
+                      onInput={(e) => setEmbedUrl(e.target.value)}/>
+                    <Button 
+                      content='Submit' 
+                      className='text-[1.2rem]'
+                      onClick={handleEmbedUrl}/>
+                </div>
+            }
             <div className="w-full flex flex-col justify-center items-center gap-10 mb-10">
                 <textarea
                   className="text-primary w-4/5 text-6xl text-center font-bold bg-black
-                             text-wrap focus:outline-none resize-none"
+                             text-wrap focus:outline-none resize-none [srollbar-width:none]"
                   value={title}
                   rows={1}
                   ref={titleRef}
@@ -190,18 +276,31 @@ const TiptapEditor = () => {
             <div className='flex gap-5 sticky bottom-10 items-center justify-center'>
                 <div className="flex items-center justify-center gap-2 bg-white p-3 rounded-full">
             
-                    <button
-                      className={`text-[2rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg `}
-                      onClick={() => fileRef.current?.click()}>
-                        <RiAttachmentLine />
-                        <input 
-                            type="file"
-                            ref={fileRef}
-                            onChange={handleFileInput}
-                            accept='video/*,image/*'
-                            className='hidden'
-                        />
-                    </button>
+                    <div className='relative flex flex-col items-center justify-center' ref={attachmentRef}>
+                        <button
+                          className={`text-[2rem] cursor-pointer hover:scale-110 bg-none p-1 rounded-lg `}
+                          onClick={() => setShowAttachmentMenu(!showAttachmentMenu)}>
+                            <RiAttachmentLine />
+                            <input 
+                                type="file"
+                                ref={fileRef}
+                                onChange={handleFileInput}
+                                accept='video/*,image/*,audio/*'
+                                className='hidden'
+                            />
+                        </button>
+                        <ul className={`list-none text-nowrap absolute bg-white text-center bottom-full 
+                            mb-5 rounded-xl overflow-hidden transition-all duration-200 ${showAttachmentMenu ? 'h-auto' : 'h-0'}`}>
+                            <li 
+                              className='p-2 border border-solid border-t-2 hover:bg-primary cursor-pointer'
+                              onClick={() => { setShowAttachmentMenu(false); fileRef.current?.click()}}
+                            >Upload File</li>
+                            <li 
+                              className='p-2 border border-solid border-t-2 hover:bg-primary cursor-pointer'
+                              onClick={() => { setShowAttachmentMenu(false); setAskEmbedUrl(true)}}
+                            >Embed</li>
+                        </ul>
+                    </div>    
 
                     <select 
                       className='text-center outline-none cursor-pointer' 
@@ -302,7 +401,7 @@ const TiptapEditor = () => {
             <div 
               className='text-white text-[1.5rem] w-4/5 p-5 break-words'
               dangerouslySetInnerHTML={{
-                  __html : body
+                  __html : decodeHtml(body)
               }}      
             >
             </div>

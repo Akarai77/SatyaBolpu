@@ -1,23 +1,21 @@
 import { NodeViewWrapper } from '@tiptap/react';
 import { useRef, useState, useEffect } from 'react';
 
-interface ImageComponentProps {
+interface AudioComponentProps {
   node: {
     attrs: {
       src: string;
-      width?: string | number;
-      height?: string | number;
-      alt?: string;
+      type: string;
+      controls: boolean;
       align?: 'left' | 'center' | 'right';
     };
   };
   updateAttributes: (attrs: Record<string, any>) => void;
-  selected: boolean;
   deleteNode: () => void;
 }
 
-const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ImageComponentProps) => {
-  const imgRef = useRef<HTMLImageElement | null>(null);
+const AudioComponent = ({ node, updateAttributes, deleteNode }: AudioComponentProps) => {
+  const audioRef = useRef<HTMLVideoElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -34,7 +32,7 @@ const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ImageC
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!imgRef.current || !wrapperRef.current) return;
+    if (!audioRef.current || !wrapperRef.current) return;
 
     const rect = wrapperRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -52,41 +50,6 @@ const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ImageC
     setShowMenu(true);
   };
 
-  const startResize = (e: React.MouseEvent) => {
-    if (!imgRef.current || !wrapperRef.current) return;
-    e.preventDefault();
-    const startX = e.clientX;
-    const startWidth = imgRef.current.offsetWidth;
-
-    const computedStyle = window.getComputedStyle(imgRef.current);
-    const maxWidthStr = computedStyle.maxWidth;
-    let maxWidth = parseFloat(maxWidthStr);
-
-    if (maxWidthStr.endsWith('%') && wrapperRef.current) {
-      const parentWidth = wrapperRef.current.parentElement?.offsetWidth || window.innerWidth;
-      maxWidth = (parseFloat(maxWidthStr) / 100) * parentWidth;
-    } else if (maxWidthStr === 'none' || maxWidthStr === 'auto' || isNaN(maxWidth)) {
-      maxWidth = wrapperRef.current.parentElement?.offsetWidth || imgRef.current.naturalWidth;
-    }
-
-    const doResize = (moveEvent: MouseEvent) => {
-      let newWidth = Math.max(50, startWidth + (moveEvent.clientX - startX));
-      newWidth = Math.min(newWidth, maxWidth);
-
-      updateAttributes({
-        width: `${newWidth}px`,
-      });
-    };
-
-    const stopResize = () => {
-      window.removeEventListener('mousemove', doResize);
-      window.removeEventListener('mouseup', stopResize);
-    };
-
-    window.addEventListener('mousemove', doResize);
-    window.addEventListener('mouseup', stopResize);
-  };
-
   const handleMenuAction = (action: 'left' | 'center' | 'right' | 'delete') => {
     if (action === 'delete') {
       deleteNode();
@@ -102,21 +65,18 @@ const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ImageC
     >
       <div
       ref={wrapperRef}
-        className={`relative
+        className={`relative 
             ${node.attrs.align === 'center' ? 'ml-auto mr-auto' : 
-            node.attrs.align === 'right' ? 'ml-auto' : 
-            node.attrs.align === 'left' ? 'mr-auto' : ''}`}
+              node.attrs.align === 'right' ? 'ml-auto' : 
+              node.attrs.align === 'left' ? 'mr-auto' : ''}`}
       >
-        <img
-          ref={imgRef}
-          src={node.attrs.src}
-          width={node.attrs.width}
-          height={node.attrs.height}
-          alt={node.attrs.alt || 'Resizable image'}
+        <audio
+          controls={node.attrs.controls}
+          ref={audioRef}
           onContextMenu={handleContextMenu}
-          className={`max-w-full z-10`}
-          style={{ opacity: selected ? 0.9 : 1, display: 'block' }}
-        />
+        >
+            <source src={node.attrs.src} type={node.attrs.type} />
+        </audio>
         <div
           className={`absolute bg-white border border-solid border-black z-20 text-sm ${showMenu ? 'block' : 'hidden'}`}
           style={{
@@ -152,16 +112,10 @@ const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ImageC
             </li>
           </ul>
         </div>
-        {selected && (
-            <div
-                onMouseDown={startResize}
-                className="absolute right-[-8px] bottom-[-8px] w-4 h-4 bg-blue-500 cursor-se-resize z-10 rounded-full"
-            />
-        )}
-
       </div>
     </NodeViewWrapper>
   );
 };
 
-export default ImageComponent;
+export default AudioComponent;
+
