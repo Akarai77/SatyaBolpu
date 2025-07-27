@@ -37,7 +37,7 @@ export const ResizableImage = Image.extend({
     return [
       'div',
       {
-        class: `custom-image-wrapper w-fit ${tailwindAlignClass}`,
+        class: `w-fit ${tailwindAlignClass}`,
         'data-align': align,
       },
       [

@@ -10,6 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo } from 'react-icons/fa';
 import { ResizableImage } from './extensions/Image';
 import { useLenis } from '../context/LenisContext';
+import { Video } from './extensions/Video';
 
 type clickedType = {
   bold: boolean;
@@ -37,6 +38,7 @@ const TiptapEditor = () => {
         TextStyle,
         FontSize,
         ResizableImage,
+        Video,
         Placeholder.configure({
             placeholder: '...',
             emptyEditorClass: 'is-editor-empty',
@@ -114,8 +116,19 @@ const TiptapEditor = () => {
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if(file) {
+        const type = file.type.split('/')[0];
         const url = URL.createObjectURL(file);
-        editor?.chain().focus().setImage({ src:url }).run();
+        if(type === 'image') {
+            editor?.chain().focus().setImage({ src:url }).run();
+        } else if(type === 'video') {
+            editor?.commands.insertContent({
+                type: "video",
+                attrs : {
+                    src: url,
+                    controls: true
+                }
+            })
+        }
     }
   }
 
@@ -135,14 +148,20 @@ const TiptapEditor = () => {
   }
 
   useEffect(() => {
-    if(preview) {
-        lenis.destroyLenis();
-    }
+      if (preview) {
+          lenis.destroyLenis();
+      }
 
-    return () => {
-        lenis.initLenis();
-    }
-  },[preview])
+      const videos = document.querySelectorAll('video');
+      videos.forEach((vid) => {
+          vid.pause();
+          vid.currentTime = 0;
+      });
+
+      return () => {
+          lenis.initLenis();
+      };
+  }, [preview]);
 
   return (
     <div className="w-full">
@@ -179,7 +198,7 @@ const TiptapEditor = () => {
                             type="file"
                             ref={fileRef}
                             onChange={handleFileInput}
-                            accept='.jpg,.png,.webp,.jpeg,.mp4,.mkv'
+                            accept='video/*,image/*'
                             className='hidden'
                         />
                     </button>

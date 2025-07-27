@@ -15,6 +15,7 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, {}>((_,ref) => {
   const INITIAL_ZOOM : number = 9;
   const [zoom,setZoom] = useState<number>(INITIAL_ZOOM);
   const center: LatLngExpression = [13.006995870591474, 75.07172913896241];
+  const [focus,setFocus] = useState<boolean>(false);
   const {isLoading,setLoading} = useLoading();
 
   const maxBounds: LatLngBoundsExpression = [
@@ -37,6 +38,19 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, {}>((_,ref) => {
     fetchGeoJson();
     }, []);
 
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent) => {
+        if(ref && !ref.current.contains(e.target as Node)) {
+            setFocus(false); 
+        } else {
+            setFocus(true);
+        }
+    }
+
+    document.addEventListener("mousedown",handleClickOutside);
+    return () => document.removeEventListener("mousedown",handleClickOutside);
+  },[]);
+
   const MapEvents = () => {
     const map = useMap();
 
@@ -55,24 +69,34 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, {}>((_,ref) => {
     }, [map]);
 
     useEffect(() => {
-    if (map) {
-        if (lock) {
-        map.dragging.disable();
-        map.touchZoom.disable();
-        map.doubleClickZoom.disable();
-        map.scrollWheelZoom.disable();
-        map.boxZoom.disable();
-        map.keyboard.disable();
-        } else {
-        map.dragging.enable();
-        map.touchZoom.enable();
-        map.doubleClickZoom.enable();
-        map.scrollWheelZoom.enable();
-        map.boxZoom.enable();
-        map.keyboard.enable();
+        if (map) {
+            if (lock) {
+                map.dragging.disable();
+                map.touchZoom.disable();
+                map.doubleClickZoom.disable();
+                map.scrollWheelZoom.disable();
+                map.boxZoom.disable();
+                map.keyboard.disable();
+            } else {
+                map.dragging.enable();
+                map.touchZoom.enable();
+                map.doubleClickZoom.enable();
+                map.scrollWheelZoom.enable();
+                map.boxZoom.enable();
+                map.keyboard.enable();
+            }
         }
-    }
     }, [map,lock]);
+
+    useEffect(() => {
+        if(map) {
+            if(focus) {
+                map.scrollWheelZoom.enable();
+            } else {
+                map.scrollWheelZoom.disable();
+            }
+        }
+    }, [map,focus]);
 
     return null;
   };
@@ -112,8 +136,16 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, {}>((_,ref) => {
           }
       </div>
 
-      <MapContainer className="z-0 relative w-full h-full" center={center} zoom={INITIAL_ZOOM} maxBounds={maxBounds} minZoom={INITIAL_ZOOM} scrollWheelZoom={false} zoomControl={false}>
-        <MapEvents /> {/*A Seperate func component MpaEvents is required to acccess the map instance as ref is not working initially for some reason*/}
+      <MapContainer 
+        className="z-0 relative w-full h-full" 
+        center={center} 
+        zoom={INITIAL_ZOOM} 
+        maxBounds={maxBounds} 
+        minZoom={INITIAL_ZOOM} 
+        scrollWheelZoom={false} 
+        zoomControl={false}>
+
+        <MapEvents /> {/*A Seperate func component MapEvents is required to acccess the map instance as ref is not working initially for some reason*/}
           <TileLayer
               url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
               attribution='&copy; <a class="pr-2" target="_blank" href="https://www.esri.com/">Esri</a>'

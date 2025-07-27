@@ -16,6 +16,7 @@ const MAP = () => {
     const [lock,setLock] = useState<boolean>(false);
     const INITIAL_ZOOM : number = 9;
     const [zoom,setZoom] = useState<number>(INITIAL_ZOOM);
+    const [focus,setFocus] = useState<boolean>(false);
     const center: LatLngExpression = [13.006995870591474, 75.07172913896241];
     const [isFullScreen,setFullScreen] = useState<boolean>(false);
     const [dragging,setDragging] = useState<boolean>(false);
@@ -43,6 +44,19 @@ const MAP = () => {
 
         ["districts", "dakshina_kannada", "udupi", "kasaragod"].forEach(fetchGeoJson);
     }, []);
+
+    useEffect(() => {
+        const handleClickOutside = (e: MouseEvent) => {
+            if(mapRef.current && !mapRef.current.contains(e.target as Node)) {
+                setFocus(false); 
+            } else {
+                setFocus(true);
+            }
+        }
+
+        document.addEventListener("mousedown",handleClickOutside);
+        return () => document.removeEventListener("mousedown",handleClickOutside);
+    },[]);
 
     useEffect(()=>{
         if(mapRef.current){
@@ -91,6 +105,16 @@ const MAP = () => {
                 }
             }
         }, [map,lock]);
+
+        useEffect(() => {
+            if (map) {
+                if (focus) {
+                    map.scrollWheelZoom.enable();
+                } else {
+                    map.scrollWheelZoom.disable();
+                }
+            }
+        }, [map,focus]);
 
         {/* The below useffect callback function is necessary as while dragging the map the tooltips of the layers which come
             under the dragging radius are opened and the user needs to click on the screen to close them.*/}

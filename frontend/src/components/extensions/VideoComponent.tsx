@@ -1,13 +1,15 @@
 import { NodeViewWrapper } from '@tiptap/react';
 import { useRef, useState, useEffect } from 'react';
 
-interface ImageComponentProps {
+interface VideoComponentProps {
   node: {
     attrs: {
       src: string;
+      type: string;
+      controls: boolean;
+      autoplay: boolean;
       width?: string | number;
       height?: string | number;
-      alt?: string;
       align?: 'left' | 'center' | 'right';
     };
   };
@@ -16,8 +18,8 @@ interface ImageComponentProps {
   deleteNode: () => void;
 }
 
-const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ImageComponentProps) => {
-  const imgRef = useRef<HTMLImageElement | null>(null);
+const VideoComponent = ({ node, updateAttributes, selected, deleteNode }: VideoComponentProps) => {
+  const videoRef = useRef<HTMLVideoElement | null>(null);
   const wrapperRef = useRef<HTMLDivElement | null>(null);
   const [showMenu, setShowMenu] = useState<boolean>(false);
   const [menuPosition, setMenuPosition] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
@@ -34,7 +36,7 @@ const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ImageC
 
   const handleContextMenu = (e: React.MouseEvent) => {
     e.preventDefault();
-    if (!imgRef.current || !wrapperRef.current) return;
+    if (!videoRef.current || !wrapperRef.current) return;
 
     const rect = wrapperRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -53,12 +55,12 @@ const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ImageC
   };
 
   const startResize = (e: React.MouseEvent) => {
-    if (!imgRef.current || !wrapperRef.current) return;
+    if (!videoRef.current || !wrapperRef.current) return;
     e.preventDefault();
     const startX = e.clientX;
-    const startWidth = imgRef.current.offsetWidth;
+    const startWidth = videoRef.current.offsetWidth;
 
-    const computedStyle = window.getComputedStyle(imgRef.current);
+    const computedStyle = window.getComputedStyle(videoRef.current);
     const maxWidthStr = computedStyle.maxWidth;
     let maxWidth = parseFloat(maxWidthStr);
 
@@ -66,7 +68,7 @@ const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ImageC
       const parentWidth = wrapperRef.current.parentElement?.offsetWidth || window.innerWidth;
       maxWidth = (parseFloat(maxWidthStr) / 100) * parentWidth;
     } else if (maxWidthStr === 'none' || maxWidthStr === 'auto' || isNaN(maxWidth)) {
-      maxWidth = wrapperRef.current.parentElement?.offsetWidth || imgRef.current.naturalWidth;
+      maxWidth = wrapperRef.current.parentElement?.offsetWidth || videoRef.current.videoWidth;
     }
 
     const doResize = (moveEvent: MouseEvent) => {
@@ -104,19 +106,21 @@ const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ImageC
       ref={wrapperRef}
         className={`relative 
             ${node.attrs.align === 'center' ? 'ml-auto mr-auto' : 
-            node.attrs.align === 'right' ? 'ml-auto' : 
-            node.attrs.align === 'left' ? 'mr-auto' : ''}`}
+              node.attrs.align === 'right' ? 'ml-auto' : 
+              node.attrs.align === 'left' ? 'mr-auto' : ''}`}
       >
-        <img
-          ref={imgRef}
-          src={node.attrs.src}
+        <video
+          controls={node.attrs.controls}
+          autoPlay={node.attrs.autoplay}
+          ref={videoRef}
           width={node.attrs.width}
           height={node.attrs.height}
-          alt={node.attrs.alt || 'Resizable image'}
           onContextMenu={handleContextMenu}
           className={`max-w-full ${selected ? 'border border-solid border-blue-500' : ''}`}
           style={{ opacity: selected ? 0.9 : 1, display: 'block' }}
-        />
+        >
+            <source src={node.attrs.src} type={node.attrs.type} />
+        </video>
         <div
           className={`absolute bg-white border border-solid border-black z-20 text-sm ${showMenu ? 'block' : 'hidden'}`}
           style={{
@@ -163,4 +167,5 @@ const ImageComponent = ({ node, updateAttributes, selected, deleteNode }: ImageC
   );
 };
 
-export default ImageComponent;
+export default VideoComponent;
+
