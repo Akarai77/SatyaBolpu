@@ -1,60 +1,115 @@
-import { Node, ReactNodeViewRenderer } from '@tiptap/react';
+import { Node, mergeAttributes, ReactNodeViewRenderer } from '@tiptap/react';
+import { Node as ProseMirrorNode } from 'prosemirror-model';
 import AudioComponent from './AudioComponent';
+import { element } from 'prop-types';
 
 export const Audio = Node.create({
-    name: "audio",
+  name: 'audio',
 
-    group: "block",
-    selectable: true,
-    draggable: true,
-    atom: true,
+  group: 'block',
+  selectable: true,
+  draggable: true,
+  atom: true,
 
-    addAttributes() {
-        return {
-            src: {
-                default: null
+  addAttributes() {
+    return {
+        src: {
+            default: null,
+            parseHTML: (element: HTMLElement) => element.getAttribute('src'),
+                renderHTML: (attributes: Record<string, any>) => ({
+                src: attributes.src,
+            }),
+        },
+        type: {
+            default: null,
+            parseHTML: (element: HTMLElement) => element.getAttribute('type'),
+                renderHTML: (attributes: Record<string, any>) => ({
+                type: attributes.type,
+            }),
+        },
+        controls : {
+            default: true,
+            parseHtml: (element: HTMLElement) => element.getAttribute('controls'),
+            renderHTML: (attributes: Record<string, any>) => ({
+                controls: attributes.controls
+            })
+        },
+        width: {
+            default: '300px',
+            parseHTML: (element: HTMLElement) => element.getAttribute('width') || '300px',
+                renderHTML: (attributes) => ({ width: attributes.width }),
+        },
+        height: {
+            default: 'auto',
+            parseHTML: (element) => element.getAttribute('height') || 'auto',
+                renderHTML: (attributes) => ({ height: attributes.height }),
+        },
+        align: {
+            default: 'center',
+            parseHTML: (element) => element.getAttribute('align') || 'center',
+                renderHTML: (attributes) => ({
+                'align': attributes.align,
+            }),
+        },
+        caption: {
+            default: '',
+            parseHTML: (element: HTMLElement) => {
+                const captionElement = element.querySelector('p.caption')
+                return captionElement?.textContent ?? ''
             },
-            controls: {
-                default: true
-            },
-            align: {
-                default: 'center',
-                parseHTML: (element) => element.getAttribute('align') || 'center',
-                    renderHTML: (attributes) => ({
-                    'align': attributes.align,
-                }),
-            },
-        };
-    },
+            renderHTML: (attributes: Record<string, any>) => ({
+                caption: attributes.caption,
+            }),
+        },
+    };
+  },
 
-    renderHTML({ HTMLAttributes }) {
-        const { src, type, align, controls } = HTMLAttributes;
+  parseHTML() {
+    return [
+      {
+        tag: 'audio[src]',
+      },
+    ];
+  },
 
-        const tailwindAlignClass =
-            align === 'left' ? 'mr-auto' :
-            align === 'right' ? 'ml-auto' :
-            'mx-auto';
+  renderHTML({ HTMLAttributes }) {
+    const { src, type, width, height, caption, controls } = HTMLAttributes
 
-        return [
-            'div',
-            {
-                class: `w-fit ${tailwindAlignClass}`,
-            },
-            [
-                'audio',
-                {
-                    src,
-                    type,
-                    controls,
-                    style: 'width: 100%; display: block;',
-                },
-            ],
-        ];
-    },
+    const audioChildren = [
+      [
+        'audio',
+        {
+          src,
+          type,
+          controls,
+          width,
+          height,
+          style: 'max-width: 100%; display: block;',
+        },
+      ],
+    ]
 
-    addNodeView() {
-        return ReactNodeViewRenderer(AudioComponent);
-    },
+    if (caption) {
+      audioChildren.push([
+        'p',
+        {
+          class: 'caption text-center text-[1rem] text-gray-300 mt-2',
+        },
+        caption,
+      ])
+    }
+
+    return [
+      'div',
+      {
+        class: `w-fit mx-auto`,
+      },
+      ...audioChildren,
+    ]
+  },
+
+  addNodeView() {
+    return ReactNodeViewRenderer(AudioComponent);
+  },
 });
-
 

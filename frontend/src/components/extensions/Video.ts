@@ -12,13 +12,25 @@ export const Video = Node.create({
     addAttributes() {
         return {
             src: {
-                default: null
+                default: null,
+                parseHTML: (element: HTMLElement) => element.getAttribute('src'),
+                    renderHTML: (attributes: Record<string, any>) => ({
+                    src: attributes.src,
+                }),
+            },
+            type: {
+                default: null,
+                parseHTML: (element: HTMLElement) => element.getAttribute('type'),
+                renderHTML: (attributes: Record<string, any>) => ({
+                  type: attributes.type,
+                }),
             },
             controls: {
-                default: true
-            },
-            autoplay: {
-                defaut: false
+                default: true,
+                parseHTML: (element: HTMLElement) => element.getAttribute('controls'),
+                renderHTML: (attributes: Record<string, any>) => ({
+                  controls: attributes.controls,
+                }),
             },
             width: {
                 default: '300px',
@@ -37,36 +49,61 @@ export const Video = Node.create({
                     'align': attributes.align,
                 }),
             },
+              caption: {
+                default: '',
+                parseHTML: (element: HTMLElement) => {
+                  const captionElement = element.querySelector('p.caption')
+                  return captionElement?.textContent ?? ''
+                },
+                renderHTML: (attributes: Record<string, any>) => ({
+                  caption: attributes.caption,
+                }),
+              },
         };
     },
 
-    renderHTML({ HTMLAttributes }) {
-        const { src, type, width, height, align, controls, autoplay } = HTMLAttributes;
+  renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
+    const { src, type, width, height, align, caption, controls } = HTMLAttributes
 
-        const tailwindAlignClass =
-            align === 'left' ? 'mr-auto' :
-            align === 'right' ? 'ml-auto' :
-            'mx-auto';
+    const tailwindAlignClass =
+      align === 'left'
+        ? 'mr-auto'
+        : align === 'right'
+        ? 'ml-auto'
+        : 'mx-auto'
 
-        return [
-            'div',
-            {
-                class: `w-fit ${tailwindAlignClass}`,
-            },
-            [
-                'video',
-                {
-                    src,
-                    type,
-                    width,
-                    height,
-                    controls,
-                    autoplay,
-                    style: 'max-width: 100%; display: block;',
-                },
-            ],
-        ];
-    },
+    const videoChildren = [
+      [
+        'video',
+        {
+          src,
+          type,
+          controls,
+          width,
+          height,
+          style: 'max-width: 100%; display: block;',
+        },
+      ],
+    ]
+
+    if (caption) {
+      videoChildren.push([
+        'p',
+        {
+          class: 'caption text-center text-[1rem] text-gray-300 mt-2',
+        },
+        caption,
+      ])
+    }
+
+    return [
+      'div',
+      {
+        class: `w-fit ${tailwindAlignClass}`,
+      },
+      ...videoChildren,
+    ]
+  },
 
     addNodeView() {
         return ReactNodeViewRenderer(VideoComponent);

@@ -1,17 +1,21 @@
-import { NodeViewWrapper } from '@tiptap/react'
-import React from 'react'
+import { useRef } from 'react';
+import BaseComponent from './BaseComponent';
 
-export default function IframeComponent({ node }: any) {
-  const html = node.attrs.html
+const VideoComponent = (props) => {
+  const { node } = props;
+  const IFrameRef = useRef<HTMLDivElement | null>(null);
 
-  return (
-      <NodeViewWrapper>
-        <div
+  const IFrameEl = (
+      <div
           className='w-fit mx-auto'
           data-iframe-embed
-          dangerouslySetInnerHTML={{ __html: html }}
-        />
-      </NodeViewWrapper>
-  )
-}
+          ref={IFrameRef}
+          dangerouslySetInnerHTML={{ __html: node.attrs.html }}
+      />
+  );
+
+  return <BaseComponent {...props} enableCaption mediaRef={IFrameRef} mediaElement={IFrameEl} />;
+};
+
+export default VideoComponent;
 

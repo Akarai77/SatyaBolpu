@@ -12,6 +12,16 @@ export const Iframe = Node.create({
       html: {
         default: '',
       },
+      caption: {
+        default: '',
+        parseHTML: (element: HTMLElement) => {
+          const captionElement = element.querySelector('p.caption')
+          return captionElement?.textContent ?? ''
+        },
+        renderHTML: (attributes: Record<string, any>) => ({
+          caption: attributes.caption,
+        }),
+      },
     }
   },
 
@@ -26,16 +36,31 @@ export const Iframe = Node.create({
     ]
   },
 
-  renderHTML({ HTMLAttributes }) {
-    return [
+
+renderHTML({ HTMLAttributes }) {
+  const { caption, html } = HTMLAttributes;
+
+  return [
+    'div',
+    { 
+        class: 'w-fit mx-auto',
+    },
+    [
       'div',
       {
         'data-iframe-embed': 'true',
-        contenteditable: 'false',
       },
-      HTMLAttributes.html
+      html
+    ],
+    [
+      'p',
+      {
+        class: 'caption text-center text-[1rem] text-gray-300 mt-2'
+      },
+      caption || ''
     ]
-  },
+  ];
+},
 
   addNodeView() {
     return ReactNodeViewRenderer(IframeComponent)
