@@ -57,6 +57,7 @@ const Explore = () => {
                       {
                           clipPath: data[index].clipPathNormal,
                           ease: 'power4.inOut',
+                          delay: 0.25,
                           duration: 0.4 * index + 0.1
                       }
                   )

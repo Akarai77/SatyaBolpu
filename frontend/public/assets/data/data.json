@@ -92,5 +92,102 @@
       "position": "center 30%",
       "placement": "bottom"
     }
-  ]
+  ],
+  "categories" : [
+      {
+          "title" : "Daivaradhane",
+          "items" : [
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              },
+              {
+                  "title" : "Title1",
+                  "image" : "/assets/Explore/daivaradhane.jpg",
+                  "alt" : "Daivaradhane",
+                  "content" : "content1"
+              }
+            ]
+        }
+    ]
 }

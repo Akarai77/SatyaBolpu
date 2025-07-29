@@ -15,7 +15,6 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, {}>((_,ref) => {
   const INITIAL_ZOOM : number = 9;
   const [zoom,setZoom] = useState<number>(INITIAL_ZOOM);
   const center: LatLngExpression = [13.006995870591474, 75.07172913896241];
-  const [focus,setFocus] = useState<boolean>(false);
   const {isLoading,setLoading} = useLoading();
 
   const maxBounds: LatLngBoundsExpression = [
@@ -38,67 +37,67 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, {}>((_,ref) => {
     fetchGeoJson();
     }, []);
 
-  useEffect(() => {
-    const handleClickOutside = (e: MouseEvent) => {
-        if(ref && !ref.current.contains(e.target as Node)) {
-            setFocus(false); 
-        } else {
-            setFocus(true);
-        }
-    }
-
-    document.addEventListener("mousedown",handleClickOutside);
-    return () => document.removeEventListener("mousedown",handleClickOutside);
-  },[]);
-
   const MapEvents = () => {
-    const map = useMap();
+      const map = useMap();
 
-    useEffect(() => {
-        setMap(map);
-    }, [map]);
+      useEffect(() => {
+          setMap(map);
+      }, [map]);
 
-    useEffect(() => {
-    if(map){
-        const handleZoom = () => setZoom(map.getZoom());
-        map.on("zoomend", handleZoom);
-        return () => {
-            map.off("zoomend", handleZoom);
-        };
-    }
-    }, [map]);
+      useEffect(() => {
+          if(map){
+              const handleZoom = () => setZoom(map.getZoom());
+              map.on("zoomend", handleZoom);
+              return () => {
+                  map.off("zoomend", handleZoom);
+              };
+          }
+      }, [map]);
 
-    useEffect(() => {
-        if (map) {
-            if (lock) {
-                map.dragging.disable();
-                map.touchZoom.disable();
-                map.doubleClickZoom.disable();
-                map.scrollWheelZoom.disable();
-                map.boxZoom.disable();
-                map.keyboard.disable();
-            } else {
-                map.dragging.enable();
-                map.touchZoom.enable();
-                map.doubleClickZoom.enable();
-                map.scrollWheelZoom.enable();
-                map.boxZoom.enable();
-                map.keyboard.enable();
-            }
-        }
-    }, [map,lock]);
+      useEffect(() => {
+          const handleKeyDown = (e: KeyboardEvent) => {
+              console.log(e);
+              if (e.ctrlKey && map) {
+                  map.scrollWheelZoom.enable();
+              } else {
+                  map?.scrollWheelZoom.disable();
+              }
+          };
 
-    useEffect(() => {
-        if(map) {
-            if(focus) {
-                map.scrollWheelZoom.enable();
-            } else {
-                map.scrollWheelZoom.disable();
-            }
-        }
-    }, [map,focus]);
+          const handleKeyUp = (e: KeyboardEvent) => {
+              if(map) {
+                  map.scrollWheelZoom.disable()
+              }
+          }
 
-    return null;
+          window.addEventListener('keydown', handleKeyDown);
+          window.addEventListener('keyup',handleKeyUp);
+          return () => {
+              window.removeEventListener('keydown', handleKeyDown);
+              window.removeEventListener('keyup',handleKeyUp);
+          };
+      }, [map]);
+
+      useEffect(() => {
+          if (map) {
+              if (lock) {
+                  map.dragging.disable();
+                  map.touchZoom.disable();
+                  map.doubleClickZoom.disable();
+                  map.scrollWheelZoom.disable();
+                  map.boxZoom.disable();
+                  map.keyboard.disable();
+              } else {
+                  map.dragging.enable();
+                  map.touchZoom.enable();
+                  map.doubleClickZoom.enable();
+                  map.boxZoom.enable();
+                  map.keyboard.enable();
+              }
+          }
+      }, [map,lock]);
+
+      return null;
   };
 
   const handleZoomChange = (delta: number) => map && map.setZoom(zoom + delta);

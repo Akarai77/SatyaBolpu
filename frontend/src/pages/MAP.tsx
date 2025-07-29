@@ -1,7 +1,7 @@
-import { MapContainer, TileLayer, GeoJSON, Marker, Popup, useMap } from "react-leaflet";
+import { MapContainer, TileLayer, GeoJSON, useMap } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
-import React, { act, useEffect, useRef, useState } from "react";
-import { LatLngBoundsExpression, LatLngExpression, Layer, Map } from "leaflet";
+import React, { useEffect, useRef, useState } from "react";
+import { LatLngBoundsExpression, LatLngExpression, Map } from "leaflet";
 import { IoLocationSharp } from "react-icons/io5";
 import { AiOutlineFullscreen,AiOutlineFullscreenExit } from "react-icons/ai";
 import { FaLock,FaLockOpen,FaPlus,FaMinus } from "react-icons/fa";
@@ -16,7 +16,6 @@ const MAP = () => {
     const [lock,setLock] = useState<boolean>(false);
     const INITIAL_ZOOM : number = 9;
     const [zoom,setZoom] = useState<number>(INITIAL_ZOOM);
-    const [focus,setFocus] = useState<boolean>(false);
     const center: LatLngExpression = [13.006995870591474, 75.07172913896241];
     const [isFullScreen,setFullScreen] = useState<boolean>(false);
     const [dragging,setDragging] = useState<boolean>(false);
@@ -44,19 +43,6 @@ const MAP = () => {
 
         ["districts", "dakshina_kannada", "udupi", "kasaragod"].forEach(fetchGeoJson);
     }, []);
-
-    useEffect(() => {
-        const handleClickOutside = (e: MouseEvent) => {
-            if(mapRef.current && !mapRef.current.contains(e.target as Node)) {
-                setFocus(false); 
-            } else {
-                setFocus(true);
-            }
-        }
-
-        document.addEventListener("mousedown",handleClickOutside);
-        return () => document.removeEventListener("mousedown",handleClickOutside);
-    },[]);
 
     useEffect(()=>{
         if(mapRef.current){
@@ -87,6 +73,30 @@ const MAP = () => {
         }, [map]);
 
         useEffect(() => {
+            const handleKeyDown = (e: KeyboardEvent) => {
+                console.log(e);
+                if (e.ctrlKey && map) {
+                    map.scrollWheelZoom.enable();
+                } else {
+                    map?.scrollWheelZoom.disable();
+                }
+            };
+
+            const handleKeyUp = (e: KeyboardEvent) => {
+                if(map) {
+                    map.scrollWheelZoom.disable()
+                }
+            }
+
+            window.addEventListener('keydown', handleKeyDown);
+            window.addEventListener('keyup',handleKeyUp);
+            return () => {
+                window.removeEventListener('keydown', handleKeyDown);
+                window.removeEventListener('keyup',handleKeyUp);
+            };
+        }, [map]);
+
+        useEffect(() => {
             if (map) {
                 if (lock) {
                     map.dragging.disable();
@@ -99,22 +109,11 @@ const MAP = () => {
                     map.dragging.enable();
                     map.touchZoom.enable();
                     map.doubleClickZoom.enable();
-                    map.scrollWheelZoom.enable();
                     map.boxZoom.enable();
                     map.keyboard.enable();
                 }
             }
         }, [map,lock]);
-
-        useEffect(() => {
-            if (map) {
-                if (focus) {
-                    map.scrollWheelZoom.enable();
-                } else {
-                    map.scrollWheelZoom.disable();
-                }
-            }
-        }, [map,focus]);
 
         {/* The below useffect callback function is necessary as while dragging the map the tooltips of the layers which come
             under the dragging radius are opened and the user needs to click on the screen to close them.*/}
@@ -186,7 +185,6 @@ const MAP = () => {
                 }
             },
             click: () => {
-                // Unstyle and reset tooltip of previous active
                 if (activeLayerRef.current && activeLayerRef.current !== layer) {
                     activeLayerRef.current.setStyle(styles.default);
                     const oldTooltipContent = activeLayerRef.current.getTooltip()?.getContent();
@@ -197,7 +195,6 @@ const MAP = () => {
                     });
                 }
 
-                // Toggle current
                 if (layer === activeLayerRef.current) {
                     layer.setStyle(styles.default);
                     const tooltipContent = layer.getTooltip()?.getContent();

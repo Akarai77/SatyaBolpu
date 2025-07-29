@@ -96,7 +96,9 @@ const Navbar = () => {
 
         <div className='hidden links lg:flex gap-5 font-semibold items-center justify-center text-xl'>
           <NavLinks />
-          <div className='hidden auth lg:flex gap-2 bg-black rounded-3xl overflow-hidden cursor-pointer'>
+          <div 
+            className={`hidden lg:flex gap-2 bg-black rounded-3xl overflow-hidden cursor-pointer
+              ${location.pathname !== '/' ? 'bg-white text-black' : ''}`}>
             <div className='hover:bg-primary p-2 pl-3'>
               Log In
             </div>
