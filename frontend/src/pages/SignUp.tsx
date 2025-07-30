@@ -1,0 +1,160 @@
+import { ChangeEvent, FormEvent, useState } from "react";
+import Button from "../components/Button";
+import PhoneInput from 'react-phone-input-2'
+import 'react-phone-input-2/lib/style.css'
+import { GrFormView, GrFormViewHide } from "react-icons/gr";
+
+type SignUpProps = {
+  name: string;
+  email: string;
+  phone?: string;
+  password: string;
+  confirmPassword: string;
+};
+
+const SignUp = () => {
+  const [formData, setFormData] = useState<SignUpProps>({
+    name: '',
+    email: '',
+    phone: '',
+    password: '',
+    confirmPassword: '',
+  });
+
+  const [showPassword, setShowPassword] = useState<boolean>(false);
+  const [errors, setErrors] = useState<string[]>([]);
+
+  const handleFormDataChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData((prev) => ({
+      ...prev,
+      [name]: value,
+    }));
+  };
+
+  const validateForm = () => {
+    const errorList: string[] = [];
+
+    if (!formData.name.trim()) errorList.push("Name is required.");
+    if (!formData.email.trim()) errorList.push("Email is required.");
+    if (!/\S+@\S+\.\S+/.test(formData.email)) errorList.push("Invalid email format.");
+    if (!formData.phone?.trim()) errorList.push("Phone number is required.");
+    if (!formData.password) errorList.push("Password is required.");
+    if (formData.password.length < 6) errorList.push("Password must be at least 6 characters.");
+    else if (formData.password !== formData.confirmPassword) errorList.push("Passwords do NOT match.");
+
+    return errorList;
+  };
+
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    const validationErrors = validateForm();
+
+    if (validationErrors.length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setErrors([]);
+    console.log("✅ Signing up user:", formData);
+  };
+
+  return (
+    <div className="w-screen min-h-screen text-primary flex flex-col items-center justify-center py-10">
+      <form
+        className="w-[90%] md:w-4/5 lg:w-3/5 xl:w-2/5 gap-5 border-4 border-white border-solid rounded-2xl
+        flex flex-col items-center justify-evenly py-10 text-[1.8rem]"
+        onSubmit={handleSubmit}
+      >
+        <h1 className="text-[4rem] font-semibold">Sign Up</h1>
+        
+        {errors.length > 0 && (
+          <ul className="text-red-500 list-disc text-[1.2rem] bg-red-100 p-4 pl-10 w-[80%] rounded-lg">
+            {errors.map((err, i) => (
+              <li key={i}>{err}</li>
+            ))}
+          </ul>
+        )}
+
+        <div className="w-4/5 md:w-2/3 flex flex-col">
+          <label htmlFor="name">Name:</label>
+          <input
+            className="text-black p-2 text-[1.5rem]"
+            type="text"
+            id="name"
+            name="name"
+            value={formData.name}
+            onChange={handleFormDataChange}
+            required
+          />
+        </div>
+
+        <div className="w-4/5 md:w-2/3 flex flex-col">
+          <label htmlFor="email">Email:</label>
+          <input
+            className="text-black p-2 text-[1.5rem]"
+            type="email"
+            id="email"
+            name="email"
+            value={formData.email}
+            onChange={handleFormDataChange}
+            required
+          />
+        </div>
+
+        <div className="w-4/5 md:w-2/3 flex flex-col" data-lenis-prevent>
+          <label htmlFor="phone">Phone:</label>
+          <PhoneInput
+            country={'in'}
+            value={formData.phone}
+            onChange={phone => setFormData(prev => ({ ...prev, phone }))}
+            inputStyle={{
+              width: '100%',
+              textAlign: 'center',
+              padding: '1.75rem',
+              fontSize: '1.5rem',
+              color: 'black'
+            }}
+          />
+        </div>
+
+        <div className="w-4/5 md:w-2/3 flex flex-col">
+          <label htmlFor="password" className="flex items-center justify-between">
+            Password:
+            <div className="cursor-pointer" onClick={() => setShowPassword(!showPassword)}>
+              {showPassword ? <GrFormViewHide /> : <GrFormView />}
+            </div>
+          </label>
+          <input
+            className="text-black p-2 text-[1.5rem]"
+            type={showPassword ? "text" : "password"}
+            id="password"
+            name="password"
+            value={formData.password}
+            onChange={handleFormDataChange}
+            required
+          />
+        </div>
+
+        <div className="w-4/5 md:w-2/3 flex flex-col">
+          <label htmlFor="confirmPassword">Confirm Password:</label>
+          <input
+            className="text-black p-2 text-[1.5rem]"
+            type={showPassword ? "text" : "password"}
+            id="confirmPassword"
+            name="confirmPassword"
+            value={formData.confirmPassword}
+            onChange={handleFormDataChange}
+            required
+          />
+        </div>
+
+        <Button className="text-[1.5rem]" type="submit" content="Sign Up" />
+
+      </form>
+    </div>
+  );
+};
+
+export default SignUp;
+

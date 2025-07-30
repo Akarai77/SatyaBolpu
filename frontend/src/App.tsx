@@ -8,12 +8,16 @@ import Daivaradhane from './pages/Daivaradhane'
 import Editor from './components/Editor'
 import CategoriesList from './pages/CategoriesList'
 import CategoryPage from './pages/CategoryPage'
+import Login from './pages/Login'
+import SignUp from './pages/SignUp'
 
 function App() {
   return (
     <>
       <Routes>
         <Route path='/' element={<Home/>}/>
+        <Route path='/login' element={<Login/>}/>
+        <Route path='/signup' element={<SignUp/>}/>
         <Route path='/explore' element={<Explore/>}/>
         <Route path='/map' element={<MAP/>}/>
         <Route path='/explore/daivaradhane' element={<Daivaradhane/>}/>
