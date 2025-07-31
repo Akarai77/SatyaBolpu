@@ -60,7 +60,7 @@ const Navbar = () => {
 
   return (
     <>
-      <nav className={`navbar z-[9998] text-white w-screen flex p-7 items-center justify-between ${location.pathname === '/' ? 'absolute bg-transparent' : 'relative bg-black'}`}>
+      <nav className={`navbar z-[9998] text-white w-screen flex p-7 items-center justify-between ${location.pathname === '/' && !isLoading ? 'absolute bg-transparent' : 'relative bg-black'}`}>
         <div className="brand flex gap-2 items-center justify-center">
           <NavLink to="/">
             <img src="/assets/logoen.png" alt="logo" className="logo w-14 aspect-square" />
@@ -72,12 +72,12 @@ const Navbar = () => {
           
         <div className='flex gap-1 sm:gap-3 font-semibold items-center justify-center'>
           <div className='lg:hidden text-sm sm:text-xl auth flex bg-black rounded-3xl overflow-hidden cursor-pointer'>
-            <div className='hover:bg-primary p-2 pl-3'>
+            <NavLink to="/login" className='hover:bg-primary p-2 pl-3'>
               Log In
-            </div>
-            <div className='hover:bg-primary p-2 pr-3'>
+            </NavLink>
+            <NavLink to="/signup" className='hover:bg-primary p-2 pr-3'>
               Sign Up
-            </div>
+            </NavLink>
           </div>
           {isMenuOpen ? (
               <MdOutlineHorizontalRule
@@ -99,17 +99,17 @@ const Navbar = () => {
           <div 
             className={`hidden lg:flex gap-2 bg-black rounded-3xl overflow-hidden cursor-pointer
               ${location.pathname !== '/' ? 'bg-white text-black' : ''}`}>
-            <div className='hover:bg-primary p-2 pl-3'>
+            <NavLink to='/login' className='hover:bg-primary p-2 pl-3'>
               Log In
-            </div>
-            <div className='hover:bg-primary p-2 pr-3'>
+            </NavLink>
+            <NavLink to='/signup' className='hover:bg-primary p-2 pr-3'>
               Sign Up
-            </div>
+            </NavLink>
           </div>
         </div>
       </nav>
       <div
-        className={`links lg:hidden text-xl font-semibold text-white text-center bg-black h-0 w-screen overflow-hidden flex flex-col items-center justify-center gap-3 absolute right-0 z-10 transition-all duration-500 ${
+        className={`links lg:hidden text-xl font-semibold text-white text-center bg-black h-0 w-screen overflow-hidden flex flex-col items-center justify-center gap-3 absolute right-0 z-[9999] transition-all duration-500 ${
           isMenuOpen ? 'h-screen' : ''
         }`}
         ref={menuRef}

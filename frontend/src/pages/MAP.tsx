@@ -6,7 +6,6 @@ import { IoLocationSharp } from "react-icons/io5";
 import { AiOutlineFullscreen,AiOutlineFullscreenExit } from "react-icons/ai";
 import { FaLock,FaLockOpen,FaPlus,FaMinus } from "react-icons/fa";
 import { useLoading } from "../context/LoadingContext";
-import LoadingPage from "../components/Loading/LoadingPage";
 
 const MAP = () => {
 
@@ -37,8 +36,9 @@ const MAP = () => {
                 setGeoJsonData(prev => ({ ...prev, [name]: data }));
             } catch (error) {
                 console.error(`Error loading ${name} GeoJSON:`, error);
+            } finally {
+                setLoading(false);
             }
-            setLoading(false)
         };
 
         ["districts", "dakshina_kannada", "udupi", "kasaragod"].forEach(fetchGeoJson);
@@ -218,114 +218,113 @@ const MAP = () => {
         });
     };
 
-    if(isLoading) return <LoadingPage/>
-        return (
-            <div className="w-screen h-screen relative overflow-hidden" ref={mapRef} >
-                <style>
-                    {`
-                        .leaflet-interactive:focus{
-                            outline: none;
-                        }
-                    `}
-                </style>
+    return (
+        <div className="w-screen h-screen relative overflow-hidden" ref={mapRef} >
+            <style>
+                {`
+                    .leaflet-interactive:focus{
+                        outline: none;
+                    }
+                `}
+            </style>
 
-                <div className="controls z-10 absolute flex flex-col justify-center items-center gap-2
-                left-7 top-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
-                    <div className={`flex h-[3.5rem] flex-col gap-2 bg-slate-100 rounded-md ${lock ? 'pointer-events-none' : ''}`}>
-                        <div className="h-1/2 p-1 pl-2 pr-2" onClick={() => handleZoomChange(1)}>
-                            <FaPlus className={`${lock ? 'text-slate-300' : 'text-black'}`}/>
-                        </div>
-
-                        <div className="h-1/2 p-1 pl-2 pr-2" onClick={() => handleZoomChange(-1)}>
-                            <FaMinus className={`${lock ? 'text-slate-300' : 'text-black'}`}/>
-                        </div>
-
+            <div className="controls z-10 absolute flex flex-col justify-center items-center gap-2
+            left-7 top-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
+                <div className={`flex h-[3.5rem] flex-col gap-2 bg-slate-100 rounded-md ${lock ? 'pointer-events-none' : ''}`}>
+                    <div className="h-1/2 p-1 pl-2 pr-2" onClick={() => handleZoomChange(1)}>
+                        <FaPlus className={`${lock ? 'text-slate-300' : 'text-black'}`}/>
                     </div>
 
-                    <IoLocationSharp
-                        className={`${lock ? 'text-slate-300 pointer-events-none' : 'text-red-500'}`}
-                        size={32}
-                        onClick={() => map && map.setView(center,INITIAL_ZOOM,{animate:true})}
-                        />
+                    <div className="h-1/2 p-1 pl-2 pr-2" onClick={() => handleZoomChange(-1)}>
+                        <FaMinus className={`${lock ? 'text-slate-300' : 'text-black'}`}/>
+                    </div>
 
-                        {
-                            lock ? 
-                                <FaLock
-                                    className="text-slate-500"
-                                    size={24}
-                                    onClick={() => setLock(false)}
-                                /> :
-                                <FaLockOpen
-                                    className="text-slate-500"
-                                    size={24}
-                                    onClick={() => setLock(true)}
-                                />  
-                        }
                 </div>
 
-                <div className="fullscreen z-10 absolute flex flex-col justify-center items-center gap-2
-                                right-0 top-10 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
-                    {
-                        isFullScreen ? 
-                            <AiOutlineFullscreenExit className="text-white text-[2.5rem] stroke-2 hover:scale-110" 
-                                                     onClick={()=>setFullScreen(false)}/> : 
-                            <AiOutlineFullscreen className="text-white text-[2.5rem] stroke-2 hover:scale-110" 
-                                                 onClick={()=>setFullScreen(true)}/>
-                    }
-                </div>
-
-                <MapContainer 
-                    className={`z-0 relative w-full h-full`} 
-                    center={center} 
-                    zoom={INITIAL_ZOOM} 
-                    maxBounds={maxBounds} 
-                    minZoom={INITIAL_ZOOM} 
-                    scrollWheelZoom={false} 
-                    zoomControl={false}>
-                {/*A Seperate func component MapEvents is required to acccess the map instance as ref is not working initially for some reason*/}
-                    <MapEvents /> 
-                    <TileLayer
-                        url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
-                        attribution='&copy; <a class="pr-2" target="_blank" href="https://www.esri.com/">Esri</a>'
+                <IoLocationSharp
+                    className={`${lock ? 'text-slate-300 pointer-events-none' : 'text-red-500'}`}
+                    size={32}
+                    onClick={() => map && map.setView(center,INITIAL_ZOOM,{animate:true})}
                     />
-                    {
-                        zoom < 11 ? 
-                            geoJsonData["districts"] && 
-                            <GeoJSON data={geoJsonData["districts"]} 
-                            style={{ color: "var(--primary)", fillColor: "transparent", opacity: 0.5 }} /> : 
-                        <>
-                            {
-                                geoJsonData["districts"] &&
-                                <GeoJSON data={geoJsonData["districts"]}
-                                style={{ color: "var(--primary)", fillColor: "transparent", opacity: 0.5 }} />
-                            }
-                            
-                            {
-                                geoJsonData["dakshina_kannada"] &&
-                                <GeoJSON data={geoJsonData["dakshina_kannada"]} 
-                                style={{ color: "black",weight : 1, fillColor: "transparent", opacity: 0.5}}
-                                onEachFeature={onEachVillage}/>
-                            }
-                            
-                            {
-                                geoJsonData["udupi"] &&
-                                <GeoJSON data={geoJsonData["udupi"]}
-                                style={{ color: "black",weight : 1, fillColor: "transparent", opacity: 0.5}}
-                                onEachFeature={onEachVillage}/>
-                            }
-                    
-                            {
-                                geoJsonData["kasaragod"] &&
-                                <GeoJSON data={geoJsonData["kasaragod"]} 
-                                style={{ color: "black",weight : 1, fillColor: "transparent", opacity: 0.5}}
-                                onEachFeature={onEachVillage}/>
-                            }
-                        </>
-                    }
-                </MapContainer>
 
+                    {
+                        lock ? 
+                            <FaLock
+                                className="text-slate-500"
+                                size={24}
+                                onClick={() => setLock(false)}
+                            /> :
+                            <FaLockOpen
+                                className="text-slate-500"
+                                size={24}
+                                onClick={() => setLock(true)}
+                            />  
+                    }
             </div>
-        );
+
+            <div className="fullscreen z-10 absolute flex flex-col justify-center items-center gap-2
+                            right-0 top-10 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
+                {
+                    isFullScreen ? 
+                        <AiOutlineFullscreenExit className="text-white text-[2.5rem] stroke-2 hover:scale-110" 
+                                                 onClick={()=>setFullScreen(false)}/> : 
+                        <AiOutlineFullscreen className="text-white text-[2.5rem] stroke-2 hover:scale-110" 
+                                             onClick={()=>setFullScreen(true)}/>
+                }
+            </div>
+
+            <MapContainer 
+                className={`z-0 relative w-full h-full`} 
+                center={center} 
+                zoom={INITIAL_ZOOM} 
+                maxBounds={maxBounds} 
+                minZoom={INITIAL_ZOOM} 
+                scrollWheelZoom={false} 
+                zoomControl={false}>
+            {/*A Seperate func component MapEvents is required to acccess the map instance as ref is not working initially for some reason*/}
+                <MapEvents /> 
+                <TileLayer
+                    url="https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}"
+                    attribution='&copy; <a class="pr-2" target="_blank" href="https://www.esri.com/">Esri</a>'
+                />
+                {
+                    zoom < 11 ? 
+                        geoJsonData["districts"] && 
+                        <GeoJSON data={geoJsonData["districts"]} 
+                        style={{ color: "var(--primary)", fillColor: "transparent", opacity: 0.5 }} /> : 
+                    <>
+                        {
+                            geoJsonData["districts"] &&
+                            <GeoJSON data={geoJsonData["districts"]}
+                            style={{ color: "var(--primary)", fillColor: "transparent", opacity: 0.5 }} />
+                        }
+                        
+                        {
+                            geoJsonData["dakshina_kannada"] &&
+                            <GeoJSON data={geoJsonData["dakshina_kannada"]} 
+                            style={{ color: "black",weight : 1, fillColor: "transparent", opacity: 0.5}}
+                            onEachFeature={onEachVillage}/>
+                        }
+                        
+                        {
+                            geoJsonData["udupi"] &&
+                            <GeoJSON data={geoJsonData["udupi"]}
+                            style={{ color: "black",weight : 1, fillColor: "transparent", opacity: 0.5}}
+                            onEachFeature={onEachVillage}/>
+                        }
+                
+                        {
+                            geoJsonData["kasaragod"] &&
+                            <GeoJSON data={geoJsonData["kasaragod"]} 
+                            style={{ color: "black",weight : 1, fillColor: "transparent", opacity: 0.5}}
+                            onEachFeature={onEachVillage}/>
+                        }
+                    </>
+                }
+            </MapContainer>
+
+        </div>
+    );
 };
 
 export default MAP;

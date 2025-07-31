@@ -1,5 +1,4 @@
 import { useEffect, useLayoutEffect, useRef, useState } from 'react'
-import LoadingPage from '../components/Loading/LoadingPage'
 import { useLoading } from '../context/LoadingContext'
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/all'
@@ -32,7 +31,7 @@ type recentDataType = {
 }
 
 const Home = () => {
-  const {isLoading} = useLoading();
+  const {isLoading, setLoading} = useLoading();
   const scrollWatcherRef = useRef<HTMLDivElement[]>([]);
   const svgRef = useRef<SVGSVGElement | null>(null);
   const headingRefs = useRef<HTMLDivElement[]>([]);
@@ -56,6 +55,7 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
+        setLoading(true);
         const response = await fetch('/assets/data/data.json');
         if (!response.ok) {
           throw new Error('Failed to fetch data');
@@ -70,6 +70,8 @@ const Home = () => {
         }
       } catch (error) {
         console.error(error);
+      } finally {
+          setLoading(false)
       }
     };
   
@@ -109,9 +111,6 @@ const Home = () => {
 
   },[recentData,swiperData]);
 
-
-  if(isLoading) return <LoadingPage/>
-  else {
     return (
       <div className='home w-screen bg-black'>
 
@@ -351,7 +350,6 @@ const Home = () => {
 
       </div>
     )
-  }
 }
 
 export default Home;

@@ -5,7 +5,6 @@ import { GeoJSONOptions, LatLngBoundsExpression, LatLngExpression, Map } from "l
 import { IoLocationSharp } from "react-icons/io5";
 import { FaLock,FaLockOpen,FaPlus,FaMinus } from "react-icons/fa";
 import { useLoading } from "../context/LoadingContext";
-import LoadingPage from "./Loading/LoadingPage";
 
 const MapComponent = React.forwardRef<HTMLDivElement | null, {}>((_,ref) => {
  
@@ -15,7 +14,6 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, {}>((_,ref) => {
   const INITIAL_ZOOM : number = 9;
   const [zoom,setZoom] = useState<number>(INITIAL_ZOOM);
   const center: LatLngExpression = [13.006995870591474, 75.07172913896241];
-  const {isLoading,setLoading} = useLoading();
 
   const maxBounds: LatLngBoundsExpression = [
       [14.025289007277138, 73.94617968510107],
@@ -102,7 +100,6 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, {}>((_,ref) => {
 
   const handleZoomChange = (delta: number) => map && map.setZoom(zoom + delta);
 
-  if(isLoading) return <LoadingPage/>
   return (
     <div className="w-full h-full relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-3xl overflow-hidden" ref={ref} >
       <div className="z-10 absolute flex flex-col justify-center items-center gap-2 left-7 top-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer">

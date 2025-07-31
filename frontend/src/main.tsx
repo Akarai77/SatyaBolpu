@@ -11,13 +11,13 @@ import { LenisProvider } from './context/LenisContext.tsx'
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-      <LoadingProvider>
         <LenisProvider >
             <Navbar />
-            <App />
+            <LoadingProvider>
+                <App />
+            </LoadingProvider>
             <Footer />
         </LenisProvider>
-      </LoadingProvider>
     </BrowserRouter>
   </StrictMode>
 )

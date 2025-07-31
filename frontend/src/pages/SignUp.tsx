@@ -1,8 +1,9 @@
-import { ChangeEvent, FormEvent, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useState } from "react";
 import Button from "../components/Button";
 import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import { GrFormView, GrFormViewHide } from "react-icons/gr";
+import useApi from "../hooks/useApi";
 
 type SignUpProps = {
   name: string;
@@ -20,9 +21,9 @@ const SignUp = () => {
     password: '',
     confirmPassword: '',
   });
-
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
+  const { data, error, post } = useApi("api/auth/signup",{auto: false});
 
   const handleFormDataChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -31,6 +32,12 @@ const SignUp = () => {
       [name]: value,
     }));
   };
+
+  useEffect(() => {
+    if(sessionStorage.getItem('signup-data')) {
+        setFormData(JSON.parse(sessionStorage.getItem('signup-data')))
+    }
+  },[])
 
   const validateForm = () => {
     const errorList: string[] = [];
@@ -46,8 +53,9 @@ const SignUp = () => {
     return errorList;
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    sessionStorage.setItem('signup-data',JSON.stringify(formData));
     const validationErrors = validateForm();
 
     if (validationErrors.length > 0) {
@@ -56,11 +64,13 @@ const SignUp = () => {
     }
 
     setErrors([]);
-    console.log("✅ Signing up user:", formData);
+    await post(formData);
+    console.log(data, error)
+
   };
 
   return (
-    <div className="w-screen min-h-screen text-primary flex flex-col items-center justify-center py-10">
+    <div className="w-screen min-h-screen text-primary flex flex-col items-center justify-center py-32">
       <form
         className="w-[90%] md:w-4/5 lg:w-3/5 xl:w-2/5 gap-5 border-4 border-white border-solid rounded-2xl
         flex flex-col items-center justify-evenly py-10 text-[1.8rem]"

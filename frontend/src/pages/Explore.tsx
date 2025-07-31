@@ -2,7 +2,6 @@ import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react
 import { MdCancel } from "react-icons/md";
 import Button from "../components/Button";
 import { useLoading } from "../context/LoadingContext";
-import LoadingPage from "../components/Loading/LoadingPage";
 import { useNavigate } from "react-router-dom";
 import gsap from "gsap";
 
@@ -26,7 +25,7 @@ const Explore = () => {
 
   useEffect(() => {
     const fetchData = async () => {
-      setLoading(true);
+        setLoading(true);
       try {
         const res = await fetch('/assets/data/data.json');
         if (!res.ok) throw new Error('Failed to fetch data');
@@ -38,36 +37,36 @@ const Explore = () => {
         }
       } catch (error) {
         console.error(error);
+      } finally {
+          setLoading(false)
       }
-      setLoading(false);
     };
 
     fetchData();
   }, []);
 
-  useLayoutEffect(() => {
-      let ctx = gsap.context(() => {
-          if(refs.current) {
-              refs.current.map((ref,index) => {
-                  gsap.fromTo(
-                      ref,
-                      {
-                          clipPath: data[index].clipPathInitial
-                      },
-                      {
-                          clipPath: data[index].clipPathNormal,
-                          ease: 'power4.inOut',
-                          delay: 0.25,
-                          duration: 0.4 * index + 0.1
-                      }
-                  )
-              })
-          }
+    useLayoutEffect(() => {
+      if (isLoading || data.length === 0) return;
+
+      const ctx = gsap.context(() => {
+        refs.current.forEach((ref, index) => {
+          if (!ref || !data[index]) return;
+
+          gsap.fromTo(
+            ref,
+            { clipPath: data[index].clipPathInitial },
+            {
+              clipPath: data[index].clipPathNormal,
+              ease: "power4.inOut",
+              delay: 0.25,
+              duration: 0.4 * index + 0.1,
+            }
+          );
+        });
       });
 
       return () => ctx.revert();
-
-  },[data])
+    }, [data, isLoading]);
 
   const handleClick = useCallback((index: number) => () => setActive(index), []);
   
@@ -76,7 +75,6 @@ const Explore = () => {
       setActive(null);
   }, []);
 
-  if (isLoading) return <LoadingPage />;
 
   return (
     <div className="explore w-screen h-screen relative bg-black">

@@ -8,7 +8,7 @@ const Login = () => {
         password: "",
     });
 
-    const [errorList, setErrorList] = useState<string[]>([]);
+    const [errors, setErrors] = useState<string[]>([]);
     const [showPassword, setShowPassword] = useState<boolean>(false);
     const passwordRef = useRef<HTMLInputElement | null>(null);
 
@@ -37,7 +37,7 @@ const Login = () => {
             [name]: value,
         }));
 
-        setErrorList((prev) => ({
+        setErrors((prev) => ({
             ...prev,
             [name]: "",
         }));
@@ -47,11 +47,11 @@ const Login = () => {
         e.preventDefault();
         const validationErrors = validateForm();
         if (validationErrors.length > 0) {
-            setErrorList(validationErrors);
+            setErrors(validationErrors);
             return;
         }
 
-        setErrorList([]);
+        setErrors([]);
 
     };
 
@@ -64,6 +64,14 @@ const Login = () => {
             >
                 <h1 className="text-[4rem] font-semibold">Login</h1>
 
+                {errors.length > 0 && (
+                  <ul className="text-red-500 list-disc text-[1.2rem] bg-red-100 p-4 pl-10 w-[80%] rounded-lg">
+                    {errors.map((err, i) => (
+                      <li key={i}>{err}</li>
+                    ))}
+                  </ul>
+                )}
+
                 <div className="w-2/3 flex flex-col">
                     <label htmlFor="email">Email:</label>
                     <input
@@ -74,7 +82,6 @@ const Login = () => {
                         value={formData.email}
                         onChange={handleFormDataChange}
                     />
-                    {errorList.email && <p className="text-red-500 text-[1.2rem] mt-1">{errorList.email}</p>}
                 </div>
 
                 <div className="w-2/3 flex flex-col">
@@ -98,9 +105,6 @@ const Login = () => {
                             onChange={handleFormDataChange}
                         />
                     </div>
-                    {errorList.password && (
-                        <p className="text-red-500 text-[1.2rem] mt-1">{errorList.password}</p>
-                    )}
                 </div>
 
                 <Button className="text-[1.5rem]" type="submit" content="Login" />

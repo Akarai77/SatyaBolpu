@@ -1,4 +1,5 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import LoadingPage from "../components/LoadingPage";
 
 interface LoadingContextType {
   isLoading: boolean;
@@ -6,7 +7,7 @@ interface LoadingContextType {
 }
 
 const LoadingContext = createContext<LoadingContextType>({
-  isLoading: true,
+  isLoading: false,
   setLoading: () => {
     console.warn("setLoading called outside of LoadingProvider");
   },
@@ -15,15 +16,10 @@ const LoadingContext = createContext<LoadingContextType>({
 export const LoadingProvider = ({ children }: { children: ReactNode }) => {
   const [isLoading, setLoading] = useState(false);
 
-  // useEffect(() => {
-  //   const handleLoad = () => setLoading(false);
-  //   window.addEventListener("load", handleLoad);
-  //   return () => window.removeEventListener("load", handleLoad);
-  // }, []);
-
   return (
     <LoadingContext.Provider value={{ isLoading, setLoading }}>
-      {children}
+        {children}
+        {isLoading && <LoadingPage /> }
     </LoadingContext.Provider>
   );
 };
