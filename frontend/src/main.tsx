@@ -7,16 +7,19 @@ import { BrowserRouter } from 'react-router-dom'
 import { LoadingProvider } from './context/LoadingContext.tsx'
 import Footer from './components/Footer.tsx'
 import { LenisProvider } from './context/LenisContext.tsx'
+import { AuthProvider } from './context/AuthContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
-        <LenisProvider >
-            <Navbar />
-            <LoadingProvider>
-                <App />
-            </LoadingProvider>
-            <Footer />
+      <LenisProvider >
+        <AuthProvider>
+          <Navbar />
+          <LoadingProvider>
+            <App />
+          </LoadingProvider>
+          <Footer />
+        </AuthProvider>
         </LenisProvider>
     </BrowserRouter>
   </StrictMode>

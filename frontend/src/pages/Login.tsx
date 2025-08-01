@@ -1,6 +1,9 @@
-import { ChangeEvent, FormEvent, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useRef, useState } from "react";
 import Button from "../components/Button";
 import { GrFormView, GrFormViewHide } from "react-icons/gr";
+import useApi from "../hooks/useApi";
+import { useAuth } from "../context/AuthContext";
+import { Navigate, useNavigate } from "react-router-dom";
 
 const Login = () => {
     const [formData, setFormData] = useState<{ email: string; password: string }>({
@@ -10,7 +13,11 @@ const Login = () => {
 
     const [errors, setErrors] = useState<string[]>([]);
     const [showPassword, setShowPassword] = useState<boolean>(false);
+    const [buttonLoad,setButtonLoad] = useState<boolean>(false);
     const passwordRef = useRef<HTMLInputElement | null>(null);
+    const {state, dispatch} = useAuth();
+    const {data, error, loading, post} = useApi('auth/login',{auto: false});
+    const navigate = useNavigate();
 
     const validateForm = () => {
         const newErrors: string[] = [];
@@ -29,6 +36,13 @@ const Login = () => {
         return newErrors;
     };
 
+    useEffect(() => {
+        const savedData = sessionStorage.getItem('login-data');
+        if (savedData) {
+            setFormData(JSON.parse(savedData));
+        }
+    },[])
+
     const handleFormDataChange = (e: ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;
 
@@ -43,17 +57,54 @@ const Login = () => {
         }));
     };
 
-    const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
+    const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         const validationErrors = validateForm();
+        sessionStorage.setItem('login-data',JSON.stringify(formData));
         if (validationErrors.length > 0) {
             setErrors(validationErrors);
             return;
         }
-
+        
+        await post(formData);
         setErrors([]);
-
+        setShowPassword(false);
     };
+
+
+    useEffect(() => {
+        setButtonLoad(loading);
+
+        if (error) {
+            console.error("Login error:", error);
+            setErrors([error]);
+            return;
+        }
+
+        if (data && !loading) {
+            console.log("Login success:", data);
+
+            dispatch({
+                type: 'LOGIN',
+                payload: {
+                    user: data.user,
+                    token: data.token,
+                },
+            });
+
+            sessionStorage.removeItem('login-data');
+
+            setFormData({
+                email: '',
+                password: '',
+            });
+
+            navigate('/profile');
+        }
+    }, [data, error, loading]);
+
+    if(state.token) 
+        return <Navigate to={'/profile'} replace/>
 
     return (
         <div className="w-full h-screen text-primary flex flex-col items-center justify-center">
@@ -107,7 +158,7 @@ const Login = () => {
                     </div>
                 </div>
 
-                <Button className="text-[1.5rem]" type="submit" content="Login" />
+                <Button loading={buttonLoad} loadingText="Logging In" className="text-[1.5rem]" type="submit" content="Login" />
             </form>
         </div>
     );

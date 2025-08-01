@@ -4,26 +4,34 @@ import PhoneInput from 'react-phone-input-2'
 import 'react-phone-input-2/lib/style.css'
 import { GrFormView, GrFormViewHide } from "react-icons/gr";
 import useApi from "../hooks/useApi";
+import { useAuth } from "../context/AuthContext";
+import { Navigate } from "react-router-dom";
 
 type SignUpProps = {
   name: string;
+  uname: string;
   email: string;
   phone?: string;
   password: string;
   confirmPassword: string;
 };
 
-const SignUp = () => {
-  const [formData, setFormData] = useState<SignUpProps>({
+const initialFormData = {
     name: '',
+    uname: '',
     email: '',
     phone: '',
     password: '',
-    confirmPassword: '',
-  });
+    confirmPassword: ''
+}
+
+const SignUp = () => {
+  const [formData, setFormData] = useState<SignUpProps>(initialFormData);
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [errors, setErrors] = useState<string[]>([]);
-  const { data, error, post } = useApi("api/auth/signup",{auto: false});
+  const [buttonLoad, setButtonLoad] = useState<boolean>(false);
+  const { data, error, loading, post } = useApi("auth/signup",{auto: false});
+  const { state, dispatch } = useAuth();
 
   const handleFormDataChange = (e: ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
@@ -34,9 +42,10 @@ const SignUp = () => {
   };
 
   useEffect(() => {
-    if(sessionStorage.getItem('signup-data')) {
-        setFormData(JSON.parse(sessionStorage.getItem('signup-data')))
-    }
+      const savedData = sessionStorage.getItem('signup-data');
+      if (savedData) {
+          setFormData(JSON.parse(savedData));
+      }
   },[])
 
   const validateForm = () => {
@@ -65,15 +74,36 @@ const SignUp = () => {
 
     setErrors([]);
     await post(formData);
-    console.log(data, error)
-
   };
+
+  useEffect(() => {
+      if (error) {
+          setErrors([error]);
+      }
+
+      if (data) {
+          setButtonLoad(loading);
+          console.log("✅ Signup success:", data);
+          dispatch({
+              type: 'LOGIN',
+              payload: {
+                  user: data.user,
+                  token: data.token
+              }
+          });
+          sessionStorage.removeItem('signup-data');
+          setFormData(initialFormData);
+      }
+  }, [data, error, loading]);
+
+  if(state.token) 
+      return <Navigate to={'/profile'} replace/>
 
   return (
     <div className="w-screen min-h-screen text-primary flex flex-col items-center justify-center py-32">
       <form
-        className="w-[90%] md:w-4/5 lg:w-3/5 xl:w-2/5 gap-5 border-4 border-white border-solid rounded-2xl
-        flex flex-col items-center justify-evenly py-10 text-[1.8rem]"
+        className="w-[90%] md:w-4/5 lg:w-3/5 xl:w-1/2 gap-5 border-4 border-white border-solid rounded-2xl
+        flex flex-col items-center justify-evenly py-10 text-[1.5rem]"
         onSubmit={handleSubmit}
       >
         <h1 className="text-[4rem] font-semibold">Sign Up</h1>
@@ -94,6 +124,19 @@ const SignUp = () => {
             id="name"
             name="name"
             value={formData.name}
+            onChange={handleFormDataChange}
+            required
+          />
+        </div>
+
+        <div className="w-4/5 md:w-2/3 flex flex-col">
+          <label htmlFor="name">Username:</label>
+          <input
+            className="text-black p-2 text-[1.5rem]"
+            type="text"
+            id="uname"
+            name="uname"
+            value={formData.uname}
             onChange={handleFormDataChange}
             required
           />
@@ -159,7 +202,7 @@ const SignUp = () => {
           />
         </div>
 
-        <Button className="text-[1.5rem]" type="submit" content="Sign Up" />
+        <Button loading={buttonLoad} loadingText="Signing In" className="text-[1.5rem]" type="submit" content="Sign Up" />
 
       </form>
     </div>

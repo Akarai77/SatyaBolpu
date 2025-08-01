@@ -5,9 +5,9 @@ import jwt from 'jsonwebtoken';
 
 export const signup = async (req: Request, res: Response) => {
   try {
-    const { name, email, phone, password } = req.body;
+    const { name, uname, email, phone, password } = req.body;
 
-    if (!name || !email || !phone || !password) {
+    if (!name || !uname || !email || !phone || !password) {
       return res.status(400).json({ msg: 'Missing Required Field' });
     }
 
@@ -16,11 +16,17 @@ export const signup = async (req: Request, res: Response) => {
       return res.status(400).json({ msg: 'An account with this email already exists.' });
     }
 
+    const takenUsername = await User.findOne({ uname });
+    if(takenUsername) {
+        return res.status(400).json({ msg: 'Username already taken by another user' });
+    }
+
     const salt = await bcrypt.genSalt(10);
     const hashedPassword = await bcrypt.hash(password, salt);
 
     const newUser = await User.create({
       name,
+      uname,
       email,
       phone,
       password: hashedPassword
@@ -36,8 +42,12 @@ export const signup = async (req: Request, res: Response) => {
       token,
       user: {
         id: newUser._id,
+        uname: newUser.uname,
         name: newUser.name,
-        email: newUser.email
+        phone: newUser.phone,
+        email: newUser.email,
+        role: newUser.role,
+        verified: newUser.verified
       }
     });
   } catch (err: any) {
@@ -69,12 +79,16 @@ export const login = async (req: Request,res: Response) => {
             { expiresIn: '1h' }
         );
     
-    return res.json(200).json({
+    return res.status(200).json({
         token,
         user : {
             id: user._id,
+            uname: user.uname,
             name: user.name,
-            email: user.email
+            phone: user.phone,
+            email: user.email,
+            role: user.role,
+            verified: user.verified
         }
     });
 }

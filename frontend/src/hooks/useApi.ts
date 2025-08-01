@@ -74,10 +74,11 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
                     : JSON.stringify(mergedOptions.body);
             }
 
-            const res = await fetch(`http://localhost:3000/${endpoint}`, requestOptions);
+            const res = await fetch(`http://localhost:3000/api/${endpoint}`, requestOptions);
             
             if (!res.ok) {
-                throw new Error(`HTTP error ${res.status}: ${res.statusText}`);
+                const err = await res.json();
+                throw new Error(err.msg);
             }
 
             const contentType = res.headers.get('content-type');

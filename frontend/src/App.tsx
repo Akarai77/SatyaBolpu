@@ -10,6 +10,8 @@ import CategoriesList from './pages/CategoriesList'
 import CategoryPage from './pages/CategoryPage'
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
+import Profile from './pages/Profile'
+import LoadingPage from './components/LoadingPage'
 
 function App() {
   return (
@@ -18,6 +20,7 @@ function App() {
         <Route path='/' element={<Home/>}/>
         <Route path='/login' element={<Login/>}/>
         <Route path='/signup' element={<SignUp/>}/>
+        <Route path='/profile' element={<Profile/>}/>
         <Route path='/explore' element={<Explore/>}/>
         <Route path='/map' element={<MAP/>}/>
         <Route path='/explore/daivaradhane' element={<Daivaradhane/>}/>
