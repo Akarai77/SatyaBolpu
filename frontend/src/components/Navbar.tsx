@@ -88,7 +88,7 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`navbar z-[9998] text-white w-screen flex p-7 items-center justify-between 
+        className={`navbar z-[9995] text-white w-screen flex p-7 items-center justify-between 
           ${location.pathname === '/' && !isLoading ? 'absolute bg-transparent' : 'relative bg-black'}`}
       >
         <div className="brand flex gap-2 items-center justify-center">

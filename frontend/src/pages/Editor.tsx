@@ -6,10 +6,9 @@ import { Placeholder } from '@tiptap/extension-placeholder'
 import { RiAttachmentLine } from 'react-icons/ri';
 import { GrBlockQuote } from "react-icons/gr";
 import { MdCancel, MdPreview } from "react-icons/md";
-import { ReactNode, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo, FaSave, FaUpload } from 'react-icons/fa';
 import { ResizableImage } from '../components/EditorExtensions/Image';
-import { useLenis } from '../context/LenisContext';
 import { Video } from '../components/EditorExtensions/Video';
 import { Audio } from '../components/EditorExtensions/Audio';
 import Button from '../components/Button';
@@ -17,6 +16,7 @@ import { Iframe } from '../components/EditorExtensions/Iframe';
 import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { useDialog } from '../context/DialogBoxContext';
 
 type clickedType = {
   bold: boolean;
@@ -40,8 +40,8 @@ const TiptapEditor = () => {
   const [showAttachmentMenu,setShowAttachmentMenu] = useState<boolean>(false);
   const [askEmbedUrl,setAskEmbedUrl] = useState<boolean>(false);
   const [embedUrl,setEmbedUrl] = useState<string>('');
-  const lenis = useLenis();
   const { state } = useAuth();
+  const dialog = useDialog();
 
   const attachmentRef = useRef<HTMLDivElement | null>(null);
 
@@ -73,6 +73,14 @@ const TiptapEditor = () => {
     ],
     content: localStorage.getItem('editorContentDraft') || '' ,
     onUpdate: () => {
+        const editorBottom = editor.view.dom.getBoundingClientRect().bottom + window.scrollY;
+        const screenCenter = window.innerHeight / 2;
+        const scrollToY = editorBottom - screenCenter;
+        window.scrollTo({
+            top: scrollToY,
+            behavior: 'smooth',
+        });
+
         setClicked({
             bold: editor.isActive('bold'),
             italic: editor.isActive('italic'),
@@ -84,38 +92,6 @@ const TiptapEditor = () => {
     }
   });
 
-  useEffect(() => {
-    const handleKeyPress = (e: KeyboardEvent) => {
-      if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
-        const key = e.key.toLowerCase();
-
-        if (['b', 'i', 'u'].includes(key)) {
-          e.preventDefault();
-          editor.chain().focus();
-          const keyToButton: Record<string, keyof clickedType> = {
-              b: "bold",
-              i: "italic",
-              u: "underline",
-          };
-          const button = keyToButton[key] || "underline";
-          handleClick(button)
-        }
-
-        if(key === 'p') {
-            e.preventDefault()
-            handlePreview()
-        } else if(key === 's') {
-            e.preventDefault();
-            handleSave()
-        } else if(key === 'enter') {
-            handleUpload();
-        }
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyPress);
-    return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [editor]);
 
   useEffect(() => {
     if (titleRef.current) {
@@ -131,7 +107,7 @@ const TiptapEditor = () => {
       }
   }
 
-  const handleClick = (button: keyof clickedType) => {
+  const handleClick = useCallback((button: keyof clickedType) => {
       const chain = editor?.chain().focus();
       if (!chain) {
           setClicked({ bold: false, italic: false, underline: false });
@@ -152,7 +128,7 @@ const TiptapEditor = () => {
 
           return newState;
       });
-  };
+  },[editor]);
 
   const handleFileInput = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -205,40 +181,78 @@ const TiptapEditor = () => {
       return txt.value
   }
 
-
-  const handlePreview = () => {
-    if(editor) {
-        setPreview(prev => !prev);
-        setBody(formatHtml(editor.getHTML()));
-    }
-  }
-
-  const handleSave = () => {
-    if(editor) {
-        toast.info("Draft saved to local storage");
-        localStorage.setItem("editorTitleDraft",title);
-        localStorage.setItem("editorContentDraft",editor.getHTML());
-    }
-  }
-
-  const handleUpload = () => {
-      if(editor && previewRef.current) {
-          let editorContent: string = '';
-          const children = previewRef.current.children;
-          for(let i=0; i<children.length; i++) {
-              if(children[i].id !== 'cancel'){
-                  editorContent += children[i].outerHTML;
-              }
-          }
-          localStorage.setItem('editorContent',editorContent);
+  const handleSave = useCallback(() => {
+      if(editor) {
+          toast.info("Draft saved to local storage");
+          localStorage.setItem("editorTitleDraft", title);
+          localStorage.setItem("editorContentDraft", editor.getHTML());
       }
-  }
+  }, [editor, title]);
+
+  const handlePreview = useCallback(() => {
+      if(editor) {
+          setPreview(prev => !prev);
+          setBody(formatHtml(editor.getHTML()));
+      }
+  }, [editor]);
+
+  const handleUpload = useCallback(() => {
+      const upload = () => {
+          if(editor && previewRef.current) {
+              let editorContent: string = '';
+              const children = previewRef.current.children;
+              for(let i=0; i<children.length; i++) {
+                  if(children[i].id !== 'cancel'){
+                      editorContent += children[i].outerHTML;
+                  }
+              }
+              localStorage.setItem('editorContent', editorContent);
+          }
+      }
+
+      dialog?.popup({
+          title: 'Draft Upload',
+          descr: 'The edited document will get uploaded to the server.',
+          onConfirm: upload
+      });
+
+  }, [editor, previewRef, dialog]);
 
   useEffect(() => {
-      if (preview) {
-          lenis.destroyLenis();
-      }
+      const handleKeyPress = (e: KeyboardEvent) => {
+          if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+              const key = e.key.toLowerCase();
 
+              if (['b', 'i', 'u'].includes(key)) {
+                  e.preventDefault();
+                  editor.chain().focus();
+                  const keyToButton: Record<string, keyof clickedType> = {
+                      b: "bold",
+                      i: "italic",
+                      u: "underline",
+                  };
+                  const button = keyToButton[key] || "underline";
+                  handleClick(button)
+              }
+
+              if(key === 'p') {
+                  e.preventDefault()
+                  handlePreview()
+              } else if(key === 's') {
+                  e.preventDefault();
+                  handleSave();
+              } else if(key === 'enter') {
+                  e.preventDefault();
+                  handleUpload();
+              }
+          }
+      };
+
+      window.addEventListener('keydown', handleKeyPress);
+      return () => window.removeEventListener('keydown', handleKeyPress);
+  }, [editor, handleSave, handleUpload, handlePreview, handleClick]);
+
+  useEffect(() => {
       const videos = document.querySelectorAll('video');
       videos.forEach((vid) => {
           vid.pause();
@@ -257,10 +271,6 @@ const TiptapEditor = () => {
           iframe.src = '';
           iframe.src = src;
       });
-
-      return () => {
-          lenis.initLenis();
-      };
   }, [preview]);
 
   if(!state.token || state.user?.role !== "admin") 
@@ -300,7 +310,7 @@ const TiptapEditor = () => {
                   onChange={(e) => setTitle(e.target.value)}
                 />
 
-                <div className="flex items-center justify-center w-1/2 mx-auto">
+                <div className="flex items-center justify-center w-4/5 sm:w-2/3 lg:w-1/2 mx-auto">
                 <div className="w-1/2 border-t-2 border-solid border-primary"></div>
                 <span className="mx-4 text-xl text-primary font-bold">ॐ</span>
                 <div className="w-1/2 border-t-2 border-solid border-primary flex-grow"></div>
@@ -309,9 +319,9 @@ const TiptapEditor = () => {
 
             <EditorContent 
               editor={editor} 
-              className="text-white text-[1.5rem] border border-solid border-white w-4/5 p-5 whitespace-pre-wrap" />
+              className="text-white text-[1.5rem] border border-solid border-white w-[90%] p-5 whitespace-pre-wrap" />
             
-            <div className='flex gap-5 sticky bottom-10 items-center justify-center'>
+            <div className='flex md:flex-row flex-col gap-5 sticky bottom-10 items-center justify-center'>
                 <div className="flex items-center justify-center gap-2 bg-white p-3 rounded-full">
             
                     <div className='relative flex flex-col items-center justify-center' ref={attachmentRef}>

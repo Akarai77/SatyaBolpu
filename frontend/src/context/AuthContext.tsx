@@ -1,7 +1,6 @@
 import { createContext, ReactNode, useCallback, useContext, useEffect, useReducer, useRef } from "react";
 import useApi from "../hooks/useApi";
 import { jwtDecode } from 'jwt-decode';
-import { toast } from "react-toastify";
 
 interface User {
   id: string;
@@ -103,7 +102,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       const { exp } = jwtDecode<{ exp: number }>(token);
       const currentTime = Date.now() / 1000;
       const timeUntilExpiry = exp - currentTime;
-      const refreshThreshold = 60;
+      const refreshThreshold = 300;
       
       if (refreshTimeoutRef.current) {
         clearTimeout(refreshTimeoutRef.current);
@@ -116,14 +115,15 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
           refreshToken();
         }, refreshTime);
         
+        console.log(`Token refresh scheduled in ${Math.round(refreshTime / 1000)} seconds`);
       } else if (timeUntilExpiry > 0) {
         refreshToken();
       } else {
-        toast.error("Token Expired! User Logged Out!");
+        console.warn('Token is already expired');
         dispatch({ type: 'LOGOUT' });
       }
     } catch (err) {
-      toast.info("Session Expired! User Logged Out!");
+      console.error('Invalid token:', err);
       dispatch({ type: 'LOGOUT' });
     }
   }, [refreshToken]);
@@ -143,6 +143,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
 
   useEffect(() => {
     if (data?.accessToken && state.isRefreshing) {
+      console.log('Token refreshed successfully');
       dispatch({
         type: 'REFRESH_SUCCESS',
         payload: { user: data.user, token: data.accessToken },
