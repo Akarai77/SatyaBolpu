@@ -1,19 +1,22 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import { TextStyle } from '@tiptap/extension-text-style'
-import { FontSize } from './extensions/FontSize'
+import { FontSize } from '../components/EditorExtensions/FontSize'
 import { Placeholder } from '@tiptap/extension-placeholder'
 import { RiAttachmentLine } from 'react-icons/ri';
 import { GrBlockQuote } from "react-icons/gr";
 import { MdCancel, MdPreview } from "react-icons/md";
-import { useEffect, useRef, useState } from 'react';
-import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo } from 'react-icons/fa';
-import { ResizableImage } from './extensions/Image';
+import { ReactNode, useEffect, useRef, useState } from 'react';
+import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo, FaSave, FaUpload } from 'react-icons/fa';
+import { ResizableImage } from '../components/EditorExtensions/Image';
 import { useLenis } from '../context/LenisContext';
-import { Video } from './extensions/Video';
-import { Audio } from './extensions/Audio';
-import Button from './Button';
-import { Iframe } from './extensions/Iframe';
+import { Video } from '../components/EditorExtensions/Video';
+import { Audio } from '../components/EditorExtensions/Audio';
+import Button from '../components/Button';
+import { Iframe } from '../components/EditorExtensions/Iframe';
+import { useAuth } from '../context/AuthContext';
+import { Navigate } from 'react-router-dom';
+import { toast } from 'react-toastify';
 
 type clickedType = {
   bold: boolean;
@@ -27,16 +30,18 @@ const TiptapEditor = () => {
     italic: false,
     underline: false,
   });
-  const [title, setTitle] = useState<string>('Title');
+  const [title, setTitle] = useState<string>(localStorage.getItem('editorTitleDraft') || 'Title');
   const titleRef = useRef<HTMLTextAreaElement | null>(null);
   const [fontSize,setFontSize] = useState<string>('normal');
   const fileRef = useRef<HTMLInputElement | null>(null);
   const [preview,setPreview] = useState<boolean>(false);
+  const previewRef = useRef<HTMLDivElement | null>(null);
   const [body,setBody] = useState<string>('');
   const [showAttachmentMenu,setShowAttachmentMenu] = useState<boolean>(false);
   const [askEmbedUrl,setAskEmbedUrl] = useState<boolean>(false);
   const [embedUrl,setEmbedUrl] = useState<string>('');
   const lenis = useLenis();
+  const { state } = useAuth();
 
   const attachmentRef = useRef<HTMLDivElement | null>(null);
 
@@ -66,7 +71,7 @@ const TiptapEditor = () => {
             showOnlyWhenEditable: true,
         })
     ],
-    content: '',
+    content: localStorage.getItem('editorContentDraft') || '' ,
     onUpdate: () => {
         setClicked({
             bold: editor.isActive('bold'),
@@ -87,13 +92,23 @@ const TiptapEditor = () => {
         if (['b', 'i', 'u'].includes(key)) {
           e.preventDefault();
           editor.chain().focus();
-          let button = key === 'b' ? 'bold' : key === 'i' ? 'italic' : 'underline'
+          const keyToButton: Record<string, keyof clickedType> = {
+              b: "bold",
+              i: "italic",
+              u: "underline",
+          };
+          const button = keyToButton[key] || "underline";
           handleClick(button)
         }
 
         if(key === 'p') {
             e.preventDefault()
             handlePreview()
+        } else if(key === 's') {
+            e.preventDefault();
+            handleSave()
+        } else if(key === 'enter') {
+            handleUpload();
         }
       }
     };
@@ -195,8 +210,28 @@ const TiptapEditor = () => {
     if(editor) {
         setPreview(prev => !prev);
         setBody(formatHtml(editor.getHTML()));
-        console.log(editor.getHTML())
     }
+  }
+
+  const handleSave = () => {
+    if(editor) {
+        toast.info("Draft saved to local storage");
+        localStorage.setItem("editorTitleDraft",title);
+        localStorage.setItem("editorContentDraft",editor.getHTML());
+    }
+  }
+
+  const handleUpload = () => {
+      if(editor && previewRef.current) {
+          let editorContent: string = '';
+          const children = previewRef.current.children;
+          for(let i=0; i<children.length; i++) {
+              if(children[i].id !== 'cancel'){
+                  editorContent += children[i].outerHTML;
+              }
+          }
+          localStorage.setItem('editorContent',editorContent);
+      }
   }
 
   useEffect(() => {
@@ -228,6 +263,9 @@ const TiptapEditor = () => {
       };
   }, [preview]);
 
+  if(!state.token || state.user?.role !== "admin") 
+    return <Navigate to={'/404'} replace/>
+
   return (
     <div className="w-full relative">
         <div className={`w-full relative flex-col items-center justify-center gap-10 py-20 bg-black
@@ -245,7 +283,7 @@ const TiptapEditor = () => {
                       type="url" 
                       name='url' 
                       className='w-4/5 p-2 text-black' 
-                      onInput={(e) => setEmbedUrl(e.target.value)}/>
+                      onInput={(e) => setEmbedUrl((e.target as HTMLInputElement).value)}/>
                     <Button 
                       content='Submit' 
                       className='text-[1.2rem]'
@@ -254,8 +292,8 @@ const TiptapEditor = () => {
             }
             <div className="w-full flex flex-col justify-center items-center gap-10 mb-10">
                 <textarea
-                  className="text-primary w-4/5 text-6xl text-center font-bold bg-black
-                             text-wrap focus:outline-none resize-none [srollbar-width:none]"
+                  className="text-primary w-4/5 text-6xl text-center font-bold bg-black overflow-hidden
+                             text-wrap focus:outline-none resize-none"
                   value={title}
                   rows={1}
                   ref={titleRef}
@@ -363,24 +401,40 @@ const TiptapEditor = () => {
                     </button>
                 </div>
 
-                <div className='bg-white p-2 rounded-2xl flex items-center justify-center'>
+                <div className='bg-white p-3 rounded-full flex gap-3 items-center justify-center'>
                     <button
                       className={`text-[2.5rem] cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
                                  ${preview ? 'text-primary' : ''}`}
                       onClick={() => handlePreview()}>
                       <MdPreview />
                     </button>
-                </div>
 
+                    <button
+                    className={`text-[2rem] cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
+                        ${preview ? 'text-primary' : ''}`}
+                        onClick={() => handleSave()}>
+                        <FaSave />
+                    </button>
+
+                    <button
+                    className={`text-[2rem] cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
+                        ${preview ? 'text-primary' : ''}`}
+                        onClick={() => handleUpload()}>
+                        <FaUpload />
+                    </button>
+                </div>
+                
             </div>
         </div>
 
         <div
           className={`w-full relative border border-solid border-white flex-col
-                     items-center justify-center gap-10 bg-black py-20 ${preview ? 'flex' : 'hidden'}`}>
+                     items-center justify-center gap-10 bg-black py-20 ${preview ? 'flex' : 'hidden'}`}
+          ref={previewRef}>
             <MdCancel
               className="absolute text-[2.5rem] left-0 top-0 cursor-pointer m-5 bg-black 
                          text-primary rounded-full hover:scale-110 z-50"
+              id='cancel'
               onClick={() => {
                   setPreview(false);
               }}/>

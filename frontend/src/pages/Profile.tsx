@@ -28,7 +28,7 @@ const Profile = () => {
         }
     },[error, loading])
 
-    if(!state.token) return <Navigate to={'/login'} />
+    if(!state.token) return <Navigate to={'/login'} replace/>
     return (
         <div className="w-full h-screen flex items-center justify-center">
             <div className=" w-4/5 sm:w-2/3 md:w-3/5 lg:w-2/5 xl:w-1/3 relative flex flex-col items-center justify-center bg-white/80 

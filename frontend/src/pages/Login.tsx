@@ -90,7 +90,7 @@ const Login = () => {
                     token: data.accessToken,
                 },
             });
-            toast.success(`Log In Successful! Welcome back ${data.user.name}`);
+            toast.success(`Welcome back ${data.user.name}`);
             sessionStorage.removeItem('login-data');
 
             setFormData({
