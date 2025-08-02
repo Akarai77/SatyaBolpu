@@ -66,6 +66,7 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
                     "Content-Type": "application/json",
                     ...(mergedOptions.headers || {}),
                 },
+                credentials: 'include'
             };
 
             if (mergedOptions.body && ['POST', 'PUT', 'PATCH'].includes(mergedOptions.method || 'GET')) {

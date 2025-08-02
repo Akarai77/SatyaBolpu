@@ -50,7 +50,7 @@ const Home = () => {
   const [openIndex,setOpenIndex] = useState<boolean[]>([]);
 
   const navigate = useNavigate();
-  const {token} = useAuth();
+  const {state} = useAuth();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -121,7 +121,7 @@ const Home = () => {
                 ref={(el) => {if(el) scrollWatcherRef.current[0] = el}}>
             <div className='overlay w-full h-full absolute top-0 bg-[rgba(0,0,0,0.7)] z-0'></div>
             <div className='w-full h-full relative flex flex-col items-center justify-center'>
-              <div className={`relative w-full text-center text-[2.6rem] sm:text-[3.25rem] md:text-[4rem] lg:text-[5rem]
+              <div className={`relative w-full text-center text-wrap text-[2.6rem] sm:text-[3.25rem] md:text-[4rem] lg:text-[5rem]
                                xl:text-[6rem] 2xl:text-[7rem] whitespace-nowrap font-black [background-image:url('/assets/Home/hero/bg2.webp')]
                                bg-no-repeat [background-size:100vw_100vh] bg-fixed bg-center [-webkit-text-fill-color:transparent]
                                [-webkit-background-clip:text] bg-clip-text`}
@@ -144,7 +144,7 @@ const Home = () => {
                 <img className='absolute z-20 w-full h-full object-cover object-[center_5%]'
                      src="/assets/Home/hero/foliage.png" alt="foliage" 
                      ref={(el) => { if(el) foliageRef.current[0] = el }}/>
-                <div className='w-full p-5 text-center bg-[rgba(0,0,0,0.25)] text-stroke-2 text-stroke-color-primary text-[2.5rem]
+                <div className='w-full p-5 text-center bg-[rgba(0,0,0,0.5)] text-stroke-2 text-stroke-color-primary text-[2.5rem]
                                 md:text-[3rem] lg:text-[4rem] xl:text-[5rem] 2xl:text-[6rem] font-black z-10 
                                 [-webkit-text-fill-color:transparent] [-webkit-background-clip:text] bg-clip-text' 
                      ref={(el) => {if(el) headingRefs.current[1] = el}}>
@@ -162,7 +162,7 @@ const Home = () => {
                 <img className='absolute scale-[2] z-20 w-full h-full object-cover object-[center_5%]' 
                      src="/assets/Home/hero/foliage.png" alt="foliage" 
                      ref={(el) => { if(el) foliageRef.current[1] = el }}/>
-                <div className="w-full p-5 text-center bg-[rgba(0,0,0,0.25)] text-stroke-2 text-stroke-color-primary
+                <div className="w-full p-5 text-center bg-[rgba(0,0,0,0.5)] text-stroke-2 text-stroke-color-primary
                                 text-[2.5rem] md:text-[3rem] lg:text-[4rem] xl:text-[5rem] 2xl:text-[6rem] font-black
                                 z-10 [-webkit-text-fill-color:transparent] [-webkit-background-clip:text] bg-clip-text" 
                      ref={(el) => {if(el) headingRefs.current[2] = el}}>
@@ -175,7 +175,7 @@ const Home = () => {
                             bg-no-repeat bg-center bg-cover bg-fixed">
               <div className='overlay w-full h-[200vh] absolute bottom-[100vh] bg-[rgba(0,0,0,0.7)] z-10'></div>
               <div className="flex items-center justify-center sticky top-0 w-screen h-screen z-0 overflow-hidden">
-                <div className="w-full p-5 text-center bg-[rgba(0,0,0,0.25)] text-stroke-2 text-stroke-color-primary
+                <div className="w-full p-5 text-center bg-[rgba(0,0,0,0.5)] text-stroke-2 text-stroke-color-primary
                                 text-[2.5rem] md:text-[3rem] lg:text-[4rem] xl:text-[5rem] 2xl:text-[6rem] font-black
                                 z-10 [-webkit-text-fill-color:transparent] [-webkit-background-clip:text] bg-clip-text"
                      ref={(el) => {if(el) headingRefs.current[3] = el}}>
@@ -191,7 +191,7 @@ const Home = () => {
         <div className='map w-full h-screen flex flex-col lg:flex-row gap-5 items-center justify-center p-10 mb-[100vh]'
              ref={(el) => {if(el) scrollWatcherRef.current[1] = el }}>
           <div className='w-full lg:w-1/2 lg:h-full flex items-center justify-center text-center text-primary text-[1.5rem]
-                          md:text-[2rem] lg:text-[2.5rem] xl:text-[3rem] xl:p-20' 
+                          md:text-[2rem] lg:text-[2.5rem] xl:text-[3rem] xl:p-20 font-semibold' 
                 ref={(el) => {if(el) headingRefs.current[4] = el }}>
             The Spiritual Hub is Spread Across Two States And Three Districts
           </div>
@@ -338,8 +338,17 @@ const Home = () => {
                  ref={(el) => {if(el) bgRefs.current[3] = el}}></div>
           </div>
           <div className='sticky top-0 w-full h-screen flex flex-col items-center justify-center gap-3 text-center z-20 p-5'>
-            <h1 className='text-white text-[2rem]'>Fully Experience The World Of Faith</h1>
-            <Button content='Get Started'/>
+            <h1 className='text-white text-[2rem]'>
+            {
+                state.token ?
+                "Embrace The Land of Faith"
+                    :
+                "Fully Experience The World Of Faith"
+            }
+            </h1>
+            {
+                !state.token && <Button content='Get Started'/>
+            }
           </div>
         </div>
 

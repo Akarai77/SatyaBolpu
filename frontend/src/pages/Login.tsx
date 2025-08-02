@@ -4,6 +4,7 @@ import { GrFormView, GrFormViewHide } from "react-icons/gr";
 import useApi from "../hooks/useApi";
 import { useAuth } from "../context/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 const Login = () => {
     const [formData, setFormData] = useState<{ email: string; password: string }>({
@@ -82,16 +83,14 @@ const Login = () => {
         }
 
         if (data && !loading) {
-            console.log("Login success:", data);
-
             dispatch({
                 type: 'LOGIN',
                 payload: {
                     user: data.user,
-                    token: data.token,
+                    token: data.accessToken,
                 },
             });
-
+            toast.success(`Log In Successful! Welcome back ${data.user.name}`);
             sessionStorage.removeItem('login-data');
 
             setFormData({

@@ -83,14 +83,14 @@ const SignUp = () => {
 
       if (data) {
           setButtonLoad(loading);
-          console.log("✅ Signup success:", data);
           dispatch({
               type: 'LOGIN',
               payload: {
                   user: data.user,
-                  token: data.token
+                  token: data.accessToken
               }
           });
+          toast.sucess(`Sign In Successful! Welcome ${data.user.name}`)
           sessionStorage.removeItem('signup-data');
           setFormData(initialFormData);
       }

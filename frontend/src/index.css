@@ -4,7 +4,7 @@
   @tailwind components;
   @tailwind utilities;
 
-  :root {
+:root {
     font-family: "Parkinsans", serif;
     line-height: 1.5;
     font-optical-sizing: auto;
@@ -80,3 +80,6 @@ blockquote {
   color: #aaa;
 }
 
+.Toastify__toast {
+    font-family: "Parkinsans", serif !important;
+}

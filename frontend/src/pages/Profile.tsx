@@ -3,16 +3,30 @@ import { useAuth } from "../context/AuthContext";
 import { FaUserAlt } from "react-icons/fa";
 import { MdVerified } from "react-icons/md";
 import Button from "../components/Button";
+import useApi from "../hooks/useApi";
+import { useEffect, useState } from "react";
+import { toast } from "react-toastify";
 
 const Profile = () => {
     
     const {state, dispatch} = useAuth();
+    const {error, loading, post} = useApi('auth/logout', {auto: false});
+    const [buttonLoad, setButtonLoad] = useState<boolean>(false);
 
-    const handleLogout = () => {
+    const handleLogout = async () => {
+        await post({});
         dispatch({
             type: 'LOGOUT'
-        })
+        });
+        toast.info("User Logged Out");
     }
+
+    useEffect(() => {
+        setButtonLoad(loading);
+        if(error) {
+            console.warn(error);
+        }
+    },[error, loading])
 
     if(!state.token) return <Navigate to={'/login'} />
     return (
@@ -26,7 +40,7 @@ const Profile = () => {
                 </div>
                 
                 <div className="text-center pt-[5rem]">
-                    <div className="text-[2rem]/[2rem] flex items-center gap-2 justify-center relative font-black line flex">
+                    <div className="text-[2rem]/[2rem] flex items-center gap-2 justify-center relative font-black">
                         <p>{state.user?.name}</p>
                         {
                             state.user?.verified && 
@@ -55,7 +69,8 @@ const Profile = () => {
                 </div>
               </div>
 
-              <Button onClick={handleLogout} className="text-[1.25rem]" content="Log Out"/>
+              <Button loading={buttonLoad} loadingText="Logging Out" 
+                onClick={handleLogout} className="text-[1.25rem]" content="Log Out"/>
             
             </div>
         </div>
