@@ -32,14 +32,27 @@ export const signup = async (req: Request, res: Response) => {
       password: hashedPassword
     });
 
-    const token = jwt.sign(
-      { id: newUser._id },
-      process.env.JWT_SECRET!,
-      { expiresIn: '1h' }
+    const accessToken = jwt.sign(
+        { id: newUser._id },
+        process.env.JWT_ACCESS_TOKEN_SECRET!,
+        { expiresIn: '15m' }
     );
 
+    const refreshToken = jwt.sign(
+        { id: newUser._id },
+        process.env.JWT_REFRESH_TOKEN_SECRET!,
+        { expiresIn: '7d' }
+    )
+
+    res.cookie("jwt", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 24 * 60 * 60 * 1000
+    });
+
     return res.status(201).json({
-      token,
+      accessToken,
       user: {
         id: newUser._id,
         uname: newUser.uname,
@@ -57,30 +70,43 @@ export const signup = async (req: Request, res: Response) => {
 };
 
 export const login = async (req: Request,res: Response) => {
-        const {email, password} = req.body;
-        
-        if(!email || !password) {
-            return res.status(400).json({msg: 'Email and Password are required'});
-        }
-        
-        const user = await User.findOne({ email });
-        if(!user) {
-            return res.status(404).json({ msg: 'User Not Found' });
-        }
+    const {email, password} = req.body;
 
-        const isMatch = await bcrypt.compare(password, user.password);
-        if(!isMatch) {
-            return res.status(401).json({msg: 'Invlaid Credentials'});
-        }
+    if(!email || !password) {
+        return res.status(400).json({msg: 'Email and Password are required'});
+    }
 
-        const token = jwt.sign(
-            { id: user._id },
-            process.env.JWT_SECRET!,
-            { expiresIn: '1h' }
-        );
-    
+    const user = await User.findOne({ email });
+    if(!user) {
+        return res.status(404).json({ msg: 'User Not Found' });
+    }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if(!isMatch) {
+        return res.status(401).json({msg: 'Invlaid Credentials'});
+    }
+
+    const accessToken = jwt.sign(
+        { id: user._id },
+        process.env.JWT_ACCESS_TOKEN_SECRET!,
+        { expiresIn: '15m' }
+    );
+
+    const refreshToken = jwt.sign(
+        { id: user._id },
+        process.env.JWT_REFRESH_TOKEN_SECRET!,
+        { expiresIn: '7d' }
+    )
+
+    res.cookie("jwt", refreshToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        maxAge: 24 * 60 * 60 * 1000
+    });
+
     return res.status(200).json({
-        token,
+        accessToken,
         user : {
             id: user._id,
             uname: user.uname,
@@ -91,4 +117,51 @@ export const login = async (req: Request,res: Response) => {
             verified: user.verified
         }
     });
+}
+
+export const refresh = async (req: Request, res: Response) => {
+  const token = req.cookies?.jwt;
+  if (!token) return res.status(401).json({ msg: 'Unauthorized' });
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_REFRESH_TOKEN_SECRET!) as { id: string };
+
+    const user = await User.findById(decoded.id).lean();
+    if (!user) return res.status(404).json({ msg: 'User not found' });
+
+    const accessToken = jwt.sign(
+      { id: user._id },
+      process.env.JWT_ACCESS_TOKEN_SECRET!,
+      { expiresIn: '15m' }
+    );
+
+    return res.status(200).json({
+      accessToken,
+      user: {
+        id: user._id,
+        uname: user.uname,
+        name: user.name,
+        phone: user.phone,
+        email: user.email,
+        role: user.role,
+        verified: user.verified
+      }
+    });
+  } catch (err) {
+    console.error('Refresh Error:', err);
+    return res.status(403).json({ msg: 'Invalid token' });
+  }
+};
+
+export const logout = async (req: Request, res: Response) => {
+    const token = req.cookies?.jwt;
+    if(!token) return res.status(401).json({ msg: 'Unauthorized' });
+
+    res.clearCookie('jwt', {
+        httpOnly: true,
+        sameSite: process.env.NODE_ENV === "production" ? "none" : "lax",
+        secure: process.env.NODE_ENV === 'production'
+    });
+
+    res.status(200).json({ message: 'Logged out' });
 }
