@@ -12,6 +12,7 @@ import SignUp from './pages/SignUp'
 import Profile from './pages/Profile'
 import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
+import Dashboard from './pages/Dashboard'
 
 function App() {
   return (
@@ -43,6 +44,7 @@ function App() {
         <Route path='/login' element={<Login/>}/>
         <Route path='/signup' element={<SignUp/>}/>
         <Route path='/profile' element={<Profile/>}/>
+        <Route path='/dashboard' element={<Dashboard />}/>
         <Route path='/explore' element={<Explore/>}/>
         <Route path='/map' element={<MAP/>}/>
         <Route path='/explore/daivaradhane' element={<Daivaradhane/>}/>

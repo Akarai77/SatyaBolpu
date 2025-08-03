@@ -18,14 +18,14 @@ const Profile = () => {
     const profileRef = useRef<HTMLDivElement | null>(null);
 
     const handleLogout = async () => {
-        const logout = () => {
+        const logout = async () => {
+            await post({});
             dispatch({
                 type: 'LOGOUT'
             });
             toast.info("User Logged Out");
         }
 
-        await post({});
         dialog?.popup({
             title: "Logging Out",
             descr: "Are you sure you want to log out?",

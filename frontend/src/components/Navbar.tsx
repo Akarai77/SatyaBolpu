@@ -16,7 +16,6 @@ const Navbar = () => {
   useEffect(() => {
     if (isMenuOpen) {
       document.body.style.overflowY = 'hidden';
-      document.body.setAttribute("data-lenis-prevent", "true");
     } else {
       document.body.style.overflowY = 'auto';
     }
@@ -65,6 +64,14 @@ const Navbar = () => {
         onClick={() => setIsMenuOpen(false)}
       >
         Home
+      </NavLink>
+      <NavLink
+        style={{ textShadow: '1px 1px 6px black' }}
+        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${location.pathname === '/dashboard' ? 'text-primary' : ''}`}
+        to="/dashboard"
+        onClick={() => setIsMenuOpen(false)}
+      >
+        Dashboard
       </NavLink>
       <NavLink
         style={{ textShadow: '1px 1px 6px black' }}

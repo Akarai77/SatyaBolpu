@@ -1,3 +1,5 @@
+import { cn } from "../utils/merge";
+
 type ButtonProps = {
   content: string;
   className?: string;
@@ -7,9 +9,10 @@ type ButtonProps = {
   loadingText?: string;
 };
 
+
 const Button: React.FC<ButtonProps> = ({
   content,
-  className = "",
+  className,
   type = "button",
   onClick,
   loading = false,
@@ -17,9 +20,12 @@ const Button: React.FC<ButtonProps> = ({
 }) => {
   return (
     <button
-      className={`p-2 rounded-md flex items-center justify-center gap-2 text-primary bg-white font-semibold cursor-pointer
-        transition-all duration-150 hover:text-white hover:bg-primary hover:scale-110 ${className}
-        disabled:cursor-not-allowed disabled:scale-100 disabled:bg-primary/70 disabled:text-white`}
+      className={cn(
+        `p-2 rounded-md flex items-center justify-center gap-2 text-primary bg-white font-semibold cursor-pointer
+        transition-all duration-150 hover:text-white hover:bg-primary hover:scale-110 
+        disabled:cursor-not-allowed disabled:scale-100 disabled:bg-primary/70 disabled:text-white`,
+        className
+      )}
       disabled={loading}
       onClick={onClick}
       type={type}
@@ -30,7 +36,6 @@ const Button: React.FC<ButtonProps> = ({
           width="24"
           height="24"
           viewBox="0 0 24 24"
-          xmlns="http://www.w3.org/2000/svg"
         >
           <path d="M12,23a9.63,9.63,0,0,1-8-9.5,9.51,9.51,0,0,1,6.79-9.1A1.66,1.66,0,0,0,12,2.81h0a1.67,1.67,0,0,0-1.94-1.64A11,11,0,0,0,12,23Z" />
         </svg>
