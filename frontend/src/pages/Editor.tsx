@@ -17,6 +17,7 @@ import { useAuth } from '../context/AuthContext';
 import { Navigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useDialog } from '../context/DialogBoxContext';
+import Title from '../components/Title';
 
 type clickedType = {
   bold: boolean;
@@ -301,20 +302,20 @@ const TiptapEditor = () => {
                 </div>
             }
             <div className="w-full flex flex-col justify-center items-center gap-10 mb-10">
-                <textarea
-                  className="text-primary w-4/5 text-6xl text-center font-bold bg-black overflow-hidden
-                             text-wrap focus:outline-none resize-none"
-                  value={title}
-                  rows={1}
-                  ref={titleRef}
-                  onChange={(e) => setTitle(e.target.value)}
-                />
+              <textarea
+                className="text-primary w-4/5 text-6xl text-center font-bold bg-black overflow-hidden
+                           text-wrap focus:outline-none resize-none"
+                value={title}
+                rows={1}
+                ref={titleRef}
+                onChange={(e) => setTitle(e.target.value)}
+              />
 
-                <div className="flex items-center justify-center w-4/5 sm:w-2/3 lg:w-1/2 mx-auto">
+              <div className="flex items-center justify-center w-4/5 sm:w-2/3 lg:w-1/2 mx-auto">
                 <div className="w-1/2 border-t-2 border-solid border-primary"></div>
                 <span className="mx-4 text-xl text-primary font-bold">ॐ</span>
                 <div className="w-1/2 border-t-2 border-solid border-primary flex-grow"></div>
-                </div>
+              </div>
             </div>
 
             <EditorContent 
@@ -448,20 +449,9 @@ const TiptapEditor = () => {
               onClick={() => {
                   setPreview(false);
               }}/>
-            <div className="w-full flex flex-col justify-center items-center gap-[3.2em] mb-10">
-                <div
-                  className="text-primary w-4/5 text-6xl text-center font-bold bg-black whitespace-pre-line">
-                    {title}
-                </div>
-
-                <div className="flex items-center justify-center w-1/2 mx-auto">
-                    <div className="w-1/2 border-t-2 border-solid border-primary">
-                </div>
-                <span className="mx-4 text-xl text-primary font-bold">ॐ</span>
-                <div className="w-1/2 border-t-2 border-solid border-primary flex-grow"></div>
-                </div>
-            </div>
-
+            
+            <Title title={title}/>
+            
             <div 
               className='text-white text-[1.5rem] w-4/5 p-5 break-words'
               dangerouslySetInnerHTML={{
