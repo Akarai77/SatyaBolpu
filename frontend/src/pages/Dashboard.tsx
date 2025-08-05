@@ -5,12 +5,12 @@ import { FaPencilAlt, FaStar, FaHandsHelping } from "react-icons/fa";
 import Button from "../components/Button";
 
 const data = [
-  { month: 'Jan 2025', articles: 4 },
-  { month: 'Feb 2025', articles: 7 },
-  { month: 'Mar 2025', articles: 20 },
-  { month: 'Apr 2025', articles: 4 },
-  { month: 'May 2025', articles: 7 },
-  { month: 'Jun 2025', articles: 20 },
+  { month: 'Jan 2025', posts: 4 },
+  { month: 'Feb 2025', posts: 7 },
+  { month: 'Mar 2025', posts: 20 },
+  { month: 'Apr 2025', posts: 4 },
+  { month: 'May 2025', posts: 7 },
+  { month: 'Jun 2025', posts: 20 },
 ];
 
 const Dashboard = () => {
@@ -24,7 +24,7 @@ const Dashboard = () => {
             <div className="w-[95%] flex items-center gap-5 p-5 xl:text-nowrap">
               <div className="relative w-1/3 min-h-36 lg:min-h-24 xl:min-h-fit flex flex-col justify-center text-center p-3 outline outline-white rounded-2xl 
                   cursor-pointer hover:-mt-5 transition-all duration-300">
-                <h1 className="text-[1.5rem]">Articles Published</h1>
+                <h1 className="text-[1.5rem]">All Time Posts</h1>
                 <p className="text-white text-[2rem]">1902</p>
               </div>
               <div className="relative w-1/3 min-h-36 lg:min-h-24 xl:min-h-fit flex flex-col justify-center text-center p-3 outline outline-white rounded-2xl 
@@ -56,7 +56,7 @@ const Dashboard = () => {
 
                 <Line
                   type="monotone"
-                  dataKey="articles"
+                  dataKey="posts"
                   stroke="#E88138"
                   strokeWidth={3}
                   style={{cursor: 'pointer'}}
@@ -82,8 +82,7 @@ const Dashboard = () => {
                   <img className="w-full aspect-square object-cover" src="/assets/Explore/daivaradhane.jpg" alt="" />
                 </div>
                 <div className="text-center text-white">
-                  <h1 className="text-primary">Hello World!</h1>
-                  <p>lorem ipsum dolor sit</p>
+                  <h1 className="text-primary text-[1.25rem]">Hello World!</h1>
                 </div>
               </div>
 
@@ -93,8 +92,7 @@ const Dashboard = () => {
                   <img className="w-full aspect-square object-cover" src="/assets/Explore/daivaradhane.jpg" alt="" />
                 </div>
                 <div className="text-center text-white">
-                  <h1 className="text-primary">Hello World!</h1>
-                  <p>lorem ipsum dolor sit</p>
+                  <h1 className="text-primary text-[1.25rem]">Hello World!</h1>
                 </div>
               </div>
 
@@ -104,8 +102,7 @@ const Dashboard = () => {
                   <img className="w-full aspect-square object-cover" src="/assets/Explore/daivaradhane.jpg" alt="" />
                 </div>
                 <div className="text-center text-white">
-                  <h1 className="text-primary">Hello World!</h1>
-                  <p>lorem ipsum dolor sit</p>
+                  <h1 className="text-primary text-[1.25rem]">Hello World!</h1>
                 </div>
               </div>
 
@@ -115,8 +112,7 @@ const Dashboard = () => {
                   <img className="w-full aspect-square object-cover" src="/assets/Explore/daivaradhane.jpg" alt="" />
                 </div>
                 <div className="text-center text-white">
-                  <h1 className="text-primary">Hello World!</h1>
-                  <p>lorem ipsum dolor sit</p>
+                  <h1 className="text-primary text-[1.25rem]">Hello World!</h1>
                 </div>
               </div>
 
@@ -126,8 +122,7 @@ const Dashboard = () => {
                   <img className="w-full aspect-square object-cover" src="/assets/Explore/daivaradhane.jpg" alt="" />
                 </div>
                 <div className="text-center text-white">
-                  <h1 className="text-primary">Hello World!</h1>
-                  <p>lorem ipsum dolor sit</p>
+                  <h1 className="text-primary text-[1.25rem]">Hello World!</h1>
                 </div>
               </div>
 

@@ -3,10 +3,8 @@ import NotFound from './components/NotFound'
 import Home from './pages/Home'
 import Explore from './pages/Explore'
 import MAP from './pages/MAP'
-import Daivaradhane from './pages/Daivaradhane'
 import Editor from './pages/Editor'
 import CategoriesList from './pages/CategoriesList'
-import CategoryPage from './pages/CategoryPage'
 import Login from './pages/Login'
 import SignUp from './pages/SignUp'
 import Profile from './pages/Profile'
@@ -14,6 +12,7 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Dashboard from './pages/Dashboard'
 import Updates from './pages/Updates'
+import NewPost from './pages/NewPost'
 
 function App() {
   return (
@@ -47,12 +46,11 @@ function App() {
         <Route path='/profile' element={<Profile/>}/>
         <Route path='/dashboard' element={<Dashboard />}/>
         <Route path='/explore' element={<Explore/>}/>
+        <Route path='/new-post' element={<NewPost/>}/>
         <Route path='/updates' element={<Updates />}/>
-        <Route path='/map' element={<MAP/>}/>
-        <Route path='/explore/daivaradhane' element={<Daivaradhane/>}/>
         <Route path='/editor' element={<Editor/>}/>
         <Route path='/:title/categories' element={<CategoriesList/>}/>
-        <Route path='/:title/categories/:category' element={<CategoryPage />}/>
+        <Route path='/map' element={<MAP/>}/>
         <Route path='*' element={<NotFound/>}/>
       </Routes>
     </>

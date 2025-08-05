@@ -65,14 +65,28 @@ const Navbar = () => {
       >
         Home
       </NavLink>
-      <NavLink
-        style={{ textShadow: '1px 1px 6px black' }}
-        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${location.pathname === '/dashboard' ? 'text-primary' : ''}`}
-        to="/dashboard"
-        onClick={() => setIsMenuOpen(false)}
-      >
-        Dashboard
-      </NavLink>
+      {
+        state.token &&
+        <NavLink
+          style={{ textShadow: '1px 1px 6px black' }}
+          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${location.pathname === '/dashboard' ? 'text-primary' : ''}`}
+          to="/dashboard"
+          onClick={() => setIsMenuOpen(false)}
+        >
+          Dashboard
+        </NavLink>
+      }
+      {
+        state.token && state.user?.role === 'admin' &&
+        <NavLink
+          style={{ textShadow: '1px 1px 6px black' }}
+          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${location.pathname === '/new-post' ? 'text-primary' : ''}`}
+          to="/new-post"
+          onClick={() => setIsMenuOpen(false)}
+        >
+          New Post
+        </NavLink>
+      }
       <NavLink
         style={{ textShadow: '1px 1px 6px black' }}
         className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${location.pathname === '/explore' ? 'text-primary' : ''}`}

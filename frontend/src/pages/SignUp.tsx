@@ -6,6 +6,7 @@ import { GrFormView, GrFormViewHide } from "react-icons/gr";
 import useApi from "../hooks/useApi";
 import { useAuth } from "../context/AuthContext";
 import { Navigate } from "react-router-dom";
+import { toast } from "react-toastify";
 
 type SignUpProps = {
   name: string;
@@ -90,7 +91,7 @@ const SignUp = () => {
                   token: data.accessToken
               }
           });
-          toast.sucess(`Sign In Successful! Welcome ${data.user.name}`)
+          toast.success(`Sign In Successful! Welcome ${data.user.name}`)
           sessionStorage.removeItem('signup-data');
           setFormData(initialFormData);
       }
