@@ -6,18 +6,19 @@ import { Placeholder } from '@tiptap/extension-placeholder'
 import { RiAttachmentLine } from 'react-icons/ri';
 import { GrBlockQuote } from "react-icons/gr";
 import { MdCancel, MdPreview } from "react-icons/md";
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo, FaSave, FaUpload } from 'react-icons/fa';
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { FaBold, FaItalic, FaUnderline, FaUndo, FaRedo, FaSave, FaUpload, FaEdit } from 'react-icons/fa';
 import { ResizableImage } from '../components/EditorExtensions/Image';
 import { Video } from '../components/EditorExtensions/Video';
 import { Audio } from '../components/EditorExtensions/Audio';
 import Button from '../components/Button';
 import { Iframe } from '../components/EditorExtensions/Iframe';
 import { useAuth } from '../context/AuthContext';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import { useDialog } from '../context/DialogBoxContext';
 import Title from '../components/Title';
+import { useLoading } from '../context/LoadingContext';
 
 type clickedType = {
   bold: boolean;
@@ -31,7 +32,7 @@ const TiptapEditor = () => {
     italic: false,
     underline: false,
   });
-  const [title, setTitle] = useState<string>(localStorage.getItem('editorTitleDraft') || 'Title');
+  const [title, setTitle] = useState<string>(localStorage.getItem('editorTitle') || 'Title');
   const titleRef = useRef<HTMLTextAreaElement | null>(null);
   const [fontSize,setFontSize] = useState<string>('normal');
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -41,10 +42,24 @@ const TiptapEditor = () => {
   const [showAttachmentMenu,setShowAttachmentMenu] = useState<boolean>(false);
   const [askEmbedUrl,setAskEmbedUrl] = useState<boolean>(false);
   const [embedUrl,setEmbedUrl] = useState<string>('');
+  const objectUrls = useRef<string[]>([]);
+  const [submitted,setSubmitted] = useState<boolean>(false);
   const { state } = useAuth();
+  const { setLoading } = useLoading();
+  const navigate = useNavigate();
   const dialog = useDialog();
 
   const attachmentRef = useRef<HTMLDivElement | null>(null);
+
+  useLayoutEffect(() => {
+    const finalEditorContent = localStorage.getItem('finalEditorContent');
+    if(finalEditorContent) {
+      setSubmitted(true);
+      setPreview(true);
+      setBody(localStorage.getItem('editorContent') || '');
+      setTitle(localStorage.getItem('editorTitle') || 'Title')
+    }
+  },[])
 
   useEffect(() => {
     const handleClick = (e: MouseEvent) => {
@@ -54,6 +69,7 @@ const TiptapEditor = () => {
     }
 
     window.addEventListener('mousedown',handleClick);
+
     return () => window.removeEventListener('mousedown',handleClick);
   },[])
 
@@ -72,7 +88,7 @@ const TiptapEditor = () => {
             showOnlyWhenEditable: true,
         })
     ],
-    content: localStorage.getItem('editorContentDraft') || '' ,
+    content: localStorage.getItem('editorContent') || '' ,
     onUpdate: () => {
         const editorBottom = editor.view.dom.getBoundingClientRect().bottom + window.scrollY;
         const screenCenter = window.innerHeight / 2;
@@ -136,6 +152,7 @@ const TiptapEditor = () => {
     if(file) {
         const type = file.type.split('/')[0];
         const url = URL.createObjectURL(file);
+        objectUrls.current.push(url);
         if(type === 'image') {
             editor?.chain().focus().setImage({ src:url }).run();
         } else if(type === 'video') {
@@ -157,6 +174,12 @@ const TiptapEditor = () => {
         }
     }
   }
+
+  useEffect(() => {
+    return () => {
+      objectUrls.current?.forEach(URL.revokeObjectURL);
+    };
+  }, []);
 
   const handleEmbedUrl = () => {
     if(embedUrl) {
@@ -185,8 +208,8 @@ const TiptapEditor = () => {
   const handleSave = useCallback(() => {
       if(editor) {
           toast.info("Draft saved to local storage");
-          localStorage.setItem("editorTitleDraft", title);
-          localStorage.setItem("editorContentDraft", editor.getHTML());
+          localStorage.setItem("editorTitle", title);
+          localStorage.setItem("editorContent", editor.getHTML());
       }
   }, [editor, title]);
 
@@ -197,31 +220,36 @@ const TiptapEditor = () => {
       }
   }, [editor]);
 
-  const handleUpload = useCallback(() => {
-      const upload = () => {
+  const handleSubmit = useCallback(() => {
+      const submit = () => {
           if(editor && previewRef.current) {
+              handleSave();
+              handlePreview();
               let editorContent: string = '';
               const children = previewRef.current.children;
               for(let i=0; i<children.length; i++) {
-                  if(children[i].id !== 'cancel'){
+                  if(children[i].id !== 'cancel' && children[i].id !== 'edit'){
                       editorContent += children[i].outerHTML;
                   }
               }
-              localStorage.setItem('editorContent', editorContent);
+              localStorage.setItem('finalEditorContent', editorContent);
+              setSubmitted(true);
+              setPreview(true);
           }
       }
 
       dialog?.popup({
-          title: 'Draft Upload',
-          descr: 'The edited document will get uploaded to the server.',
-          onConfirm: upload
+          title: 'Draft Submit',
+          descr: "Are you sure you want to submit the document?",
+          severity: 'default',
+          onConfirm: submit
       });
-
+      
   }, [editor, previewRef, dialog]);
 
   useEffect(() => {
       const handleKeyPress = (e: KeyboardEvent) => {
-          if ((e.ctrlKey || e.metaKey) && !e.shiftKey) {
+          if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !submitted) {
               const key = e.key.toLowerCase();
 
               if (['b', 'i', 'u'].includes(key)) {
@@ -234,8 +262,10 @@ const TiptapEditor = () => {
                   };
                   const button = keyToButton[key] || "underline";
                   handleClick(button)
+                  return
               }
 
+              editor.chain().blur()
               if(key === 'p') {
                   e.preventDefault()
                   handlePreview()
@@ -243,15 +273,15 @@ const TiptapEditor = () => {
                   e.preventDefault();
                   handleSave();
               } else if(key === 'enter') {
-                  e.preventDefault();
-                  handleUpload();
+                  e.preventDefault()
+                  handleSubmit();
               }
           }
       };
 
       window.addEventListener('keydown', handleKeyPress);
       return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [editor, handleSave, handleUpload, handlePreview, handleClick]);
+  }, [editor, handleSave, handleSubmit, handlePreview, handleClick, submitted]);
 
   useEffect(() => {
       const videos = document.querySelectorAll('video');
@@ -274,6 +304,20 @@ const TiptapEditor = () => {
       });
   }, [preview]);
 
+  const handleReview = () => {
+    if(!submitted) {
+      toast.error("You need to submit the edited document first!");
+    } else {
+      navigate('/review');
+    }
+  }
+
+  const handleEditAgain = () => {
+    setPreview(false);
+    setSubmitted(false);
+    localStorage.removeItem('finalEditorContent');
+  }
+
   if(!state.token || state.user?.role !== "admin") 
     return <Navigate to={'/404'} replace/>
 
@@ -289,6 +333,12 @@ const TiptapEditor = () => {
                 <div className='fixed w-1/3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
                                  flex flex-col gap-5 items-center justify-center bg-black text-primary text-center p-5
                                  rounded-xl pointer-events-auto z-50'>
+                  <MdCancel
+                    className={`absolute text-[2.5rem] right-0 top-0 cursor-pointer m-5 bg-black 
+                               text-primary rounded-full hover:scale-110 z-50`}
+                    onClick={() => {
+                      setAskEmbedUrl(false);
+                    }}/>
                     <label htmlFor="url" className='font-black text-[1.5rem]'>Enter Embed Url</label>
                     <input 
                       type="url" 
@@ -430,7 +480,7 @@ const TiptapEditor = () => {
                     <button
                     className={`text-[2rem] cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
                         ${preview ? 'text-primary' : ''}`}
-                        onClick={() => handleUpload()}>
+                        onClick={() => handleSubmit()}>
                         <FaUpload />
                     </button>
                 </div>
@@ -439,27 +489,49 @@ const TiptapEditor = () => {
         </div>
 
         <div
-          className={`w-full relative border border-solid border-white flex-col
+          className={`w-full relative flex-col ${submitted ? '' : 'border border-solid border-white'}
                      items-center justify-center gap-10 bg-black py-20 ${preview ? 'flex' : 'hidden'}`}
           ref={previewRef}>
-            <MdCancel
-              className="absolute text-[2.5rem] left-0 top-0 cursor-pointer m-5 bg-black 
-                         text-primary rounded-full hover:scale-110 z-50"
-              id='cancel'
-              onClick={() => {
-                  setPreview(false);
-              }}/>
-            
+            {
+              submitted ? 
+                <FaEdit
+                  className={`absolute text-[2.5rem] right-0 top-0 cursor-pointer m-5 bg-black 
+                             text-white hover:scale-110 hover:text-primary z-50`}
+                  id='edit'
+                  onClick={handleEditAgain}/>
+                  :
+                <MdCancel
+                  className={`absolute text-[2.5rem] right-0 top-0 cursor-pointer m-5 bg-black 
+                             text-primary rounded-full hover:scale-110 z-50`}
+                  id='cancel'
+                  onClick={() => {
+                      setPreview(false);
+                  }}/>
+            }
             <Title title={title}/>
             
             <div 
-              className='text-white text-[1.5rem] w-4/5 p-5 break-words'
+              className='text-white text-[1.5rem] w-[90%] p-5 break-words'
               dangerouslySetInnerHTML={{
                   __html : decodeHtml(body)
               }}      
             >
             </div>
 
+        </div>
+
+        <div className="w-full flex items-center justify-between p-10">
+          <div 
+            className="text-white text-[1.75rem] cursor-pointer p-2 rounded-lg hover:text-primary"
+            onClick={() => navigate('/new-post')}>
+            {`< Basic Details`}
+          </div>
+          <div 
+            className={` text-[1.75rem] p-2 rounded-lg  
+              ${submitted ? 'hover:text-primary text-white cursor-pointer' : 'text-gray-500 cursor-not-allowed'}`}
+            onClick={handleReview}>
+            {`Review >`}
+          </div>
         </div>
         
     </div>
