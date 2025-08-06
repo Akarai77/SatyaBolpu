@@ -19,6 +19,7 @@ import { toast } from 'react-toastify';
 import { useDialog } from '../context/DialogBoxContext';
 import Title from '../components/Title';
 import { useLoading } from '../context/LoadingContext';
+import { usePost } from '../context/PostContext';
 
 type clickedType = {
   bold: boolean;
@@ -32,19 +33,19 @@ const TiptapEditor = () => {
     italic: false,
     underline: false,
   });
-  const [title, setTitle] = useState<string>(localStorage.getItem('editorTitle') || 'Title');
+  const { state: authState } = useAuth();
+  const { state: postState, dispatch: postDispatch } = usePost();
+  const [editorState, setEditorState] = useState<'editing' | 'preview' | 'submitted'>('editing');
+  const [title, setTitle] = useState<string>(postState.details.mainTitle || 'Title');
   const titleRef = useRef<HTMLTextAreaElement | null>(null);
   const [fontSize,setFontSize] = useState<string>('normal');
   const fileRef = useRef<HTMLInputElement | null>(null);
-  const [preview,setPreview] = useState<boolean>(false);
   const previewRef = useRef<HTMLDivElement | null>(null);
   const [body,setBody] = useState<string>('');
   const [showAttachmentMenu,setShowAttachmentMenu] = useState<boolean>(false);
   const [askEmbedUrl,setAskEmbedUrl] = useState<boolean>(false);
   const [embedUrl,setEmbedUrl] = useState<string>('');
   const objectUrls = useRef<string[]>([]);
-  const [submitted,setSubmitted] = useState<boolean>(false);
-  const { state } = useAuth();
   const { setLoading } = useLoading();
   const navigate = useNavigate();
   const dialog = useDialog();
@@ -52,12 +53,11 @@ const TiptapEditor = () => {
   const attachmentRef = useRef<HTMLDivElement | null>(null);
 
   useLayoutEffect(() => {
-    const finalEditorContent = localStorage.getItem('finalEditorContent');
-    if(finalEditorContent) {
-      setSubmitted(true);
-      setPreview(true);
-      setBody(localStorage.getItem('editorContent') || '');
-      setTitle(localStorage.getItem('editorTitle') || 'Title')
+    console.log(postState.content)
+    if(postState.content) {
+      setEditorState("submitted");
+      setBody(postState.content);
+      setTitle(postState.details.mainTitle)
     }
   },[])
 
@@ -88,7 +88,7 @@ const TiptapEditor = () => {
             showOnlyWhenEditable: true,
         })
     ],
-    content: localStorage.getItem('editorContent') || '' ,
+    content: localStorage.getItem('editorContentDraft') || postState.content || '' ,
     onUpdate: () => {
         const editorBottom = editor.view.dom.getBoundingClientRect().bottom + window.scrollY;
         const screenCenter = window.innerHeight / 2;
@@ -115,7 +115,7 @@ const TiptapEditor = () => {
       titleRef.current.style.height = 'auto';
       titleRef.current.style.height = `${titleRef.current.scrollHeight}px`;
     }
-  }, [title,preview]);
+  }, [title,editorState]);
 
   const handleFontSize = (e: React.ChangeEvent<HTMLSelectElement>) => {
       if(editor) {
@@ -208,35 +208,43 @@ const TiptapEditor = () => {
   const handleSave = useCallback(() => {
       if(editor) {
           toast.info("Draft saved to local storage");
-          localStorage.setItem("editorTitle", title);
-          localStorage.setItem("editorContent", editor.getHTML());
+          if(title !== postState.details.mainTitle) {
+            console.log({...postState.details, mainTitle: title})
+            postDispatch({
+              type: 'SAVE_BASIC_DETAILS',
+              payload: {
+                details: {...postState.details, mainTitle: title}
+              }
+            }) 
+          }
+
+          localStorage.setItem('editorContentDraft',formatHtml(editor.getHTML()));
       }
   }, [editor, title]);
 
   const handlePreview = useCallback(() => {
       if(editor) {
-          setPreview(prev => !prev);
+          setEditorState((prev) => prev === 'editing' ? 'preview' : 'editing');
           setBody(formatHtml(editor.getHTML()));
       }
   }, [editor]);
 
   const handleSubmit = useCallback(() => {
       const submit = () => {
-          if(editor && previewRef.current) {
+          if(editor) {
               handleSave();
               handlePreview();
-              let editorContent: string = '';
-              const children = previewRef.current.children;
-              for(let i=0; i<children.length; i++) {
-                  if(children[i].id !== 'cancel' && children[i].id !== 'edit'){
-                      editorContent += children[i].outerHTML;
-                  }
-              }
-              localStorage.setItem('finalEditorContent', editorContent);
-              setSubmitted(true);
-              setPreview(true);
+              setEditorState('submitted');
+              postDispatch({
+                type: 'SAVE_EDITOR_CONTENT',
+                payload: {
+                  content: formatHtml(editor.getHTML())
+                }
+              })
+              localStorage.removeItem('editorContentDraft');
           }
       }
+
 
       dialog?.popup({
           title: 'Draft Submit',
@@ -249,7 +257,7 @@ const TiptapEditor = () => {
 
   useEffect(() => {
       const handleKeyPress = (e: KeyboardEvent) => {
-          if ((e.ctrlKey || e.metaKey) && !e.shiftKey && !submitted) {
+          if ((e.ctrlKey || e.metaKey) && !e.shiftKey && editorState !== 'submitted') {
               const key = e.key.toLowerCase();
 
               if (['b', 'i', 'u'].includes(key)) {
@@ -281,7 +289,7 @@ const TiptapEditor = () => {
 
       window.addEventListener('keydown', handleKeyPress);
       return () => window.removeEventListener('keydown', handleKeyPress);
-  }, [editor, handleSave, handleSubmit, handlePreview, handleClick, submitted]);
+  }, [editor, handleSave, handleSubmit, handlePreview, handleClick, editorState]);
 
   useEffect(() => {
       const videos = document.querySelectorAll('video');
@@ -302,10 +310,10 @@ const TiptapEditor = () => {
           iframe.src = '';
           iframe.src = src;
       });
-  }, [preview]);
+  }, [editorState]);
 
   const handleReview = () => {
-    if(!submitted) {
+    if(editorState !== 'submitted') {
       toast.error("You need to submit the edited document first!");
     } else {
       navigate('/review');
@@ -313,18 +321,22 @@ const TiptapEditor = () => {
   }
 
   const handleEditAgain = () => {
-    setPreview(false);
-    setSubmitted(false);
-    localStorage.removeItem('finalEditorContent');
+    const editorContent = localStorage.getItem('editorContent')
+    if(editorContent) {
+      localStorage.removeItem('editorContent');
+      localStorage.setItem('editorContentDraft',editorContent);
+    }
+    setEditorState('editing');
   }
 
-  if(!state.token || state.user?.role !== "admin") 
+  if(!authState.token || authState.user?.role !== "admin") 
     return <Navigate to={'/404'} replace/>
 
   return (
     <div className="w-full relative">
         <div className={`w-full relative flex-col items-center justify-center gap-10 py-20 bg-black
-               ${askEmbedUrl ? 'pointer-events-none' : ''} ${preview ? 'hidden' : 'flex'}`}>
+               ${askEmbedUrl ? 'pointer-events-none' : ''} 
+               ${editorState === 'preview' || editorState === 'submitted' ? 'hidden' : 'flex'}`}>
             <div className={`w-full h-full absolute top-0 z-10 bg-white bg-opacity-50 overflow-hidden
                    pointer-events-none ${askEmbedUrl ? '' : 'hidden'}`}
             ></div>
@@ -465,21 +477,21 @@ const TiptapEditor = () => {
                 <div className='bg-white p-3 rounded-full flex gap-3 items-center justify-center'>
                     <button
                       className={`text-[2.5rem] cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
-                                 ${preview ? 'text-primary' : ''}`}
+                                 ${editorState === 'preview' ? 'text-primary' : ''}`}
                       onClick={() => handlePreview()}>
                       <MdPreview />
                     </button>
 
                     <button
                     className={`text-[2rem] cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
-                        ${preview ? 'text-primary' : ''}`}
+                        ${editorState === 'preview' ? 'text-primary' : ''}`}
                         onClick={() => handleSave()}>
                         <FaSave />
                     </button>
 
                     <button
                     className={`text-[2rem] cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
-                        ${preview ? 'text-primary' : ''}`}
+                        ${editorState === 'preview' ? 'text-primary' : ''}`}
                         onClick={() => handleSubmit()}>
                         <FaUpload />
                     </button>
@@ -489,23 +501,18 @@ const TiptapEditor = () => {
         </div>
 
         <div
-          className={`w-full relative flex-col ${submitted ? '' : 'border border-solid border-white'}
-                     items-center justify-center gap-10 bg-black py-20 ${preview ? 'flex' : 'hidden'}`}
+          className={`w-full relative flex-col ${editorState === 'submitted' ? '' : 'border border-solid border-white'}
+                     items-center justify-center gap-10 bg-black py-20 
+                     ${editorState === 'preview' || editorState === 'submitted' ? 'flex' : 'hidden'}`}
           ref={previewRef}>
             {
-              submitted ? 
-                <FaEdit
-                  className={`absolute text-[2.5rem] right-0 top-0 cursor-pointer m-5 bg-black 
-                             text-white hover:scale-110 hover:text-primary z-50`}
-                  id='edit'
-                  onClick={handleEditAgain}/>
-                  :
+              editorState !== 'submitted' &&
                 <MdCancel
                   className={`absolute text-[2.5rem] right-0 top-0 cursor-pointer m-5 bg-black 
                              text-primary rounded-full hover:scale-110 z-50`}
                   id='cancel'
                   onClick={() => {
-                      setPreview(false);
+                    setEditorState('editing');
                   }}/>
             }
             <Title title={title}/>
@@ -526,9 +533,17 @@ const TiptapEditor = () => {
             onClick={() => navigate('/new-post')}>
             {`< Basic Details`}
           </div>
+          {
+            editorState === 'submitted' &&
+              <FaEdit
+                className={`text-[2.5rem] cursor-pointer m-5 bg-black 
+                           text-white hover:scale-110 hover:text-primary z-50`}
+                id='edit'
+                onClick={handleEditAgain}/>
+          }
           <div 
             className={` text-[1.75rem] p-2 rounded-lg  
-              ${submitted ? 'hover:text-primary text-white cursor-pointer' : 'text-gray-500 cursor-not-allowed'}`}
+              ${editorState === 'submitted' ? 'hover:text-primary text-white cursor-pointer' : 'text-gray-500 cursor-not-allowed'}`}
             onClick={handleReview}>
             {`Review >`}
           </div>

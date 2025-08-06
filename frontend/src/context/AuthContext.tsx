@@ -2,7 +2,7 @@ import { createContext, ReactNode, useCallback, useContext, useEffect, useReduce
 import useApi from "../hooks/useApi";
 import { jwtDecode } from 'jwt-decode';
 
-interface User {
+type User = {
   id: string;
   name: string;
   uname: string;
@@ -56,7 +56,7 @@ const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   }
 };
 
-interface AuthContextType {
+type AuthContextType = {
   state: AuthState;
   dispatch: React.Dispatch<AuthAction>;
 }

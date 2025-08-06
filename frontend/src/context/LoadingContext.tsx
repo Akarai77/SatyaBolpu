@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useEffect, useState } from "react";
+import { createContext, ReactNode, useContext, useState } from "react";
 import LoadingPage from "../components/LoadingPage";
 
 interface LoadingContextType {

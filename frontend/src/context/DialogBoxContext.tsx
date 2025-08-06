@@ -9,13 +9,15 @@ export type DialogBoxOptions = {
     onCancel?: () => void;
 }
 
-type DialogBoxType = {
+type DialogBoxContextType = {
     popup: (options: DialogBoxOptions) => void;
 }
 
-const DialogBoxContext = createContext<DialogBoxType | null>(null);
-
-export const useDialog = () => useContext(DialogBoxContext);
+const DialogBoxContext = createContext<DialogBoxContextType>({
+  popup: () => {
+    console.warn("popup called outside of DialogBoxProvider")
+  }
+});
 
 export const DialogBoxProvider = ({children} : {children: ReactNode}) => {
     const [options,setOptions] = useState<DialogBoxOptions | null>(null);
@@ -48,3 +50,5 @@ export const DialogBoxProvider = ({children} : {children: ReactNode}) => {
         </DialogBoxContext.Provider>
     )
 }
+
+export const useDialog = () => useContext(DialogBoxContext);

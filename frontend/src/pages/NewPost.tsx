@@ -6,15 +6,8 @@ import { useAuth } from "../context/AuthContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import Button from "../components/Button";
 import { toast } from "react-toastify";
-
-type formDataType = {
-  mainTitle: string;
-  shortTitle: string;
-  culture: "daivaradhane" | "nagaradhane" | "yakshagana" | "kambala" | "";
-  description: string;
-  tags: string[];
-  image: File | null;
-}
+import { PostDetailsType, usePost } from "../context/PostContext";
+import { FaEdit } from "react-icons/fa";
 
 type formErrorType = {
   mainTitle: string;
@@ -25,7 +18,7 @@ type formErrorType = {
   image: string;
 }
 
-const initialFormData: formDataType = {
+const initialFormData: PostDetailsType = {
   mainTitle: '',
   shortTitle: '',
   culture: '',
@@ -44,14 +37,23 @@ const initialFormErrors: formErrorType = {
 }
 
 const NewPost = () => {
-  const { state } = useAuth();
+  const { state: authState } = useAuth();
+  const { state: postState, dispatch: postDispatch } = usePost();
   const navigate = useNavigate();
-  const [formData, setFormData] = useState<formDataType>(initialFormData);
+  const [formData, setFormData] = useState<PostDetailsType>(initialFormData);
   const [errors,setErrors] = useState<formErrorType>(initialFormErrors);
   const descrRef = useRef<HTMLTextAreaElement | null>(null);
   const tagRef = useRef<HTMLInputElement | null>(null);
   const [tag,setTag] = useState<string>('');
   const [submitted, setSubmitted] = useState(false);
+
+  useLayoutEffect(() => {
+    const postDetails = localStorage.getItem('postDetails')
+    if(postDetails) {
+      setFormData(JSON.parse(postDetails));
+      setSubmitted(true);
+    }
+  },[])
 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const {name, value} = e.target;
@@ -61,12 +63,6 @@ const NewPost = () => {
       [name]: value
     }));
   }
-
-  useLayoutEffect(() => {
-    const sessionData = sessionStorage.getItem('newpost-data')
-    if(sessionData)
-      setFormData(JSON.parse(sessionData));
-  },[])
 
   useEffect(() => {
     const el = descrRef.current;
@@ -111,8 +107,6 @@ const NewPost = () => {
       image: ''
     }
 
-    sessionStorage.setItem('newpost-data',JSON.stringify(formData));
-
     if(!formData.mainTitle.trim()) {
       newErrors.mainTitle = "Main Title cannot be empty!";
     }
@@ -148,9 +142,14 @@ const NewPost = () => {
     setErrors(newErrors);
     const hasErrors = Object.values(newErrors).some(err => err !== '');
     if(!hasErrors) {
-      console.log("hujiman")
+      setSubmitted(true);
+      postDispatch({
+        type: 'SAVE_BASIC_DETAILS', 
+        payload : {
+          details: formData
+        }
+      });
     }
-
   }
 
   const handleNext = () => {
@@ -161,7 +160,7 @@ const NewPost = () => {
     }
   }
 
-  if(!state.token && state.user?.role !== 'admin') 
+  if(!authState.token && authState.user?.role !== 'admin') 
     return <Navigate to={'/404'} replace/>
 
   return (
@@ -174,7 +173,8 @@ const NewPost = () => {
             Main Title
           </label>
           <input 
-            className="text-black font-semibold p-2" 
+            className={`text-black font-semibold p-2 disabled:bg-gray-400`} 
+            disabled={submitted}
             type="text" 
             id="mainTitle" 
             name="mainTitle" 
@@ -188,7 +188,8 @@ const NewPost = () => {
             Short Title
           </label>
           <input 
-            className="text-black font-semibold p-2" 
+            className={`text-black font-semibold p-2 disabled:bg-gray-400`} 
+            disabled={submitted}
             type="text" 
             id="shortTitle" 
             name="shortTitle" 
@@ -202,9 +203,10 @@ const NewPost = () => {
             Culture
           </label>
           <select 
+            disabled={submitted}
             name="culture" 
             id="culture"
-            className="p-2 cursor-pointer"
+            className="p-2 cursor-pointer disabled:bg-gray-300"
             value={formData.culture}
             onChange={handleFormChange}
           >
@@ -222,8 +224,9 @@ const NewPost = () => {
             Description
           </label>
           <textarea
-            className="text-black font-semibold p-2 overflow-hidden resize-none"
+            className="text-black font-semibold p-2 overflow-hidden resize-none disabled:bg-gray-400"
             rows={1}
+            disabled={submitted}
             id="description"
             name="description"
             ref={descrRef}
@@ -241,18 +244,22 @@ const NewPost = () => {
           {
             formData.tags.length > 0 && formData.tags.map((tag,index) => (
               <div key={index} className="text-white max-w-full flex items-center justify-evenly gap-1 bg-gray-600 px-2 rounded-lg">
-                <p className="max-w-[95%] break-words">{tag}</p>
-                <MdCancel 
-                  className="fill-gray-400 cursor-pointer hover:fill-white"
-                  onClick={() => handleRemoveTag(index)}/>
+                <p className="max-w-full break-words">{tag}</p>
+                {
+                  !submitted &&
+                    <MdCancel 
+                      className="fill-gray-400 cursor-pointer hover:fill-white"
+                      onClick={() => handleRemoveTag(index)}/>
+                }
               </div>
             ))
           }
           </div>
           <input
-            className="text-black font-semibold p-2 overflow-hidden resize-none"
+            className="text-black font-semibold p-2 overflow-hidden resize-none disabled:bg-gray-400"
             type="text"
             id="tags"
+            disabled={submitted}
             name="tags"
             ref={tagRef}
             onKeyDown={handleAddTag}
@@ -274,6 +281,7 @@ const NewPost = () => {
           </label>
           <input
             className="hidden"
+            disabled={submitted}
             type="file"
             accept="image/*"
             id="image"
@@ -284,7 +292,7 @@ const NewPost = () => {
             }))}
           />
           {
-            formData.image &&
+            formData.image && formData.image instanceof File &&
               <div className="w-1/2 border-2 border-solid border-white flex">
                 <img 
                   className="w-full aspect-square object-cover object-center" 
@@ -294,17 +302,27 @@ const NewPost = () => {
           {errors.image && <p className="text-red-500">{errors.image}</p>}
         </div>
 
-        <Button 
-          content="Submit"
-          className="text-[1.5rem]"
-          type="submit"
-        />
+        {
+
+          submitted ? 
+            <FaEdit
+              className={`text-[2.5rem] cursor-pointer m-5 bg-black 
+                         text-white hover:scale-110 hover:text-primary z-50`}
+              id='edit'
+              onClick={() => setSubmitted(false)}/>
+            :
+            <Button 
+              content="Submit"
+              className="text-[1.5rem]"
+              type="submit"
+              />
+        }
 
         <div 
           className={` text-[1.75rem] p-2 rounded-lg ml-auto
           ${submitted ? 'hover:text-primary text-white cursor-pointer' : 'text-gray-500 cursor-not-allowed'}`}
           onClick={handleNext}>
-            {`Review >`}
+            {`Editor >`}
         </div>
 
       </form>
