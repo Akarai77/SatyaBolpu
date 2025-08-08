@@ -7,15 +7,15 @@ export const Video = Node.create({
     group: "block",
     selectable: true,
     draggable: true,
-    atom: true,
+    atom: false,
 
     addAttributes() {
         return {
-            id: {
+            idbKey: {
               default: null,
-              parseHTML: (element: HTMLElement) => element.getAttribute('id'),
+              parseHTML: (element: HTMLElement) => element.getAttribute('data-idbkey'),
               renderHTML: (attributes: Record<string, any>) => ({
-                id: attributes.id
+                'data-idbkey': attributes.idbKey
               })
             },
             src: {
@@ -42,7 +42,7 @@ export const Video = Node.create({
             width: {
                 default: '300px',
                 parseHTML: (element: HTMLElement) => element.getAttribute('width') || '300px',
-                    renderHTML: (attributes) => ({ width: attributes.width }),
+                renderHTML: (attributes) => ({ width: attributes.width }),
             },
             align: {
                 default: 'center',
@@ -51,29 +51,55 @@ export const Video = Node.create({
                     'align': attributes.align,
                 }),
             },
-              caption: {
-                default: '',
-                parseHTML: (element: HTMLElement) => {
-                  const captionElement = element.querySelector('p.caption')
-                  return captionElement?.textContent ?? ''
-                },
-                renderHTML: (attributes: Record<string, any>) => ({
-                  caption: attributes.caption,
-                }),
+            caption: {
+              default: '',
+              parseHTML: (element: HTMLElement) => {
+                const captionElement = element.querySelector('p.caption')
+                return captionElement?.textContent ?? ''
               },
+              renderHTML: (attributes: Record<string, any>) => ({
+                caption: attributes.caption,
+              }),
+            },
         };
     },
 
   parseHTML() {
     return [
       {
-        tag: 'video[src]',
+        tag: 'div.file',
+        priority: 100,
+        getAttrs: (element: HTMLElement) => {
+          const img = element.querySelector('video[data-idbkey]');
+          if (!img) return false;
+          
+          const captionEl = element.querySelector('p.caption');
+          
+          return {
+            src: img.getAttribute('src'),
+            type: img.getAttribute('type'),
+            idbKey: img.getAttribute('data-idbkey'),
+            width: element.getAttribute('width') || element.style.width || '300px',
+            align: element.classList.contains('mr-auto') ? 'left' : 
+                   element.classList.contains('ml-auto') ? 'right' : 'center',
+            caption: captionEl?.textContent || '',
+          };
+        }
       },
+      {
+        tag: 'video[src]',
+        getAttrs: (element: HTMLElement) => ({
+          src: element.getAttribute('src'),
+          type: element.getAttribute('type'),
+          idbKey: element.getAttribute('data-idbkey'),
+        })
+      }
     ];
   },
 
   renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
     const { src, type, width, align, caption, controls } = HTMLAttributes
+    console.log(HTMLAttributes)
 
     const tailwindAlignClass =
       align === 'left'
@@ -86,6 +112,7 @@ export const Video = Node.create({
       [
         'video',
         {
+          'data-idbkey': HTMLAttributes['data-idbkey'],
           src,
           type,
           controls,
@@ -107,6 +134,7 @@ export const Video = Node.create({
     return [
       'div',
       {
+        width,
         class: `file relative max-w-full ${tailwindAlignClass}`,
         style: `width: ${width}`
       },

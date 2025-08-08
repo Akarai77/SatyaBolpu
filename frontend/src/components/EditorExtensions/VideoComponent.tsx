@@ -7,9 +7,10 @@ const VideoComponent = (props) => {
 
   const videoEl = (
     <video
-      id={node.attrs.id}
+      data-idbkey={node.attrs.idbKey}
       controls
       ref={vidRef}
+      width={node.attrs.width}
       className="w-full h-full"
     >
         <source src={node.attrs.src} type={node.attrs.type}/>

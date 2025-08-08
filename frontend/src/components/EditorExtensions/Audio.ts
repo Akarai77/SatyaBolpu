@@ -1,7 +1,5 @@
-import { Node, mergeAttributes, ReactNodeViewRenderer } from '@tiptap/react';
-import { Node as ProseMirrorNode } from 'prosemirror-model';
+import { Node, ReactNodeViewRenderer } from '@tiptap/react';
 import AudioComponent from './AudioComponent';
-import { element } from 'prop-types';
 
 export const Audio = Node.create({
   name: 'audio',
@@ -13,11 +11,11 @@ export const Audio = Node.create({
 
   addAttributes() {
     return {
-        id: {
+        idbKey: {
           default: null,
-          parseHTML: (element: HTMLElement) => element.getAttribute('id'),
+          parseHTML: (element: HTMLElement) => element.getAttribute('data-idbkey'),
           renderHTML: (attributes: Record<string, any>) => ({
-            id: attributes.id
+            'data-idbkey': attributes.idbKey
           })
         },
         src: {
@@ -69,19 +67,42 @@ export const Audio = Node.create({
   parseHTML() {
     return [
       {
-        tag: 'audio[src]',
+        tag: 'div.file',
+        priority: 100,
+        getAttrs: (element: HTMLElement) => {
+          const img = element.querySelector('audio[data-idbkey]');
+          if (!img) return false;
+          
+          const captionEl = element.querySelector('p.caption');
+          
+          return {
+            src: img.getAttribute('src'),
+            type: img.getAttribute('type'),
+            idbKey: img.getAttribute('data-idbkey'),
+            width: element.getAttribute('width') || element.style.width || '300px',
+            caption: captionEl?.textContent || '',
+          };
+        }
       },
+      {
+        tag: 'audio[src]',
+        getAttrs: (element: HTMLElement) => ({
+          src: element.getAttribute('src'),
+          type: element.getAttribute('type'),
+          idbKey: element.getAttribute('data-idbkey'),
+        })
+      }
     ];
   },
 
   renderHTML({ HTMLAttributes }) {
-    const { id, src, type, width, caption, controls } = HTMLAttributes
+    const { src, type, width, caption, controls } = HTMLAttributes
 
     const audioChildren = [
       [
         'audio',
         {
-          id,
+          'data-idbkey': HTMLAttributes['data-idbkey'],
           src,
           type,
           controls,

@@ -6,17 +6,17 @@ export const ResizableImage = Image.extend({
   addAttributes() {
     return {
       ...this.parent?.(),
-      id: {
+      idbKey: {
         default: null,
-        parseHTML: (element: HTMLElement) => element.getAttribute('id'),
+        parseHTML: (element: HTMLElement) => element.getAttribute('data-idbkey'),
         renderHTML: (attributes: Record<string, any>) => ({
-          id: attributes.id
+          'data-idbkey': attributes.idbKey
         })
       },
       width: {
         default: '300px',
-        parseHTML: (element: HTMLElement) =>
-          element.parentElement?.getAttribute('width') ?? '300px',
+        parseHTML: (element: HTMLElement) => 
+          element.getAttribute('width') ?? '300px',
         renderHTML: (attributes: Record<string, any>) => ({
           width: attributes.width,
         }),
@@ -42,38 +42,70 @@ export const ResizableImage = Image.extend({
     }
   },
 
-  renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
-    const { id, src, alt, width, align, caption } = HTMLAttributes
+  parseHTML() {
+    return [
+      {
+        tag: 'div.file',
+        priority: 100,
+        getAttrs: (element: HTMLElement) => {
+          const img = element.querySelector('img[data-idbkey]');
+          if (!img) return false;
+          
+          const captionEl = element.querySelector('p.caption');
+          
+          return {
+            src: img.getAttribute('src'),
+            alt: img.getAttribute('alt'),
+            idbKey: img.getAttribute('data-idbkey'),
+            width: element.getAttribute('width') || element.style.width || '300px',
+            align: element.classList.contains('mr-auto') ? 'left' : 
+                   element.classList.contains('ml-auto') ? 'right' : 'center',
+            caption: captionEl?.textContent || '',
+          };
+        }
+      },
+      {
+        tag: 'img[src]',
+        getAttrs: (element: HTMLElement) => ({
+          src: element.getAttribute('src'),
+          alt: element.getAttribute('alt'),
+          idbKey: element.getAttribute('data-idbkey'),
+        })
+      }
+    ];
+  },
 
+  renderHTML({ HTMLAttributes }: { HTMLAttributes: Record<string, any> }) {
+    const { src, alt, width, align, caption } = HTMLAttributes
     const tailwindAlignClass =
       align === 'left'
         ? 'mr-auto'
         : align === 'right'
         ? 'ml-auto'
         : 'mx-auto'
-
+    
     const figureChildren = [
       [
         'img',
         {
-          id,
+          'data-idbkey': HTMLAttributes['data-idbkey'],
           src,
           alt,
           class: 'w-full h-full object-cover',
         },
       ],
     ]
-
+    
     if (caption) {
       figureChildren.push([
         'p',
         {
-          class: 'caption w-full text-center text-[1rem] text-gray-300 mt-1',
+          class: 'caption w-full text-center text-[1rem] text-gray-300 mt-2',
         },
         caption,
       ])
     }
-
+    
     return [
       'div',
       {
@@ -89,4 +121,3 @@ export const ResizableImage = Image.extend({
     return ReactNodeViewRenderer(ImageComponent)
   },
 })
-

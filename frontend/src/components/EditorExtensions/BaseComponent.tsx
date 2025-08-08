@@ -137,7 +137,7 @@ const BaseComponent = ({
 
         {showMenu && (
           <div
-            className="absolute bg-white text-black border z-50 text-sm"
+            className="absolute bg-white text-black border z-50 text-sm text-center"
             style={{ top: menuPosition.y, left: menuPosition.x, minWidth: '100px' }}
           >
             {['left', 'center', 'right'].map((dir) => (

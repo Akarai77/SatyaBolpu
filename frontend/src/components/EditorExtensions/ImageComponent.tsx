@@ -7,11 +7,10 @@ const ImageComponent = (props) => {
 
   const imageEl = (
     <img
-      id={node.attrs.id}
+      data-idbkey={node.attrs.idbKey}
       src={node.attrs.src}
       ref={imgRef}
       alt="image"
-      width={node.attrs.width}
       className="w-full h-full object-cover"
     />
   );
