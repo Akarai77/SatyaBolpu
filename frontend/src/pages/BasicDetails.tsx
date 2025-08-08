@@ -16,6 +16,7 @@ type formErrorType = {
   culture: string;
   description: string;
   tags: string;
+  locationSpecific: string;
   image: string;
 }
 
@@ -25,6 +26,7 @@ const initialFormData: PostDetailsType = {
   culture: '',
   description: '',
   tags: [],
+  locationSpecific: null,
   image: null
 }
 
@@ -34,10 +36,11 @@ const initialFormErrors: formErrorType = {
   culture: '',
   description: '',
   tags: '',
+  locationSpecific: '',
   image: ''
 }
 
-const NewPost = () => {
+const BasicDetails = () => {
   const { state: authState } = useAuth();
   const { state: postState, dispatch: postDispatch } = usePost();
   const navigate = useNavigate();
@@ -49,17 +52,14 @@ const NewPost = () => {
   const [submitted, setSubmitted] = useState(false);
 
   useLayoutEffect(() => {
-    const fetchPostDetails = async () => {
-      setFormData({...postDetailsWithoutImage, image: await getFile(image)});
-    }
-
-    const postDetails = localStorage.getItem('postDetails')
-    if(!postDetails)
+    if(!postState.details)
       return
 
-    const {image, ...postDetailsWithoutImage} = JSON.parse(postDetails);
+    const {image, ...postDetailsWithoutImage} = postState.details;
+    (async () => {
+      setFormData({...postDetailsWithoutImage, image: await getFile(Number(image))});
+    })();
     setSubmitted(true);
-    fetchPostDetails()
   },[])
 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
@@ -111,6 +111,7 @@ const NewPost = () => {
       culture: '',
       description: '',
       tags: '',
+      locationSpecific: '',
       image: ''
     }
 
@@ -162,6 +163,7 @@ const NewPost = () => {
     postFormData.append("shortTitle", formData.shortTitle);
     postFormData.append("culture", formData.culture);
     postFormData.append("description", formData.description);
+    postFormData.append("locationSpecific", formData.locationSpecific);
     formData.tags.forEach(tag => postFormData.append("tags", tag));
     if (formData.image) postFormData.append("file", formData.image);
 
@@ -292,6 +294,44 @@ const NewPost = () => {
           {errors.tags && <p className="text-red-500">{errors.tags}</p>}
         </div>
 
+        <div className="flex flex-col w-full">
+          <label className="text-primary font-semibold text-[1.5rem]" htmlFor="locationSpecific-yes">
+            Is the post location specific?
+          </label>
+          <div className="flex gap-10">
+            <label className="text-white text-[1.5rem] cursor-pointer" htmlFor="locationSpecific-yes">
+              <input 
+                className="cursor-pointer" 
+                type="radio" 
+                value="true" 
+                id="locationSpecific-yes"
+                name="locationSpecific"
+                checked={formData.locationSpecific ?? false}
+                onChange={(e) => setFormData((prev) => ({
+                  ...prev,
+                  locationSpecific: (e.target as HTMLInputElement).value === "true"
+                }))}
+              />
+                Yes
+            </label>
+            <label className="text-white text-[1.5rem] cursor-pointer" htmlFor="locationSpecific-no">
+              <input 
+                className="cursor-pointer" 
+                type="radio" 
+                value="false" 
+                id="locationSpecific-no"
+                name="locationSpecific"
+                checked={formData.locationSpecific ?? false}
+                onChange={(e) => setFormData((prev) => ({
+                  ...prev,
+                  locationSpecific: (e.target as HTMLInputElement).value === "false"
+                }))}
+              />
+                No
+            </label>
+          </div>
+        </div>
+
         <div className="flex flex-col w-full gap-3">
           <label className="text-primary font-semibold text-[1.5rem]">
             Image
@@ -357,5 +397,5 @@ const NewPost = () => {
   );
 };
 
-export default NewPost;
+export default BasicDetails;
 

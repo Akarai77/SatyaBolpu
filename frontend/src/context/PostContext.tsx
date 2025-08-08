@@ -8,6 +8,7 @@ export type PostDetailsType = {
   culture: "daivaradhane" | "nagaradhane" | "kambala" | "yakshagana" | "";
   description: string;
   tags: string[];
+  locationSpecific: boolean | null;
   image: File | null;
 }
 
@@ -24,6 +25,7 @@ const initialPostState : PostState = {
     culture: '',
     description: '',
     tags: [],
+    locationSpecific: null,
     image: null
   },
   content: '',
@@ -95,12 +97,6 @@ export const PostProvider = ({ children } : { children: ReactNode }) => {
 
     uploadPost();
   },[state.submitted])
-
-  useEffect(() => {
-    if(state.content) {
-      localStorage.setItem('editorContent', state.content);
-    }
-  },[state.content])
 
   useEffect(() => {
     if(error)

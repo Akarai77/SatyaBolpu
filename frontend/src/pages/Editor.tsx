@@ -53,11 +53,11 @@ const TiptapEditor = () => {
 
   useLayoutEffect(() => {
     if(postState.content) {
-      setEditorState("submitted");
       (async () => {
-        setBody(await getIndexedFiles(postState.content!));
+        const indexedContent = await getIndexedFiles(postState.content!);
+        setBody(indexedContent);
       })()
-      setTitle(postState.details.mainTitle)
+      setEditorState('submitted');
     }
   },[])
 
@@ -84,10 +84,10 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
     const child = body.children[i];
 
     if (child.className.includes('file')) {
-      const fileEl = child.querySelector('[id]');
+      const fileEl = child.querySelector('[data-idbkey]');
 
       if (fileEl) {
-        const idAttr = fileEl.getAttribute('id');
+        const idAttr = fileEl.getAttribute('data-idbkey');
         const fileId = idAttr ? Number(idAttr) : NaN;
 
         if (!isNaN(fileId)) {
@@ -101,6 +101,7 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
     }
   }
 
+  console.log(doc.documentElement.outerHTML)
   return doc.documentElement.outerHTML;
 };
 
@@ -119,22 +120,14 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
             showOnlyWhenEditable: true,
         })
     ],
-    content: '', // Start blank
+    content: '',
     onCreate: async ({ editor }) => {
       const raw = localStorage.getItem('editorContentDraft') || postState.content || '';
-      const hydrated = await getIndexedFiles(raw); // async hydration
+      const hydrated = await getIndexedFiles(raw);
       console.log(hydrated)
       editor.commands.setContent(hydrated);
     },
     onUpdate: () => {
-        const editorBottom = editor.view.dom.getBoundingClientRect().bottom + window.scrollY;
-        const screenCenter = window.innerHeight / 2;
-        const scrollToY = editorBottom - screenCenter;
-        window.scrollTo({
-            top: scrollToY,
-            behavior: 'smooth',
-        });
-
         setClicked({
             bold: editor.isActive('bold'),
             italic: editor.isActive('italic'),
@@ -195,7 +188,7 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
             editor?.commands.insertContent({ 
               type: "image",
               attrs: {
-                id: id,
+                idbKey: id,
                 src: url
               }
             })      
@@ -203,7 +196,7 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
             editor?.commands.insertContent({
                 type: "video",
                 attrs : {
-                    id: id,
+                    idbKey: id,
                     src: url,
                     controls: true
                 }
@@ -212,7 +205,7 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
             editor?.commands.insertContent({
                 type: "audio",
                 attrs : {
-                    id: id,
+                    idbKey: id,
                     src: url,
                     controls: true
                 }
@@ -262,8 +255,9 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
               }
             }) 
           }
-
-          localStorage.setItem('editorContentDraft',formatHtml(editor.getHTML()));
+          
+          localStorage.setItem('postDetails',JSON.stringify({...postState.details, mainTitle: title}));
+          localStorage.setItem('editorContentDraft',editor.getHTML());
       }
   }, [editor, title]);
 
@@ -277,16 +271,18 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
   const handleSubmit = useCallback(() => {
       const submit = () => {
           if(editor) {
-              handleSave();
               handlePreview();
+              const content = formatHtml(editor.getHTML());
               setEditorState('submitted');
               postDispatch({
                 type: 'SAVE_EDITOR_CONTENT',
                 payload: {
-                  content: formatHtml(editor.getHTML())
+                  content: content
                 }
               })
+              localStorage.setItem('editorContent',content);
               localStorage.removeItem('editorContentDraft');
+              toast.success("Editor content Submitted.");
           }
       }
 
@@ -437,7 +433,7 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
 
             <EditorContent 
               editor={editor} 
-              className="text-white text-[1.5rem] border border-solid border-white w-[90%] p-5 whitespace-pre-wrap" />
+              className="text-white text-[1.5rem] w-[90%] p-5 whitespace-pre-wrap" />
             
             <div className='flex md:flex-row flex-col gap-5 sticky bottom-10 items-center justify-center'>
                 <div className="flex items-center justify-center gap-2 bg-white p-3 rounded-full">
@@ -556,7 +552,7 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
         </div>
 
         <div
-          className={`w-full relative flex-col ${editorState === 'submitted' ? '' : 'border border-solid border-white'}
+          className={`w-full relative flex-col
                      items-center justify-center gap-10 bg-black py-20 
                      ${editorState === 'preview' || editorState === 'submitted' ? 'flex' : 'hidden'}`}>
             {
@@ -583,19 +579,11 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
 
         {
           editorState === 'submitted' &&
-            <div className='w-full flex flex-col gap-5 items-center justify-center'>
               <FaEdit
-                className={`text-[2.5rem] cursor-pointer m-5 bg-black 
+                className={`text-[2.5rem] cursor-pointer mx-auto m-5 bg-black 
                   text-white hover:scale-110 hover:text-primary z-50`}
                 id='edit'
                 onClick={handleEditAgain}/>
-              <Button 
-                content="Upload Post"
-                onClick={handleUpload}
-                loading={loading}
-                loadingText="Uploading"
-              />
-            </div>
 
         }
 
