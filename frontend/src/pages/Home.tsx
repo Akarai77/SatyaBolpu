@@ -14,6 +14,7 @@ import { useAuth } from '../context/AuthContext';
 import { buildAnimationProps } from '../constants/Animations';
 import SVGHeader from '../constants/SVGHeader';
 import { useNavigate } from 'react-router-dom';
+import { Marker, Popup } from 'react-leaflet';
 
 gsap.registerPlugin(useGSAP); 
 gsap.registerPlugin(ScrollTrigger);
@@ -196,7 +197,17 @@ const Home = () => {
             The Spiritual Hub is Spread Across Two States And Three Districts
           </div>
           <div className='w-full lg:w-2/3 xl:w-1/2 h-full'>
-            <MapComponent ref={mapRef}/>
+            <MapComponent ref={mapRef}>
+              <Marker position={[13.3409, 74.7421]}>
+                  <Popup>Udupi - The Heart of Tulunadu</Popup>
+              </Marker>
+              <Marker position={[12.8701, 74.8419]}>
+                  <Popup>Mangaluru - The Heart of Tulunadu</Popup>
+              </Marker>
+              <Marker position={[12.4996,74.9869]}>
+                  <Popup>Kasargod - The Heart of Tulunadu</Popup>
+              </Marker>
+            </MapComponent>
           </div>
         </div>
 
