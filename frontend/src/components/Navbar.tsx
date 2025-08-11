@@ -80,8 +80,8 @@ const Navbar = () => {
         state.token && state.user?.role === 'admin' &&
         <NavLink
           style={{ textShadow: '1px 1px 6px black' }}
-          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${location.pathname === '/new-post' ? 'text-primary' : ''}`}
-          to="/new-post"
+          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${location.pathname === '/new-post/basic-details' ? 'text-primary' : ''}`}
+          to="/new-post/basic-details"
           onClick={() => setIsMenuOpen(false)}
         >
           New Post

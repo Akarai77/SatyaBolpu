@@ -46,8 +46,9 @@ function App() {
         <Route path='/profile' element={<Profile/>}/>
         <Route path='/dashboard' element={<Dashboard />}/>
         <Route path='/explore' element={<Explore/>}/>
-        <Route path='/new-post' element={<BasicDetails/>}/>
+        <Route path='/new-post/basic-details' element={<BasicDetails/>}/>
         <Route path='/new-post/editor' element={<Editor/>}/>
+        <Route path='/new-post/map' element={<MAP editMode/>}/>
         <Route path='/updates' element={<Updates />}/>
         <Route path='/:title/categories' element={<Categories/>}/>
         <Route path='/map' element={<MAP/>}/>

@@ -90,6 +90,14 @@ const DialogBox: React.FC<DialogBoxOptions> = (props) => {
                     </h1>
                 </div>
 
+                {
+                  props.children && (
+                    <div>
+                    {props.children}
+                    </div>
+                  )
+                }
+
                 <div className="w-[90%] text-white flex items-center justify-center text-wrap">
                     {props.descr}
                 </div>

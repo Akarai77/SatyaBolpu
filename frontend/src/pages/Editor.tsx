@@ -590,8 +590,13 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
         <div className="w-full flex items-center justify-between p-10">
           <div 
             className="text-white text-[1.75rem] cursor-pointer p-2 rounded-lg hover:text-primary"
-            onClick={() => navigate('/new-post')}>
+            onClick={() => navigate('/new-post/basic-details')}>
             {`< Basic Details`}
+          </div>
+          <div 
+            className="text-white text-[1.75rem] cursor-pointer p-2 rounded-lg hover:text-primary"
+            onClick={() => navigate('/new-post/map')}>
+            {`Map >`}
           </div>
         </div>
         

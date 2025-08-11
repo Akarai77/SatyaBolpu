@@ -54,7 +54,8 @@ const BasicDetails = () => {
   useLayoutEffect(() => {
     if(!postState.details)
       return
-
+    
+    console.log(postState.details)
     const {image, ...postDetailsWithoutImage} = postState.details;
     (async () => {
       setFormData({...postDetailsWithoutImage, image: await getFile(Number(image))});
@@ -163,7 +164,7 @@ const BasicDetails = () => {
     postFormData.append("shortTitle", formData.shortTitle);
     postFormData.append("culture", formData.culture);
     postFormData.append("description", formData.description);
-    postFormData.append("locationSpecific", formData.locationSpecific);
+    postFormData.append("locationSpecific", formData.locationSpecific ? "true" : "false");
     formData.tags.forEach(tag => postFormData.append("tags", tag));
     if (formData.image) postFormData.append("file", formData.image);
 
@@ -304,6 +305,7 @@ const BasicDetails = () => {
                 className="cursor-pointer" 
                 type="radio" 
                 value="true" 
+                disabled={submitted}
                 id="locationSpecific-yes"
                 name="locationSpecific"
                 checked={formData.locationSpecific ?? false}
@@ -319,9 +321,10 @@ const BasicDetails = () => {
                 className="cursor-pointer" 
                 type="radio" 
                 value="false" 
+                disabled={submitted}
                 id="locationSpecific-no"
                 name="locationSpecific"
-                checked={formData.locationSpecific ?? false}
+                checked={formData.locationSpecific ? !formData.locationSpecific : false}
                 onChange={(e) => setFormData((prev) => ({
                   ...prev,
                   locationSpecific: (e.target as HTMLInputElement).value === "false"

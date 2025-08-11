@@ -1,11 +1,15 @@
 import { GeoJSON } from "react-leaflet";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { Map } from "leaflet";
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 import { useLoading } from "../context/LoadingContext";
 import MapComponent from "../components/MapComponent";
+import Button from "../components/Button";
+import { MdCancel } from "react-icons/md";
+import { FaMagnifyingGlassLocation } from "react-icons/fa6";
+import { useDialog } from "../context/DialogBoxContext";
 
-const MAP = () => {
+const MAP = ({ editMode = false } : { editMode?: boolean }) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
   const [map, setMap] = useState<Map | null>(null);
   const [geoJsonData, setGeoJsonData] = useState<{ [key: string]: any }>({});
@@ -13,6 +17,9 @@ const MAP = () => {
   const [zoom, setZoom] = useState<number>(9);
   const [isFullScreen, setFullScreen] = useState<boolean>(false);
   const toolTipPane = useRef<Element>();
+  const activeLayerRef = useRef<any>(null);
+  const [activeVillage,setActiveVillage] = useState<any>(null);
+  const dialog = useDialog();
   const { isLoading, setLoading } = useLoading();
 
   useEffect(() => {
@@ -42,9 +49,22 @@ const MAP = () => {
   }, [map]);
 
   useEffect(() => {
+    const handleFullScreenChange = () => {
+      const isFs = document.fullscreenElement === mapRef.current;
+      setFullScreen(isFs);
+    };
+
+    document.addEventListener('fullscreenchange', handleFullScreenChange);
+    return () => document.removeEventListener('fullscreenchange', handleFullScreenChange);
+  }, []);
+
+  useEffect(() => {
     if (mapRef.current) {
-      if (isFullScreen) mapRef.current.requestFullscreen();
-      else if (document.fullscreenElement === mapRef.current) document.exitFullscreen();
+      if (isFullScreen && document.fullscreenElement !== mapRef.current) {
+        mapRef.current.requestFullscreen();
+      } else if (!isFullScreen && document.fullscreenElement === mapRef.current) {
+        document.exitFullscreen();
+      }
     }
   }, [isFullScreen]);
 
@@ -63,31 +83,29 @@ const MAP = () => {
     });
   };
 
-  const activeLayerRef = useRef<any>(null);
-
+  const styles = {
+    default: {
+      color: "black",
+      weight: 1,
+      fillColor: "transparent",
+      opacity: 0.5,
+    },
+    hover: {
+      color: "red",
+      weight: 2,
+      fillColor: "pink",
+      fillOpacity: 0.5,
+      opacity: 1,
+    },
+    click: {
+      color: "red",
+      weight: 2,
+      fillColor: "blue",
+      fillOpacity: 0.5,
+      opacity: 1,
+    },
+  };
   const onEachVillage = (feature: any, layer: any) => {
-    const styles = {
-      default: {
-        color: "black",
-        weight: 1,
-        fillColor: "transparent",
-        opacity: 0.5,
-      },
-      hover: {
-        color: "red",
-        weight: 2,
-        fillColor: "pink",
-        fillOpacity: 0.5,
-        opacity: 1,
-      },
-      click: {
-        color: "red",
-        weight: 2,
-        fillColor: "blue",
-        fillOpacity: 0.5,
-        opacity: 1,
-      },
-    };
 
     layer.setStyle(styles.default);
 
@@ -135,16 +153,91 @@ const MAP = () => {
         if (layer === activeLayerRef.current) {
           layer.setStyle(styles.default);
           activeLayerRef.current = null;
+          setActiveVillage(null);
         } else {
           layer.setStyle(styles.click);
-          activeLayerRef.current = layer; 
+          activeLayerRef.current = layer;
+          setActiveVillage(feature)
+          if (feature.properties?.Village_Name && map) {
+            const permanentTooltip = L.tooltip({
+              permanent: true,
+              direction: "top",
+              className: "global-tooltip permanent-tooltip"
+            })
+            .setContent(feature.properties.Village_Name)
+            .setLatLng(e.latlng);
+
+            permanentTooltip.addTo(map);
+          }
         }
       },
     });
   };
 
+  const villageLayers = useMemo(() => (
+    <>
+      {geoJsonData["dakshina_kannada"] && (
+        <GeoJSON 
+          data={geoJsonData["dakshina_kannada"]} 
+          style={{ color: "black", weight: 1, fillColor: "transparent", opacity: 0.5 }}
+          onEachFeature={onEachVillage}
+        />
+      )}
+      
+      {geoJsonData["udupi"] && (
+        <GeoJSON 
+          data={geoJsonData["udupi"]}
+          style={{ color: "black", weight: 1, fillColor: "transparent", opacity: 0.5 }}
+          onEachFeature={onEachVillage}
+        />
+      )}
+
+      {geoJsonData["kasaragod"] && (
+        <GeoJSON 
+          data={geoJsonData["kasaragod"]} 
+          style={{ color: "black", weight: 1, fillColor: "transparent", opacity: 0.5 }}
+          onEachFeature={onEachVillage}
+        />
+      )}
+
+    </>
+  ), [geoJsonData]);
+
+  const handleVillageExit = () => {
+    if(map && activeVillage) {
+      setActiveVillage(null);
+      activeLayerRef.current.setStyle(styles.default);
+      activeLayerRef.current = null;
+    }
+  }
+
+  const handleView = () => {
+    if(map && activeVillage) {
+      console.log(activeVillage)
+      const [xmin,ymin,xmax,ymax] = activeVillage.bbox;
+      console.log(xmin,ymin)
+      map.flyTo([(ymin+ymax)/2, (xmin+xmax)/2], 14)
+    }
+  }
+
+  const askForCoordinates = () => {
+    dialog?.popup({
+      title: 'Enter the coordinates.',
+      descr: 'Paste the latitude and longitude of the location.',
+      children: (
+        <>
+          <input 
+            type="text" 
+            
+          />
+        </>
+      ),
+      onConfirm: () => {}
+    })
+  }
+
   return (
-    <div className="w-screen h-screen relative overflow-hidden" ref={mapRef}>
+    <div className="w-screen h-screen relative" ref={mapRef}>
       <style>
         {`
           .leaflet-interactive:focus{
@@ -159,13 +252,13 @@ const MAP = () => {
             font-size: 12px;
             font-weight: 500;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
-            z-index: 1000;
+            z-index: 20;
           }
           .global-tooltip:before {
             border-top-color: rgba(0, 0, 0, 0.8);
           }
           .permanent-tooltip {
-            z-index: 1001;
+            z-index: 30;
           }
         `}
       </style>
@@ -185,6 +278,31 @@ const MAP = () => {
         )}
       </div>
 
+      {
+        editMode && (
+          <div className="absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white hover:scale-105 
+            p-2 rounded-xl hover:bg-primary text-back cursor-pointer text-[2rem]" 
+            onClick={askForCoordinates}>
+              <FaMagnifyingGlassLocation className=""/>
+          </div>
+        )
+      }
+
+      {
+        activeVillage && (
+          <div className="absolute bottom-0 bg-black m-5 p-5 text-white z-[1000]
+             flex flex-col gap-2 rounded-2xl">
+            <MdCancel 
+              className="absolute top-3 right-3 cursor-pointer hover:fill-primary"
+              onClick={handleVillageExit}/>
+            <h1>Village : {activeVillage.properties.Village_Name}</h1>
+            <p className="italic">lorem ipsum</p>
+            <p>No of covered locations: {0}</p>
+            <Button content="View More" className="mx-auto" onClick={handleView}/>
+          </div>
+        )
+      }
+
       <MapComponent
         className="z-0 relative w-full h-full"
         geoJsonData={geoJsonData}
@@ -198,31 +316,7 @@ const MAP = () => {
         initialZoom={9}
       >
         {zoom >= 11 && (
-          <>
-            {geoJsonData["dakshina_kannada"] && (
-              <GeoJSON 
-                data={geoJsonData["dakshina_kannada"]} 
-                style={{ color: "black", weight: 1, fillColor: "transparent", opacity: 0.5 }}
-                onEachFeature={onEachVillage}
-              />
-            )}
-            
-            {geoJsonData["udupi"] && (
-              <GeoJSON 
-                data={geoJsonData["udupi"]}
-                style={{ color: "black", weight: 1, fillColor: "transparent", opacity: 0.5 }}
-                onEachFeature={onEachVillage}
-              />
-            )}
-    
-            {geoJsonData["kasaragod"] && (
-              <GeoJSON 
-                data={geoJsonData["kasaragod"]} 
-                style={{ color: "black", weight: 1, fillColor: "transparent", opacity: 0.5 }}
-                onEachFeature={onEachVillage}
-              />
-            )}
-          </>
+          villageLayers
         )}
       </MapComponent>
     </div>
