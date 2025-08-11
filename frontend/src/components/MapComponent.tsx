@@ -111,14 +111,12 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(
         if (lock) {
           map.dragging.disable();
           map.touchZoom.disable();
-          map.doubleClickZoom.disable();
           map.scrollWheelZoom.disable();
           map.boxZoom.disable();
           map.keyboard.disable();
         } else {
           map.dragging.enable();
           map.touchZoom.enable();
-          map.doubleClickZoom.enable();
           map.boxZoom.enable();
           map.keyboard.enable();
         }
@@ -172,6 +170,7 @@ const MapComponent = React.forwardRef<HTMLDivElement | null, MapComponentProps>(
         minZoom={minZoom}
         scrollWheelZoom={false}
         zoomControl={false}
+        doubleClickZoom={false}
       >
         <MapEvents />
 
