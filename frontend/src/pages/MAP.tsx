@@ -1,5 +1,5 @@
 import { GeoJSON } from "react-leaflet";
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { ChangeEvent, FormEvent, FormEventHandler, useEffect, useMemo, useRef, useState } from "react";
 import { Map } from "leaflet";
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 import { useLoading } from "../context/LoadingContext";
@@ -8,6 +8,11 @@ import Button from "../components/Button";
 import { MdCancel } from "react-icons/md";
 import { FaMagnifyingGlassLocation } from "react-icons/fa6";
 import { useDialog } from "../context/DialogBoxContext";
+
+type coordinatesType = {
+  latitude: number | null;
+  longitude: number | null;
+};
 
 const MAP = ({ editMode = false } : { editMode?: boolean }) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
@@ -19,6 +24,7 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
   const toolTipPane = useRef<Element>();
   const activeLayerRef = useRef<any>(null);
   const [activeVillage,setActiveVillage] = useState<any>(null);
+  const [coordinates,setCoordinates] = useState<coordinatesType>({latitude: null,longitude: null});
   const dialog = useDialog();
   const { isLoading, setLoading } = useLoading();
 
@@ -220,19 +226,58 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
     }
   }
 
+
   const askForCoordinates = () => {
+    const handleCoordinateChange = (e: ChangeEvent<HTMLInputElement>) => {
+      const {name,value} = e.target;
+
+      setCoordinates((prev) => ({
+        ...prev,
+        [name] : value
+      }));
+    }
+
+    const handleCoordinatesSubmit = (e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
+      e.preventDefault();
+    }
+
+    const CoordinatesForm = () => {
+      return (
+        <form 
+          className="w-full flex flex-col items-center justify-center gap-2"
+          onSubmit={handleCoordinatesSubmit}>
+          <div className="w-full flex items-center justify-between gap-2">
+            <label className="text-white" htmlFor="lat">Latitude</label>
+            <input
+              className="p-1"
+              type="text"
+              name="latitude"
+              value={coordinates.latitude!}
+              onChange={handleCoordinateChange}
+              />
+          </div>
+          <div className="w-full flex items-center justify-between gap-2">
+            <label className="text-white" htmlFor="lat">Longitude</label>
+            <input 
+              className="p-1"
+              type="text"
+              name="longitude"
+              value={coordinates.longitude!}
+              onChange={handleCoordinateChange}
+              />
+          </div>
+          <input type="submit" className="hidden"/>
+        </form>
+      )
+    }
+
     dialog?.popup({
       title: 'Enter the coordinates.',
       descr: 'Paste the latitude and longitude of the location.',
       children: (
-        <>
-          <input 
-            type="text" 
-            
-          />
-        </>
+        <CoordinatesForm />
       ),
-      onConfirm: () => {}
+      onConfirm: handleCoordinatesSubmit
     })
   }
 
