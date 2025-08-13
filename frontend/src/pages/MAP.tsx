@@ -1,32 +1,41 @@
-import { GeoJSON } from "react-leaflet";
-import React, { ChangeEvent, FormEvent, FormEventHandler, useEffect, useMemo, useRef, useState } from "react";
-import { Map } from "leaflet";
+import { GeoJSON, Marker } from "react-leaflet";
+import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
+import {  LeafletMouseEvent, Map } from "leaflet";
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 import { useLoading } from "../context/LoadingContext";
 import MapComponent from "../components/MapComponent";
 import Button from "../components/Button";
 import { MdCancel } from "react-icons/md";
 import { FaMagnifyingGlassLocation } from "react-icons/fa6";
-import { useDialog } from "../context/DialogBoxContext";
+import { IoMdDoneAll } from "react-icons/io";
+import { usePost } from "../context/PostContext";
 
 type coordinatesType = {
   latitude: number | null;
   longitude: number | null;
 };
 
+type coordinatesErrorType = {
+  latitude: string;
+  longitude: string;
+}
+
 const MAP = ({ editMode = false } : { editMode?: boolean }) => {
   const mapRef = useRef<HTMLDivElement | null>(null);
+  const { state, dispatch } = usePost();
   const [map, setMap] = useState<Map | null>(null);
   const [geoJsonData, setGeoJsonData] = useState<{ [key: string]: any }>({});
   const [lock, setLock] = useState<boolean>(false);
   const [zoom, setZoom] = useState<number>(9);
-  const [isFullScreen, setFullScreen] = useState<boolean>(false);
+  const [fullScreen, setFullScreen] = useState<boolean>(false);
   const toolTipPane = useRef<Element>();
   const activeLayerRef = useRef<any>(null);
   const [activeVillage,setActiveVillage] = useState<any>(null);
+  const [askForCoordinates,setAskForCoordinates] = useState<boolean>(false);
   const [coordinates,setCoordinates] = useState<coordinatesType>({latitude: null,longitude: null});
-  const dialog = useDialog();
-  const { isLoading, setLoading } = useLoading();
+  const [coordinateErrors,setCoordinateErrors] = useState<coordinatesErrorType>({latitude: '', longitude: ''});
+  const [marker,setMarker] = useState<boolean>(false);
+  const { setLoading } = useLoading();
 
   useEffect(() => {
     const fetchGeoJson = async (name: string) => {
@@ -55,6 +64,11 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
   }, [map]);
 
   useEffect(() => {
+    if(map && zoom > 15)
+      setActiveVillage(null);
+  },[zoom]);
+
+  useEffect(() => {
     const handleFullScreenChange = () => {
       const isFs = document.fullscreenElement === mapRef.current;
       setFullScreen(isFs);
@@ -66,13 +80,13 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
 
   useEffect(() => {
     if (mapRef.current) {
-      if (isFullScreen && document.fullscreenElement !== mapRef.current) {
+      if (fullScreen && document.fullscreenElement !== mapRef.current) {
         mapRef.current.requestFullscreen();
-      } else if (!isFullScreen && document.fullscreenElement === mapRef.current) {
+      } else if (!fullScreen && document.fullscreenElement === mapRef.current) {
         document.exitFullscreen();
       }
     }
-  }, [isFullScreen]);
+  }, [fullScreen]);
 
   const handleMapReady = (mapInstance: Map) => {
     setMap(mapInstance);
@@ -111,10 +125,9 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
       opacity: 1,
     },
   };
+
   const onEachVillage = (feature: any, layer: any) => {
-
     layer.setStyle(styles.default);
-
     layer.on({
       mouseover: (e: any) => {
         if (feature.properties?.Village_Name && layer !== activeLayerRef.current) {
@@ -147,7 +160,7 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
         }
       },
       
-      click: (e: any) => {
+      click: (e: LeafletMouseEvent) => {
         if (toolTipPane.current) {
           toolTipPane.current.innerHTML = '';
         }
@@ -180,32 +193,59 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
     });
   };
 
+  const districtKeys = ["dakshina_kannada", "udupi", "kasaragod"];
+  const onEachUniteractiveVillage = (feature: any,layer: any) => {
+    layer.on({
+      click: (e: LeafletMouseEvent) => {
+        setCoordinates({
+          latitude: e.latlng.lat,
+          longitude: e.latlng.lng
+        });
+        setMarker(true);
+        console.log(e)
+        localStorage.setItem('mapDetails',JSON.stringify({
+        }))
+      }
+    })
+  }
+
+  const uninteractiveVillageLayers = useMemo(() => (
+    <>
+      {districtKeys.map((key) => 
+        geoJsonData[key] && (
+          <GeoJSON
+            key={`u${key}`}
+            data={geoJsonData[key]}
+            style={{
+              color: "black",
+              weight: 1,
+              fillColor: "transparent",
+              opacity: 0.5
+            }}
+            onEachFeature={onEachUniteractiveVillage}
+          />
+        )
+      )}
+    </>
+  ), [geoJsonData]);
+
   const villageLayers = useMemo(() => (
     <>
-      {geoJsonData["dakshina_kannada"] && (
-        <GeoJSON 
-          data={geoJsonData["dakshina_kannada"]} 
-          style={{ color: "black", weight: 1, fillColor: "transparent", opacity: 0.5 }}
-          onEachFeature={onEachVillage}
-        />
+      {districtKeys.map((key) => 
+        geoJsonData[key] && (
+          <GeoJSON
+            key={key}
+            data={geoJsonData[key]}
+            style={{
+              color: "black",
+              weight: 1,
+              fillColor: "transparent",
+              opacity: 0.5
+            }}
+            onEachFeature={onEachVillage}
+          />
+        )
       )}
-      
-      {geoJsonData["udupi"] && (
-        <GeoJSON 
-          data={geoJsonData["udupi"]}
-          style={{ color: "black", weight: 1, fillColor: "transparent", opacity: 0.5 }}
-          onEachFeature={onEachVillage}
-        />
-      )}
-
-      {geoJsonData["kasaragod"] && (
-        <GeoJSON 
-          data={geoJsonData["kasaragod"]} 
-          style={{ color: "black", weight: 1, fillColor: "transparent", opacity: 0.5 }}
-          onEachFeature={onEachVillage}
-        />
-      )}
-
     </>
   ), [geoJsonData]);
 
@@ -219,66 +259,67 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
 
   const handleView = () => {
     if(map && activeVillage) {
-      console.log(activeVillage)
       const [xmin,ymin,xmax,ymax] = activeVillage.bbox;
-      console.log(xmin,ymin)
       map.flyTo([(ymin+ymax)/2, (xmin+xmax)/2], 14)
     }
   }
 
+   const handleCoordinateChange = (e: ChangeEvent<HTMLInputElement>) => {
+    setCoordinateErrors((prev) => ({
+      ...prev,
+      [name] : ''
+    }))
+    const {name, value} = e.target;
 
-  const askForCoordinates = () => {
-    const handleCoordinateChange = (e: ChangeEvent<HTMLInputElement>) => {
-      const {name,value} = e.target;
+    if(isNaN(Number(value)))
+      return
 
-      setCoordinates((prev) => ({
+    setCoordinates((prev) => ({
         ...prev,
-        [name] : value
-      }));
+        [name]: value
+    }));
+  };
+
+  const handleCoordinatesSubmit = (e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
+    e.preventDefault();
+
+    const newErrors = {
+      latitude: '',
+      longitude: ''
     }
 
-    const handleCoordinatesSubmit = (e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
-      e.preventDefault();
+    if(!coordinates.latitude) {
+      newErrors.latitude = 'Latitude is required.'
     }
 
-    const CoordinatesForm = () => {
-      return (
-        <form 
-          className="w-full flex flex-col items-center justify-center gap-2"
-          onSubmit={handleCoordinatesSubmit}>
-          <div className="w-full flex items-center justify-between gap-2">
-            <label className="text-white" htmlFor="lat">Latitude</label>
-            <input
-              className="p-1"
-              type="text"
-              name="latitude"
-              value={coordinates.latitude!}
-              onChange={handleCoordinateChange}
-              />
-          </div>
-          <div className="w-full flex items-center justify-between gap-2">
-            <label className="text-white" htmlFor="lat">Longitude</label>
-            <input 
-              className="p-1"
-              type="text"
-              name="longitude"
-              value={coordinates.longitude!}
-              onChange={handleCoordinateChange}
-              />
-          </div>
-          <input type="submit" className="hidden"/>
-        </form>
-      )
+    if(!coordinates.longitude) {
+        newErrors.longitude = 'Longitude is required.'
     }
 
-    dialog?.popup({
-      title: 'Enter the coordinates.',
-      descr: 'Paste the latitude and longitude of the location.',
-      children: (
-        <CoordinatesForm />
-      ),
-      onConfirm: handleCoordinatesSubmit
-    })
+    const maxBounds = [
+      [14.025289007277138, 73.94617968510107],
+      [11.98870273390581, 76.19727859282375],
+    ];
+
+    if(coordinates.latitude && (coordinates.latitude! > maxBounds[0][0] || coordinates.latitude! < maxBounds[1][0])) {
+      newErrors.latitude = 'Latitude exceeds max bounds.'
+    }
+
+    if(coordinates.longitude && (coordinates.longitude! > maxBounds[1][1] || coordinates.longitude! < maxBounds[0][1])) {
+      newErrors.longitude = 'Longitude exceeds max bounds.'
+    }
+
+    setCoordinateErrors(newErrors);
+    const hasError = Object.values(newErrors).some(err => err !== '');
+    if(hasError)
+      return
+
+    map?.flyTo([coordinates.latitude!, coordinates.longitude!],18);
+    setMarker(true);
+  }
+
+  const handleSubmit = () => {
+          
   }
 
   return (
@@ -309,8 +350,8 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
       </style>
 
       <div className="fullscreen z-10 absolute flex flex-col justify-center items-center
-        gap-2 right-0 top-10 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
-        {isFullScreen ? (
+        gap-2 right-0 top-16 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
+        {fullScreen ? (
           <AiOutlineFullscreenExit 
             className="text-white text-[2.5rem] stroke-2 hover:scale-110" 
             onClick={() => setFullScreen(false)} 
@@ -321,16 +362,67 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
             onClick={() => setFullScreen(true)} 
           />
         )}
+        {
+          editMode &&
+            <IoMdDoneAll 
+              className="text-[2.5rem] text-white hover:scale-110"
+              onClick={handleSubmit}
+            />
+        }
       </div>
 
       {
         editMode && (
-          <div className="absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white hover:scale-105 
-            p-2 rounded-xl hover:bg-primary text-back cursor-pointer text-[2rem]" 
-            onClick={askForCoordinates}>
-              <FaMagnifyingGlassLocation className=""/>
-          </div>
-        )
+          !fullScreen && !askForCoordinates ?
+            (
+              <div 
+                className="absolute left-5 top-1/2 -translate-y-1/2 z-10 bg-white hover:scale-105 
+                  p-2 rounded-xl hover:bg-primary text-back cursor-pointer text-[2rem]" 
+                onClick={() => setAskForCoordinates(true)} 
+              >
+                <FaMagnifyingGlassLocation className=""/>
+              </div>
+            ) :
+
+            (
+              <form 
+                className="absolute flex flex-col gap-3 left-5 top-1/2 -translate-y-1/2 z-10 bg-black
+                  p-6 rounded-xl text-back cursor-pointer" 
+                onSubmit={handleCoordinatesSubmit}>
+                <MdCancel 
+                  className="absolute top-1 right-1 fill-white hover:fill-primary" 
+                  onClick={() => setAskForCoordinates(false)}
+                />
+                <div className="w-full flex flex-col items-center justify-between gap-2">
+                  <label className="text-white" htmlFor="latitude">Latitude</label>
+                  <input
+                    className="p-1"
+                    type="text"
+                    id="latitude"
+                    name="latitude"
+                    autoComplete="off"
+                    value={coordinates.latitude ?? ''}
+                    onChange={handleCoordinateChange}
+                  />        
+                  {coordinateErrors.latitude && <p className="text-red-500">{coordinateErrors.latitude}</p>}
+                </div>
+                <div className="w-full flex flex-col items-center justify-between gap-2">
+                  <label className="text-white" htmlFor="longitude">Longitude</label>
+                  <input 
+                    className="p-1 rounded"
+                    type="text"
+                    id="longitude"
+                    name="longitude"
+                    autoComplete="off"
+                    value={coordinates.longitude ?? ''}
+                    onChange={handleCoordinateChange}
+                  />
+                  {coordinateErrors.longitude && <p className="text-red-500">{coordinateErrors.longitude}</p>}
+                </div>
+                <Button content="Find" type="submit" className="w-fit mx-auto"/>
+              </form>
+            )
+          )
       }
 
       {
@@ -349,7 +441,7 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
       }
 
       <MapComponent
-        className="z-0 relative w-full h-full"
+        className={`z-0 relative w-full h-full`}
         geoJsonData={geoJsonData}
         onMapReady={handleMapReady}
         zoom={zoom}
@@ -361,8 +453,17 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
         initialZoom={9}
       >
         {zoom >= 11 && (
-          villageLayers
+          zoom > 15 ? 
+            uninteractiveVillageLayers
+              :
+            villageLayers
         )}
+        {
+          marker &&
+            <Marker 
+              position={[coordinates.latitude!, coordinates.longitude!]}
+            />
+        }
       </MapComponent>
     </div>
   );

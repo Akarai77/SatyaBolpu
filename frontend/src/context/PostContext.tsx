@@ -1,6 +1,5 @@
 import { createContext, ReactNode, useContext, useEffect, useReducer } from "react";
 import useApi from "../hooks/useApi";
-import { saveFile } from "../utils/FileStore";
 
 export type PostDetailsType = {
   mainTitle: string;
@@ -12,9 +11,18 @@ export type PostDetailsType = {
   image: File | null;
 }
 
+export type MapDetailsType = {
+  district: string;
+  taluk?: string;
+  village: string;
+  lat: number | null;
+  lng: number | null;
+}
+
 type PostState = {
   details: PostDetailsType;
   content: string | null;
+  mapDetails: MapDetailsType;
   submitted: boolean;
 }
 
@@ -29,12 +37,20 @@ const initialPostState : PostState = {
     image: null
   },
   content: '',
+  mapDetails: {
+    district: '',
+    taluk: '',
+    village: '',
+    lat: null,
+    lng: null
+  },
   submitted: false
 }
 
 type PostAction =
   | { type: 'SAVE_BASIC_DETAILS' , payload: { details: PostDetailsType } }
   | { type: 'SAVE_EDITOR_CONTENT', payload: { content: string } }
+  | { type: 'SAVE_MAP_DETAILS', payload: { mapDetails: MapDetailsType } }
   | { type: 'SAVE_POST' }
   | { type: 'DELETE_POST' }
 
@@ -50,6 +66,12 @@ const PostReducer = (state: PostState, action: PostAction) : PostState => {
       return {
       ...state,
       content: action.payload.content
+    }
+
+    case 'SAVE_MAP_DETAILS':
+      return {
+      ...state,
+      mapDetails: action.payload.mapDetails
     }
 
     case 'SAVE_POST':
@@ -85,7 +107,8 @@ export const PostProvider = ({ children } : { children: ReactNode }) => {
   const [state,dispatch] = useReducer(PostReducer, initialPostState, () => {
     const details = JSON.parse(localStorage.getItem('postDetails') || '{}');
     const content = localStorage.getItem('editorContent');
-    return { details, content, submitted: false };
+    const mapDetails = JSON.parse(localStorage.getItem('mapDetails') || '{}');
+    return { details, content, mapDetails, submitted: false };
   });
   const {loading, error, post} = useApi('/new-post',{ auto: false });
 

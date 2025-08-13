@@ -1,4 +1,4 @@
-import { createContext, ReactNode, useContext, useState } from "react";
+import { createContext, ReactNode, useContext, useRef, useState } from "react";
 import DialogBox from "../components/DialogBox";
 
 export type DialogBoxOptions = {
@@ -6,8 +6,8 @@ export type DialogBoxOptions = {
     descr: string;
     severity?: "irreversible" | "risky" | "default";
     children?: ReactNode;
-    onConfirm: () => void;
-    onCancel?: () => void;
+    onConfirm: (args? : any) => void;
+    onCancel?: (args? : any) => void;
 }
 
 type DialogBoxContextType = {
@@ -23,31 +23,29 @@ const DialogBoxContext = createContext<DialogBoxContextType>({
 export const DialogBoxProvider = ({children} : {children: ReactNode}) => {
     const [options,setOptions] = useState<DialogBoxOptions | null>(null);
     const popup = (opts: DialogBoxOptions) => 
-        setOptions({
-            ...opts,
-            onCancel: () => {
-                opts.onCancel?.();
-                close();
-            },
-            onConfirm: () => {
-                opts.onConfirm();
-                close();
-            }
-        });
-    const close = () => setTimeout(() => setOptions(null),500);
+      setOptions({
+        ...opts,
+        severity: opts.severity || "default",
+        onCancel: () => {
+            opts.onCancel?.();
+            close();
+        },
+        onConfirm: () => {
+            opts.onConfirm();
+            close();
+        }
+    });
+    const closeTimeout = useRef<NodeJS.Timeout>();
+    const close = () => {
+      if (closeTimeout.current) clearTimeout(closeTimeout.current);
+      closeTimeout.current = setTimeout(() => setOptions(null), 500);
+    };
 
     return (
         <DialogBoxContext.Provider value={{ popup }}>
             {children}
             {options && 
-                <DialogBox 
-                    title={options.title}
-                    descr={options.descr}
-                    severity={options.severity || "default"}
-                    onConfirm={options.onConfirm}
-                    onCancel={options.onCancel}
-                    children={options.children}
-                />
+                <DialogBox {...options}/>
             }
         </DialogBoxContext.Provider>
     )
