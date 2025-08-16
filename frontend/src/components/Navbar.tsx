@@ -81,7 +81,7 @@ const Navbar = () => {
         <NavLink
           style={{ textShadow: '1px 1px 6px black' }}
           className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${location.pathname === '/new-post/basic-details' ? 'text-primary' : ''}`}
-          to="/new-post/basic-details"
+          to="/new-post"
           onClick={() => setIsMenuOpen(false)}
         >
           New Post

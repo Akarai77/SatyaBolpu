@@ -19,7 +19,6 @@ import { toast } from 'react-toastify';
 import { useDialog } from '../context/DialogBoxContext';
 import Title from '../components/Title';
 import { usePost } from '../context/PostContext';
-import useApi from '../hooks/useApi';
 import { getFile, saveFile } from '../utils/FileStore';
 
 type clickedType = {
@@ -36,9 +35,8 @@ const TiptapEditor = () => {
   });
   const { state: authState } = useAuth();
   const { state: postState, dispatch: postDispatch } = usePost();
-  const { data, loading, error, post } = useApi('/new-post', {auto: false});
   const [editorState, setEditorState] = useState<'editing' | 'preview' | 'submitted'>('editing');
-  const [title, setTitle] = useState<string>(postState.details.mainTitle || 'Title');
+  const [title, setTitle] = useState<string>(postState.details?.mainTitle || 'Title');
   const titleRef = useRef<HTMLTextAreaElement | null>(null);
   const [fontSize,setFontSize] = useState<string>('normal');
   const fileRef = useRef<HTMLInputElement | null>(null);
@@ -247,7 +245,7 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
   const handleSave = useCallback(() => {
       if(editor) {
           toast.info("Draft saved to local storage");
-          if(title !== postState.details.mainTitle) {
+          if(postState.details && title !== postState.details.mainTitle) {
             postDispatch({
               type: 'SAVE_BASIC_DETAILS',
               payload: {
@@ -256,7 +254,6 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
             }) 
           }
           
-          localStorage.setItem('postDetails',JSON.stringify({...postState.details, mainTitle: title}));
           localStorage.setItem('editorContentDraft',editor.getHTML());
       }
   }, [editor, title]);
@@ -280,7 +277,6 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
                   content: content
                 }
               })
-              localStorage.setItem('editorContent',content);
               localStorage.removeItem('editorContentDraft');
               toast.success("Editor content Submitted.");
           }
@@ -354,33 +350,17 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
   }, [editorState]);
 
   const handleEditAgain = () => {
-    const editorContent = localStorage.getItem('editorContent')
-    if(editorContent) {
-      localStorage.removeItem('editorContent');
-      localStorage.setItem('editorContentDraft',editorContent);
-    }
+    postDispatch({
+      type: 'CLEAR_EDITOR_CONTENT'
+    });
     setEditorState('editing');
   }
-
-  const handleUpload = async () => {
-    await post({ postState });
-  }
-
-  useEffect(() => {
-    if(error) {
-      toast.error(error);
-      return;
-    }
-
-    if(data)
-      navigate(data.newpost);
-  },[data, error])
 
   if(!authState.token || authState.user?.role !== "admin") 
     return <Navigate to={'/404'} replace/>
 
-  if(Object.keys(postState.details).length === 0) {
-    return <Navigate to={'/new-post'} replace/>
+  if(!postState.details) {
+    return <Navigate to={'/new-post/basic-details'} replace/>
   }
 
   return (
@@ -589,12 +569,12 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
 
         <div className="w-full flex items-center justify-between p-10">
           <div 
-            className="text-white text-[1.75rem] cursor-pointer p-2 rounded-lg hover:text-primary"
-            onClick={() => navigate('/new-post/basic-details')}>
+            className="text-white text-[1.75rem] cursor-pointer hover:text-primary"
+            onClick={() => navigate('/new-post/post-details')}>
             {`< Basic Details`}
           </div>
           <div 
-            className="text-white text-[1.75rem] cursor-pointer p-2 rounded-lg hover:text-primary"
+            className="text-white text-[1.75rem] cursor-pointer hover:text-primary"
             onClick={() => navigate('/new-post/map')}>
             {`Map >`}
           </div>

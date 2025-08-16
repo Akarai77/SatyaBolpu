@@ -7,8 +7,8 @@ export type PostDetailsType = {
   culture: "daivaradhane" | "nagaradhane" | "kambala" | "yakshagana" | "";
   description: string;
   tags: string[];
-  locationSpecific: boolean | null;
-  image: File | null;
+  locationSpecific: boolean;
+  image: number | File | null;
 }
 
 export type MapDetailsType = {
@@ -20,58 +20,77 @@ export type MapDetailsType = {
 }
 
 type PostState = {
-  details: PostDetailsType;
-  content: string | null;
-  mapDetails: MapDetailsType;
+  details: PostDetailsType | null;
+  content: string;
+  mapDetails: MapDetailsType | null;
   submitted: boolean;
 }
 
 const initialPostState : PostState = {
-  details: {
-    mainTitle: '',
-    shortTitle: '',
-    culture: '',
-    description: '',
-    tags: [],
-    locationSpecific: null,
-    image: null
-  },
+  details: null,
   content: '',
-  mapDetails: {
-    district: '',
-    taluk: '',
-    village: '',
-    lat: null,
-    lng: null
-  },
+  mapDetails: null,
   submitted: false
 }
 
 type PostAction =
   | { type: 'SAVE_BASIC_DETAILS' , payload: { details: PostDetailsType } }
+  | { type: 'CLEAR_BASIC_DETAILS' }
   | { type: 'SAVE_EDITOR_CONTENT', payload: { content: string } }
+  | { type: 'CLEAR_EDITOR_CONTENT' }
   | { type: 'SAVE_MAP_DETAILS', payload: { mapDetails: MapDetailsType } }
+  | { type: 'CLEAR_MAP_DETAILS' }
   | { type: 'SAVE_POST' }
   | { type: 'DELETE_POST' }
 
 const PostReducer = (state: PostState, action: PostAction) : PostState => {
   switch(action.type) {
-    case 'SAVE_BASIC_DETAILS':
+    case 'SAVE_BASIC_DETAILS': {
+      localStorage.setItem('postDetails',JSON.stringify(action.payload.details));
       return {
         ...state,
         details: action.payload.details
       }
-
-    case 'SAVE_EDITOR_CONTENT':
-      return {
-      ...state,
-      content: action.payload.content
     }
 
-    case 'SAVE_MAP_DETAILS':
+    case 'CLEAR_BASIC_DETAILS': {
+      localStorage.removeItem('postDetails');
       return {
-      ...state,
-      mapDetails: action.payload.mapDetails
+        ...state,
+        details: null
+      }
+    }
+
+    case 'SAVE_EDITOR_CONTENT': {
+      localStorage.setItem('editorContent',action.payload.content); 
+      return {
+        ...state,
+        content: action.payload.content
+      }
+    }
+
+    case 'CLEAR_EDITOR_CONTENT': {
+      localStorage.removeItem('editorContent');  
+      return {
+        ...state,
+        content: ''
+      }
+    }
+
+    case 'SAVE_MAP_DETAILS': {
+      localStorage.setItem('mapDetails',JSON.stringify(action.payload.mapDetails));
+      return {
+        ...state,
+        mapDetails: action.payload.mapDetails
+      }
+    }
+
+    case 'CLEAR_MAP_DETAILS': {
+      localStorage.removeItem('mapDetails');
+      return {
+        ...state,
+        mapDetails: null
+      }
     }
 
     case 'SAVE_POST':
@@ -104,12 +123,27 @@ const PostContext = createContext<PostContextType>({
 
 export const PostProvider = ({ children } : { children: ReactNode }) => {
 
-  const [state,dispatch] = useReducer(PostReducer, initialPostState, () => {
-    const details = JSON.parse(localStorage.getItem('postDetails') || '{}');
-    const content = localStorage.getItem('editorContent');
-    const mapDetails = JSON.parse(localStorage.getItem('mapDetails') || '{}');
+  const init = (): PostState => {
+    const details = (() => {
+      const raw = localStorage.getItem('postDetails');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return Object.keys(parsed).length > 0 ? parsed : null;
+    })();
+
+    const content = localStorage.getItem('editorContent') || '';
+
+    const mapDetails = (() => {
+      const raw = localStorage.getItem('mapDetails');
+      if (!raw) return null;
+      const parsed = JSON.parse(raw);
+      return Object.keys(parsed).length > 0 ? parsed : null;
+    })();
+
     return { details, content, mapDetails, submitted: false };
-  });
+  };
+
+  const [state, dispatch] = useReducer(PostReducer, initialPostState, init);
   const {loading, error, post} = useApi('/new-post',{ auto: false });
 
   useEffect(() => {

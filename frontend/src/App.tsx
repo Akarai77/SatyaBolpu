@@ -12,7 +12,8 @@ import { ToastContainer } from 'react-toastify';
 import 'react-toastify/dist/ReactToastify.css';
 import Dashboard from './pages/Dashboard'
 import Updates from './pages/Updates'
-import BasicDetails from './pages/BasicDetails'
+import NewPost from './pages/NewPost'
+import PostDetails from './pages/PostDetails'
 
 function App() {
   return (
@@ -46,7 +47,8 @@ function App() {
         <Route path='/profile' element={<Profile/>}/>
         <Route path='/dashboard' element={<Dashboard />}/>
         <Route path='/explore' element={<Explore/>}/>
-        <Route path='/new-post/basic-details' element={<BasicDetails/>}/>
+        <Route path='/new-post' element={<NewPost />}/>
+        <Route path='/new-post/post-details' element={<PostDetails/>}/>
         <Route path='/new-post/editor' element={<Editor/>}/>
         <Route path='/new-post/map' element={<MAP editMode/>}/>
         <Route path='/updates' element={<Updates />}/>

@@ -19,10 +19,10 @@ export const saveFile = async (file: File): Promise<string> => {
     const store = tx.objectStore('files');
     const key = await store.add(file);
     await tx.done;
-    console.log(`✅ File saved with key: ${key}`);
+    console.log(`File saved with key: ${key}`);
     return key as string;
   } catch (err) {
-    console.error(`💥 Failed to save file`, err);
+    console.error(`Failed to save file`, err);
     throw err;
   }
 };
@@ -35,7 +35,7 @@ export const getFile = async (id: number): Promise<File | null> => {
     const file = await store.get(id);
     return file ?? null;
   } catch (err) {
-    console.error(`💥 Failed to get file: ${id}`, err);
+    console.error(`Failed to get file: ${id}`, err);
     return null;
   }
 };

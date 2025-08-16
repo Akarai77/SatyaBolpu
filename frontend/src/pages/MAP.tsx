@@ -1,6 +1,6 @@
-import { GeoJSON, Marker } from "react-leaflet";
-import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
-import {  LeafletMouseEvent, Map } from "leaflet";
+import { Marker, GeoJSON } from "react-leaflet";
+import { ChangeEvent, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { Layer, LeafletMouseEvent, Map, Polygon, Tooltip } from "leaflet";
 import { AiOutlineFullscreen, AiOutlineFullscreenExit } from "react-icons/ai";
 import { useLoading } from "../context/LoadingContext";
 import MapComponent from "../components/MapComponent";
@@ -8,16 +8,21 @@ import Button from "../components/Button";
 import { MdCancel } from "react-icons/md";
 import { FaMagnifyingGlassLocation } from "react-icons/fa6";
 import { IoMdDoneAll } from "react-icons/io";
-import { usePost } from "../context/PostContext";
-
-type coordinatesType = {
-  latitude: number | null;
-  longitude: number | null;
-};
+import { MapDetailsType, usePost } from "../context/PostContext";
+import { toast } from "react-toastify";
+import { Navigate, useNavigate } from "react-router-dom";
 
 type coordinatesErrorType = {
-  latitude: string;
-  longitude: string;
+  lat: string;
+  lng: string;
+}
+
+const initialMapDetails = {
+  district: '',
+  taluk: '',
+  village: '',
+  lat: null,
+  lng: null
 }
 
 const MAP = ({ editMode = false } : { editMode?: boolean }) => {
@@ -29,13 +34,19 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
   const [zoom, setZoom] = useState<number>(9);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
   const toolTipPane = useRef<Element>();
-  const activeLayerRef = useRef<any>(null);
-  const [activeVillage,setActiveVillage] = useState<any>(null);
+  const activeLayerRef = useRef<Polygon | null>(null);
+  const [activeVillage,setActiveVillage] = useState<GeoJSON.Feature | null>(null);
   const [askForCoordinates,setAskForCoordinates] = useState<boolean>(false);
-  const [coordinates,setCoordinates] = useState<coordinatesType>({latitude: null,longitude: null});
-  const [coordinateErrors,setCoordinateErrors] = useState<coordinatesErrorType>({latitude: '', longitude: ''});
-  const [marker,setMarker] = useState<boolean>(false);
+  const [coordinateErrors,setCoordinateErrors] = useState<coordinatesErrorType>({lat: '', lng: ''});
+  const [mapDetails,setMapDetails] = useState<MapDetailsType>(initialMapDetails);
   const { setLoading } = useLoading();
+  const navigate = useNavigate();
+
+  useLayoutEffect(() => {
+    if(state.mapDetails) {
+      setMapDetails(state.mapDetails);
+    }
+  },[]);
 
   useEffect(() => {
     const fetchGeoJson = async (name: string) => {
@@ -126,87 +137,90 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
     },
   };
 
-  const onEachVillage = (feature: any, layer: any) => {
-    layer.setStyle(styles.default);
-    layer.on({
-      mouseover: (e: any) => {
-        if (feature.properties?.Village_Name && layer !== activeLayerRef.current) {
-          if (toolTipPane.current) {
-            const existingTooltips = toolTipPane.current.querySelectorAll('.leaflet-tooltip:not(.permanent-tooltip)');
-            existingTooltips.forEach((tooltip: Element) => tooltip.remove());
-          }
-          
-          const tooltip = L.tooltip({
-            permanent: false,
-            direction: "top",
-            className: "global-tooltip"
-          })
-          .setContent(feature.properties.Village_Name)
-          .setLatLng(e.latlng);
-          
-          if (map) {
-            tooltip.addTo(map);
-          }
-        }
-        
-        if (layer !== activeLayerRef.current) {
-          layer.setStyle(styles.hover);
-        }
-      },
-      
-      mouseout: () => {
-        if (layer !== activeLayerRef.current) {
-          layer.setStyle(styles.default);
-        }
-      },
-      
-      click: (e: LeafletMouseEvent) => {
-        if (toolTipPane.current) {
-          toolTipPane.current.innerHTML = '';
-        }
+  const onEachVillage = (feature: GeoJSON.Feature, layer: Layer) => {
+    if(layer instanceof Polygon) {
+      layer.setStyle(styles.default);
+      layer.on({
+        mouseover: (e: LeafletMouseEvent) => {
+          if (feature.properties?.VILLAGE && layer !== activeLayerRef.current) {
+            if (toolTipPane.current) {
+              const existingTooltips = toolTipPane.current.querySelectorAll('.leaflet-tooltip:not(.permanent-tooltip)');
+              existingTooltips.forEach((tooltip: Element) => tooltip.remove());
+            }
 
-        if (activeLayerRef.current && activeLayerRef.current !== layer) {
-          activeLayerRef.current.setStyle(styles.default);
-        }
-
-        if (layer === activeLayerRef.current) {
-          layer.setStyle(styles.default);
-          activeLayerRef.current = null;
-          setActiveVillage(null);
-        } else {
-          layer.setStyle(styles.click);
-          activeLayerRef.current = layer;
-          setActiveVillage(feature)
-          if (feature.properties?.Village_Name && map) {
-            const permanentTooltip = L.tooltip({
-              permanent: true,
+            const tooltip = new Tooltip({
+              permanent: false,
               direction: "top",
-              className: "global-tooltip permanent-tooltip"
+              className: "global-tooltip"
             })
-            .setContent(feature.properties.Village_Name)
+            .setContent(feature.properties.VILLAGE)
             .setLatLng(e.latlng);
 
-            permanentTooltip.addTo(map);
+            if (map) {
+              tooltip.addTo(map);
+            }
           }
-        }
-      },
-    });
+
+          if (layer !== activeLayerRef.current) {
+            layer.setStyle(styles.hover);
+          }
+        },
+
+        mouseout: () => {
+          if (layer !== activeLayerRef.current) {
+            layer.setStyle(styles.default);
+          }
+        },
+
+        click: (e: LeafletMouseEvent) => {
+          if (toolTipPane.current) {
+            toolTipPane.current.innerHTML = '';
+          }
+
+          if (activeLayerRef.current && activeLayerRef.current !== layer) {
+            activeLayerRef.current.setStyle(styles.default);
+          }
+
+          if (layer === activeLayerRef.current) {
+            layer.setStyle(styles.default);
+            activeLayerRef.current = null;
+            setActiveVillage(null);
+          } else {
+            layer.setStyle(styles.click);
+            activeLayerRef.current = layer;
+            setActiveVillage(feature)
+            if (feature.properties?.VILLAGE && map) {
+              const permanentTooltip = new Tooltip({
+                permanent: true,
+                direction: "top",
+                className: "global-tooltip permanent-tooltip"
+              })
+              .setContent(feature.properties.VILLAGE)
+              .setLatLng(e.latlng);
+
+              permanentTooltip.addTo(map);
+            }
+          }
+        },
+      });
+    }
   };
 
   const districtKeys = ["dakshina_kannada", "udupi", "kasaragod"];
-  const onEachUniteractiveVillage = (feature: any,layer: any) => {
-    layer.on({
-      click: (e: LeafletMouseEvent) => {
-        setCoordinates({
-          latitude: e.latlng.lat,
-          longitude: e.latlng.lng
-        });
-        setMarker(true);
-        console.log(e)
-        localStorage.setItem('mapDetails',JSON.stringify({
-        }))
-      }
-    })
+  const onEachUniteractiveVillage = (feature: GeoJSON.Feature,layer: Layer) => {
+    if(editMode) {
+      layer.on({
+        click: (e: LeafletMouseEvent) => {
+          setMapDetails({
+            district: feature.properties?.DISTRICT,
+            taluk: feature.properties?.TALUK,
+            village: feature.properties?.VILLAGE,
+            lat: e.latlng.lat,
+            lng: e.latlng.lng
+          });
+        }
+      })
+    }
   }
 
   const uninteractiveVillageLayers = useMemo(() => (
@@ -252,14 +266,14 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
   const handleVillageExit = () => {
     if(map && activeVillage) {
       setActiveVillage(null);
-      activeLayerRef.current.setStyle(styles.default);
+      activeLayerRef.current?.setStyle(styles.default);
       activeLayerRef.current = null;
     }
   }
 
   const handleView = () => {
     if(map && activeVillage) {
-      const [xmin,ymin,xmax,ymax] = activeVillage.bbox;
+      const [xmin,ymin,xmax,ymax] = activeVillage.bbox!;
       map.flyTo([(ymin+ymax)/2, (xmin+xmax)/2], 14)
     }
   }
@@ -269,31 +283,88 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
       ...prev,
       [name] : ''
     }))
+
     const {name, value} = e.target;
 
     if(isNaN(Number(value)))
       return
 
-    setCoordinates((prev) => ({
-        ...prev,
-        [name]: value
-    }));
+    setMapDetails((prev) => ({
+      ...prev,
+      [name] : value
+    }))
+  };
+
+  const pointInPolygon = (point: number[], polygon: number[][]) => {
+    const x = point[0], y = point[1];
+    let inside = false;
+    
+    for (let i = 0, j = polygon.length - 1; i < polygon.length; j = i++) {
+      const xi = polygon[i][0], yi = polygon[i][1];
+      const xj = polygon[j][0], yj = polygon[j][1];
+      
+      if (((yi > y) !== (yj > y)) && (x < (xj - xi) * (y - yi) / (yj - yi) + xi)) {
+        inside = !inside;
+      }
+    }
+    
+    return inside;
+  };
+
+  const findLayerContainingCoordinates = (lat: number, lng: number, geoJsonData: any) => {
+    const point = [lng, lat];
+    const districtKeys = ["dakshina_kannada", "udupi", "kasaragod"];
+    
+    for (const key of districtKeys) {
+      const data = geoJsonData[key];
+      if (!data || !data.features) continue;
+      
+      for (const feature of data.features) {
+        if (!feature.geometry) continue;
+        
+        const { geometry } = feature;
+        
+        if (geometry.type === 'Polygon') {
+          const coordinates = geometry.coordinates[0];
+          if (pointInPolygon(point, coordinates)) {
+            return {
+              layerKey: key,
+              feature: feature,
+              properties: feature.properties
+            };
+          }
+        } else if (geometry.type === 'MultiPolygon') {
+          for (const polygon of geometry.coordinates) {
+            const coordinates = polygon[0];
+            if (pointInPolygon(point, coordinates)) {
+              return {
+                layerKey: key,
+                feature: feature,
+                properties: feature.properties
+              };
+            }
+          }
+        }
+      }
+    }
+
+    return null;
   };
 
   const handleCoordinatesSubmit = (e: React.SyntheticEvent<HTMLFormElement, SubmitEvent>) => {
     e.preventDefault();
 
     const newErrors = {
-      latitude: '',
-      longitude: ''
+      lat: '',
+      lng: ''
     }
 
-    if(!coordinates.latitude) {
-      newErrors.latitude = 'Latitude is required.'
+    if(!mapDetails.lat) {
+      newErrors.lat = 'Latitude is required.'
     }
 
-    if(!coordinates.longitude) {
-        newErrors.longitude = 'Longitude is required.'
+    if(!mapDetails.lng) {
+      newErrors.lng = 'Longitude is required.'
     }
 
     const maxBounds = [
@@ -301,12 +372,12 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
       [11.98870273390581, 76.19727859282375],
     ];
 
-    if(coordinates.latitude && (coordinates.latitude! > maxBounds[0][0] || coordinates.latitude! < maxBounds[1][0])) {
-      newErrors.latitude = 'Latitude exceeds max bounds.'
+    if(mapDetails.lat && (mapDetails.lat! > maxBounds[0][0] || mapDetails.lat! < maxBounds[1][0])) {
+      newErrors.lat = 'Latitude exceeds max bounds.'
     }
 
-    if(coordinates.longitude && (coordinates.longitude! > maxBounds[1][1] || coordinates.longitude! < maxBounds[0][1])) {
-      newErrors.longitude = 'Longitude exceeds max bounds.'
+    if(mapDetails.lng && (mapDetails.lng! > maxBounds[1][1] || mapDetails.lng! < maxBounds[0][1])) {
+      newErrors.lng = 'Longitude exceeds max bounds.'
     }
 
     setCoordinateErrors(newErrors);
@@ -314,12 +385,43 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
     if(hasError)
       return
 
-    map?.flyTo([coordinates.latitude!, coordinates.longitude!],18);
-    setMarker(true);
-  }
+    const containingLayer = findLayerContainingCoordinates(
+      mapDetails.lat!, 
+      mapDetails.lng!, 
+      geoJsonData
+    );
+
+    if (!containingLayer) {
+      toast.error('Somethig went wrong! Try again later');
+    }
+
+    map?.flyTo([mapDetails.lat!, mapDetails.lng!], 18);
+    setMapDetails((prev) => ({
+      ...prev,
+      district: containingLayer?.properties.DISTRICT,
+      taluk: containingLayer?.properties.TALUK,
+      village: containingLayer?.properties.VILLAGE
+    }));
+  };
 
   const handleSubmit = () => {
-          
+    if(!mapDetails.district) {
+      toast.error("You need to submit the location details first.")
+      return;
+    }
+
+    dispatch({
+      type: 'SAVE_MAP_DETAILS',
+      payload: {
+        mapDetails: mapDetails
+      }
+    });
+    toast.success("Map Details stored successfully.");
+    setTimeout(() => navigate('/new-post'),3000)
+  }
+
+  if(editMode && !state.content) {
+    return <Navigate to={'/new-post/editor'} replace/>
   }
 
   return (
@@ -364,8 +466,9 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
         )}
         {
           editMode &&
-            <IoMdDoneAll 
-              className="text-[2.5rem] text-white hover:scale-110"
+            <IoMdDoneAll
+              className={`text-[2.5rem] 
+                ${mapDetails.district ? 'text-white hover:scale-110' : 'cursor-not-allowed text-gray-400'}`}
               onClick={handleSubmit}
             />
         }
@@ -394,30 +497,30 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
                   onClick={() => setAskForCoordinates(false)}
                 />
                 <div className="w-full flex flex-col items-center justify-between gap-2">
-                  <label className="text-white" htmlFor="latitude">Latitude</label>
+                  <label className="text-white" htmlFor="lat">Latitude</label>
                   <input
                     className="p-1"
                     type="text"
-                    id="latitude"
-                    name="latitude"
+                    id="lat"
+                    name="lat"
                     autoComplete="off"
-                    value={coordinates.latitude ?? ''}
+                    value={mapDetails?.lat ?? ''}
                     onChange={handleCoordinateChange}
                   />        
-                  {coordinateErrors.latitude && <p className="text-red-500">{coordinateErrors.latitude}</p>}
+                  {coordinateErrors.lat && <p className="text-red-500">{coordinateErrors.lat}</p>}
                 </div>
                 <div className="w-full flex flex-col items-center justify-between gap-2">
-                  <label className="text-white" htmlFor="longitude">Longitude</label>
+                  <label className="text-white" htmlFor="lng">Longitude</label>
                   <input 
                     className="p-1 rounded"
                     type="text"
-                    id="longitude"
-                    name="longitude"
+                    id="lng"
+                    name="lng"
                     autoComplete="off"
-                    value={coordinates.longitude ?? ''}
+                    value={mapDetails?.lng ?? ''}
                     onChange={handleCoordinateChange}
                   />
-                  {coordinateErrors.longitude && <p className="text-red-500">{coordinateErrors.longitude}</p>}
+                  {coordinateErrors.lng && <p className="text-red-500">{coordinateErrors.lng}</p>}
                 </div>
                 <Button content="Find" type="submit" className="w-fit mx-auto"/>
               </form>
@@ -432,7 +535,9 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
             <MdCancel 
               className="absolute top-3 right-3 cursor-pointer hover:fill-primary"
               onClick={handleVillageExit}/>
-            <h1>Village : {activeVillage.properties.Village_Name}</h1>
+            <h1>Village : {activeVillage.properties?.VILLAGE}</h1>
+            <h2>District: {activeVillage.properties?.DISTRICT}</h2>
+            <h2>Taluk: {activeVillage.properties?.TALUK}</h2>
             <p className="italic">lorem ipsum</p>
             <p>No of covered locations: {0}</p>
             <Button content="View More" className="mx-auto" onClick={handleView}/>
@@ -459,12 +564,22 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
             villageLayers
         )}
         {
-          marker &&
+          editMode && mapDetails.district &&
             <Marker 
-              position={[coordinates.latitude!, coordinates.longitude!]}
+              position={[mapDetails.lat!, mapDetails.lng!]}
             />
         }
+        {
+          editMode &&
+            <div 
+              className="absolute text-[1.75rem] text-white z-[400] bottom-0 m-5
+               cursor-pointer hover:text-primary"
+              onClick={() => navigate('/new-post/editor')}>
+              {`< Editor`}
+            </div>
+        }
       </MapComponent>
+
     </div>
   );
 };
