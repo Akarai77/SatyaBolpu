@@ -1,19 +1,21 @@
 import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import Button from "../components/Button";
 import Title from "../components/Title";
-import { usePost } from "../context/PostContext";
+import { PostState, usePost } from "../context/PostContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { MdDone } from "react-icons/md";
 import { useAuth } from "../context/AuthContext";
 import { useDialog } from "../context/DialogBoxContext";
 import useApi from "../hooks/useApi";
+import { getFile } from "../utils/FileStore";
 
 const NewPost = () => {
   
   const [progress,setProgress] = useState<number>(0);
   const navigate = useNavigate();
   const dialog = useDialog();
-  const { data, loading, error, post } = useApi('/posts', { auto: false })
+  const uploadApi = useApi('/upload',{ auto: false });
+  const postsApi = useApi('/posts', { auto: false })
   const { state: authState } = useAuth();
   const { state: postState, dispatch: postDispatch } = usePost();
 
@@ -42,25 +44,69 @@ const NewPost = () => {
 
   const handleUpload = () => {
     const uploadPost = async () => {
-       await post(postState);
+      let uploadData: PostState = postState;
+
+      if (postState.details?.image) {
+        const file = await getFile(Number(postState.details.image));
+        if (file) {
+          const formData = new FormData();
+          formData.append("file", file);
+          const res = await uploadApi.post(formData);
+          uploadData = {
+            ...uploadData,
+            details: { ...uploadData.details!, image: res.path },
+          };
+        }
+      }
+
+      const parser = new DOMParser();
+    const doc = parser.parseFromString(postState.content, "text/html");
+    const body = doc.body;
+
+    for (let i = 0; i < body.children.length; i++) {
+      const child = body.children[i];
+
+      if (child.className.includes("file")) {
+        const fileEl = child.querySelector<HTMLElement>("[data-idbkey]");
+
+        if (fileEl) {
+          const idbKey = fileEl.getAttribute("data-idbkey");
+          if (!idbKey) continue;
+
+          const file = await getFile(Number(idbKey));
+          if (!file) continue;
+
+          const formData = new FormData();
+          formData.append("file", file);
+          const res = await uploadApi.post(formData);
+
+          fileEl.setAttribute("src", res.path);
+          fileEl.removeAttribute("data-idbkey");
+        }
+      }
     }
+
+    uploadData = { ...uploadData, content: body.innerHTML };
+    await postsApi.post(uploadData);
+    };
 
     dialog.popup({
       title: "Post Upload.",
-      descr: "Are you sure you want to upload the post. All saved drafts will be cleared on upload.",
-      onConfirm: uploadPost
-    })
+      descr:
+        "Are you sure you want to upload the post? All saved drafts will be cleared on upload.",
+      onConfirm: uploadPost,
+    });
   };
 
   useEffect(() => {
-    if(data) {
+    if(postsApi.data) {
        postDispatch({
          type: 'CLEAR_POST'
        });
-      console.log(data)
+      console.log(postsApi.data)
     }
-    if(error) console.log(error)
-  },[data, error])
+    if(postsApi.error) console.log(postsApi.error)
+  },[postsApi.data, postsApi.error])
   
   if(!authState.token || authState.user?.role !== 'admin')
     return <Navigate to={'/404'} replace/>
@@ -116,7 +162,7 @@ const NewPost = () => {
           <Button 
             content="Upload Post" 
             onClick={handleUpload}
-            loading={loading}
+            loading={postsApi.loading || uploadApi.loading}
             loadingText="Uploading"
           />
       }
