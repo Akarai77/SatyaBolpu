@@ -11,7 +11,7 @@ export const uploadController = async (req: Request, res: Response) => {
 
     console.log("Uploaded file",file.path);
     return res.status(200).json({ msg: 'Upload Successful', path: file.path })
-  } catch (err) {
+  } catch (err: any) {
     console.error("Error during file upload:", err);
     return res.status(500).json({ msg: "Internal Server Error" });
   }

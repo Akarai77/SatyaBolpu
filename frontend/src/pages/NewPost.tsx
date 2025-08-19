@@ -1,23 +1,32 @@
-import { useEffect, useLayoutEffect, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useState } from "react";
 import Button from "../components/Button";
 import Title from "../components/Title";
 import { usePost } from "../context/PostContext";
 import { Navigate, useNavigate } from "react-router-dom";
 import { MdDone } from "react-icons/md";
 import { useAuth } from "../context/AuthContext";
+import { useDialog } from "../context/DialogBoxContext";
+import useApi from "../hooks/useApi";
 
 const NewPost = () => {
   
-  const steps = {
-    'Post Details' : 'post-details',
-    'Editor' : 'editor',
-    'Map Details' : 'map'
-  };
   const [progress,setProgress] = useState<number>(0);
   const navigate = useNavigate();
+  const dialog = useDialog();
+  const { data, loading, error, post } = useApi('/posts', { auto: false })
   const { state: authState } = useAuth();
-  const { state: postState } = usePost();
-  const offset = 100 / (Object.keys(steps).length - 1);
+  const { state: postState, dispatch: postDispatch } = usePost();
+
+  const steps = useMemo(() => ({
+    'Post Details': 'post-details',
+    'Editor': 'editor',
+    ...(postState.details?.locationSpecific && { 'Map Details': 'map' })
+  }), [postState.details?.locationSpecific]);
+
+  const offset = useMemo(
+    () => 100 / (Object.keys(steps).length - 1),
+      [steps]
+  );
 
   useLayoutEffect(() => {
     let width = 0;
@@ -31,6 +40,28 @@ const NewPost = () => {
     setProgress(width)
   },[postState]);
 
+  const handleUpload = () => {
+    const uploadPost = async () => {
+       await post(postState);
+    }
+
+    dialog.popup({
+      title: "Post Upload.",
+      descr: "Are you sure you want to upload the post. All saved drafts will be cleared on upload.",
+      onConfirm: uploadPost
+    })
+  };
+
+  useEffect(() => {
+    if(data) {
+       postDispatch({
+         type: 'CLEAR_POST'
+       });
+      console.log(data)
+    }
+    if(error) console.log(error)
+  },[data, error])
+  
   if(!authState.token || authState.user?.role !== 'admin')
     return <Navigate to={'/404'} replace/>
 
@@ -52,8 +83,8 @@ const NewPost = () => {
           ></div>
         {
           Object.values(steps).map((step,index) => {
-            const isDisabled = !(progress >= (offset*index))
-            const isCompleted = (progress > offset*index);
+            const isDisabled = index === 0 ? false : progress < offset * index;
+            const isCompleted = progress > offset*index;
             return (
               <div className="flex z-20 flex-col items-center justify-center" key={index}>
                 <div 
@@ -82,7 +113,12 @@ const NewPost = () => {
 
       {
         progress > 100 &&
-          <Button content="Upload Post"/>
+          <Button 
+            content="Upload Post" 
+            onClick={handleUpload}
+            loading={loading}
+            loadingText="Uploading"
+          />
       }
     </div>
   )

@@ -65,7 +65,7 @@ export const signup = async (req: Request, res: Response) => {
     });
   } catch (err: any) {
     console.error('Signup Error:', err.message);
-    return res.status(500).json({ msg: 'Something went wrong, Cody. It’s not you, it’s the server.' });
+    return res.status(500).json({ msg: 'Something went wrong...' });
   }
 };
 

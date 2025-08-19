@@ -71,37 +71,36 @@ const TiptapEditor = () => {
     return () => window.removeEventListener('mousedown',handleClick);
   },[])
 
-const getIndexedFiles = async (contentString: string): Promise<string> => {
-  if (!contentString) return '';
+  const getIndexedFiles = async (contentString: string): Promise<string> => {
+    if (!contentString) return '';
 
-  const parser = new DOMParser();
-  const doc = parser.parseFromString(contentString, 'text/html');
-  const body = doc.body;
+    const parser = new DOMParser();
+    const doc = parser.parseFromString(contentString, 'text/html');
+    const body = doc.body;
 
-  for (let i = 0; i < body.children.length; i++) {
-    const child = body.children[i];
+    for (let i = 0; i < body.children.length; i++) {
+      const child = body.children[i];
 
-    if (child.className.includes('file')) {
-      const fileEl = child.querySelector('[data-idbkey]');
+      if (child.className.includes('file')) {
+        const fileEl = child.querySelector('[data-idbkey]');
 
-      if (fileEl) {
-        const idAttr = fileEl.getAttribute('data-idbkey');
-        const fileId = idAttr ? Number(idAttr) : NaN;
+        if (fileEl) {
+          const idAttr = fileEl.getAttribute('data-idbkey');
+          const fileId = idAttr ? Number(idAttr) : NaN;
 
-        if (!isNaN(fileId)) {
-          const file = await getFile(fileId);
-          if (file) {
-            const blobURL = URL.createObjectURL(file);
-            fileEl.setAttribute('src', blobURL);
+          if (!isNaN(fileId)) {
+            const file = await getFile(fileId);
+            if (file) {
+              const blobURL = URL.createObjectURL(file);
+              fileEl.setAttribute('src', blobURL);
+            }
           }
         }
       }
     }
-  }
 
-  console.log(doc.documentElement.outerHTML)
-  return doc.documentElement.outerHTML;
-};
+    return doc.documentElement.outerHTML;
+  };
 
   const editor = useEditor({
     extensions: [
@@ -122,7 +121,6 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
     onCreate: async ({ editor }) => {
       const raw = localStorage.getItem('editorContentDraft') || postState.content || '';
       const hydrated = await getIndexedFiles(raw);
-      console.log(hydrated)
       editor.commands.setContent(hydrated);
     },
     onUpdate: () => {
@@ -266,10 +264,16 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
   }, [editor]);
 
   const handleSubmit = useCallback(() => {
+    const content = formatHtml(editor.getHTML());
+    console.log(content)
+    if(!content) {
+      toast.error("Editor content cannot be empty!");
+      return;
+    }
+
       const submit = () => {
           if(editor) {
               handlePreview();
-              const content = formatHtml(editor.getHTML());
               setEditorState('submitted');
               postDispatch({
                 type: 'SAVE_EDITOR_CONTENT',
@@ -279,9 +283,11 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
               })
               localStorage.removeItem('editorContentDraft');
               toast.success("Editor content Submitted.");
+              if(!postState.details?.locationSpecific) {
+                navigate('/new-post');
+              }
           }
       }
-
 
       dialog?.popup({
           title: 'Draft Submit',
@@ -573,11 +579,14 @@ const getIndexedFiles = async (contentString: string): Promise<string> => {
             onClick={() => navigate('/new-post/post-details')}>
             {`< Basic Details`}
           </div>
-          <div 
-            className="text-white text-[1.75rem] cursor-pointer hover:text-primary"
-            onClick={() => navigate('/new-post/map')}>
-            {`Map >`}
-          </div>
+          {
+            postState.details.locationSpecific &&
+              <div 
+                className="text-white text-[1.75rem] cursor-pointer hover:text-primary"
+                onClick={() => navigate('/new-post/map')}>
+                {`Map >`}
+              </div>
+          }
         </div>
         
     </div>

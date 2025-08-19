@@ -420,7 +420,7 @@ const MAP = ({ editMode = false } : { editMode?: boolean }) => {
     setTimeout(() => navigate('/new-post'),3000)
   }
 
-  if(editMode && !state.content) {
+  if(editMode && (!state.content || !state.details?.locationSpecific)) {
     return <Navigate to={'/new-post/editor'} replace/>
   }
 

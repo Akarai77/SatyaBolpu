@@ -26,7 +26,7 @@ const Profile = () => {
             toast.info("User Logged Out");
         }
 
-        dialog?.popup({
+        dialog.popup({
             title: "Logging Out",
             descr: "Are you sure you want to log out?",
             severity: "risky",
@@ -66,7 +66,7 @@ const Profile = () => {
     if(!state.token) return <Navigate to={'/login'} replace/>
     return (
         <div className="w-full h-screen flex items-center justify-center">
-            <div className="w-4/5 sm:w-2/3 md:w-3/5 lg:w-2/5 xl:w-1/3 relative flex flex-col items-center justify-center bg-white/80 
+            <div className="w-4/5 sm:w-2/3 md:w-3/5 lg:w-2/5 2xl:w-1/3 relative flex flex-col items-center justify-center bg-white/80 
               p-10 [box_shadow:1px_1px_6px_primary] shadow-primary rounded-2xl gap-10"
               ref={profileRef}>
  

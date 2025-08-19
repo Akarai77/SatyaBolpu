@@ -109,7 +109,7 @@ const Login = () => {
         <div className="w-full h-screen text-primary flex flex-col items-center justify-center">
             <form
                 onSubmit={handleSubmit}
-                className="w-4/5 md:w-3/5 lg:w-2/5 xl:w-1/3 h-3/4 border-4 border-white border-solid rounded-2xl
+                className="w-4/5 md:w-3/5 lg:w-2/5 xl:w-2/5 h-3/4 border-4 border-white border-solid rounded-2xl
               flex flex-col items-center justify-evenly text-[2rem]"
             >
                 <h1 className="text-[4rem] font-semibold">Login</h1>

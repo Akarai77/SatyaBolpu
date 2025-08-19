@@ -1,5 +1,4 @@
-import { createContext, ReactNode, useContext, useEffect, useReducer } from "react";
-import useApi from "../hooks/useApi";
+import { createContext, ReactNode, useContext, useReducer } from "react";
 
 export type PostDetailsType = {
   mainTitle: string;
@@ -23,14 +22,12 @@ type PostState = {
   details: PostDetailsType | null;
   content: string;
   mapDetails: MapDetailsType | null;
-  submitted: boolean;
 }
 
 const initialPostState : PostState = {
   details: null,
   content: '',
   mapDetails: null,
-  submitted: false
 }
 
 type PostAction =
@@ -40,8 +37,7 @@ type PostAction =
   | { type: 'CLEAR_EDITOR_CONTENT' }
   | { type: 'SAVE_MAP_DETAILS', payload: { mapDetails: MapDetailsType } }
   | { type: 'CLEAR_MAP_DETAILS' }
-  | { type: 'SAVE_POST' }
-  | { type: 'DELETE_POST' }
+  | { type: 'CLEAR_POST' }
 
 const PostReducer = (state: PostState, action: PostAction) : PostState => {
   switch(action.type) {
@@ -93,15 +89,13 @@ const PostReducer = (state: PostState, action: PostAction) : PostState => {
       }
     }
 
-    case 'SAVE_POST':
+    case 'CLEAR_POST': {
+      localStorage.removeItem('postDetails');
+      localStorage.removeItem('editorContent');  
+      localStorage.removeItem('mapDetails');
       return {
-        ...state,
-        submitted: true
-    }
-
-    case 'DELETE_POST':
-      return {
-      ...initialPostState
+        ...initialPostState
+      }
     }
 
     default:
@@ -140,25 +134,10 @@ export const PostProvider = ({ children } : { children: ReactNode }) => {
       return Object.keys(parsed).length > 0 ? parsed : null;
     })();
 
-    return { details, content, mapDetails, submitted: false };
+    return { details, content, mapDetails };
   };
 
   const [state, dispatch] = useReducer(PostReducer, initialPostState, init);
-  const {loading, error, post} = useApi('/new-post',{ auto: false });
-
-  useEffect(() => {
-    const uploadPost = async () => {
-      if(state.submitted)
-        await post({ post: {...state.details, content: state.content} });
-    }
-
-    uploadPost();
-  },[state.submitted])
-
-  useEffect(() => {
-    if(error)
-      console.error(error)
-  }, [error, loading])
 
   return (
     <PostContext.Provider value={{ state, dispatch }}>

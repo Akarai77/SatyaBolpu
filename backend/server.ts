@@ -1,6 +1,7 @@
 import express from 'express';
 import authRoutes from './routes/authRoutes.js';
 import uploadRoutes from './routes/uploadRoutes.js';
+import postRoutes from './routes/postRoutes.js';
 import cors from 'cors';
 import dotenv from 'dotenv';
 import { connectDB } from './utils/db.js';
@@ -22,5 +23,6 @@ connectDB()
 app.get('/api', (req, res) => res.send('Hello World!'));
 app.use('/api/auth',authRoutes);
 app.use('/api/upload',uploadRoutes);
+app.use('/api/posts',postRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

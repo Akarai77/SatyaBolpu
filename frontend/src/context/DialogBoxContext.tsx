@@ -6,8 +6,8 @@ export type DialogBoxOptions = {
     descr: string;
     severity?: "irreversible" | "risky" | "default";
     children?: ReactNode;
-    onConfirm: (args? : any) => void;
-    onCancel?: (args? : any) => void;
+    onConfirm: () => void;
+    onCancel?: () => void;
 }
 
 type DialogBoxContextType = {
