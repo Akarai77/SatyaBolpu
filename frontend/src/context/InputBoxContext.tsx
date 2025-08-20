@@ -8,10 +8,9 @@ export type InputBoxOptions = {
       label: string, 
       input: "text" | "number" | "password" | "email", 
       value: string | number,
-      onChange: (e: ChangeEvent<HTMLInputElement>) => void 
     }[];
-    onConfirm: () => void;
-    onCancel?: () => void;
+    onConfirm: (formData: Record<string, any>) => void;
+    onCancel?: (args?: any) => void;
 }
 
 type InputBoxContextType = {
@@ -33,8 +32,8 @@ export const InputBoxProvider = ({children} : {children: ReactNode}) => {
             opts.onCancel?.();
             close();
         },
-        onConfirm: () => {
-            opts.onConfirm();
+        onConfirm: (formData: Record<string, any>) => {
+            opts.onConfirm(formData);
             close();
         }
     });

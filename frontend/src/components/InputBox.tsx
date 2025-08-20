@@ -1,11 +1,29 @@
 import gsap from "gsap";
-import { useLayoutEffect, useRef } from "react";
+import { useLayoutEffect, useRef, useState } from "react";
 import Button from "./Button";
 import { InputBoxOptions } from "../context/InputBoxContext";
 
 const InputBox: React.FC<InputBoxOptions> = (props) => {
   const inputBoxRef = useRef<HTMLDivElement | null>(null);
   const bgRef = useRef<HTMLDivElement | null>(null);
+  const [formData, setFormData] = useState(() => {
+    const initial: Record<string, any> = {};
+    props.fields.forEach(field => {
+      initial[field.label.toLowerCase()] = field.value;
+    });
+    return initial;
+  });
+
+  const handleFieldChange = (fieldLabel: string, value: any) => {
+    setFormData(prev => ({
+      ...prev,
+      [fieldLabel.toLowerCase()]: value
+    }));
+  };
+
+  const handleConfirm = () => {
+    props.onConfirm(formData);
+  };
 
   useLayoutEffect(() => {
     let ctx = gsap.context(() => {
@@ -86,36 +104,33 @@ const InputBox: React.FC<InputBoxOptions> = (props) => {
               </div>
             }
 
-            {
-              props.fields.length > 0 && props.fields.map((field,index) => (
-                <div key={index} className="text-white flex justify-center items-center
-                  text-[1.5rem] gap-3">
-                  <label 
-                    htmlFor={field.label.toLowerCase()}
-                  >
-                    { field.label }
-                  </label>
-                  <input 
-                    className="text-black p-1"
-                    type={field.input}
-                    name={field.label.toLowerCase()}
-                    id={field.label.toLowerCase()}
-                    value={field.value}
-                    onChange={field.onChange}
-                  />
-                </div>
-              ))
-            }
+            {props.fields.map((field, index) => (
+              <div key={index} className="text-white flex justify-center items-center text-[1.5rem] gap-3">
+                <label htmlFor={field.label.toLowerCase()}>
+                  {field.label}
+                </label>
+                <input 
+                  className="text-black p-1"
+                  type={field.input}
+                  name={field.label.toLowerCase()}
+                  id={field.label.toLowerCase()}
+                  value={formData[field.label.toLowerCase()] || ''}
+                  onChange={(e) => handleFieldChange(field.label, e.target.value)}
+                />
+              </div>
+            ))}
 
             <div className="flex gap-3">
               <Button 
                 content="Proceed" 
                 className="bg-green-500 text-white hover:bg-green-600" 
-                onClick={() => handleClick(props.onConfirm)}/>
+                onClick={() => handleClick(handleConfirm)}
+              />
               <Button 
                 content="Cancel" 
                 className="bg-red-500 text-white hover:bg-red-600" 
-                onClick={() => handleClick(props.onCancel) }/>
+                onClick={() => handleClick(props.onCancel) }
+              />
             </div>
 
         </div>

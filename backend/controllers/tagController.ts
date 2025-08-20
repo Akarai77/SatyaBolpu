@@ -16,3 +16,25 @@ export const getTags = async (req: Request, res: Response) => {
     return res.status(500).json({ msg: 'Server error while fetching tags' });
   }
 }
+
+export const addTag = async (req: Request, res: Response) => {
+  try {
+    const { tag } = req.body;
+
+    if(!tag) {
+      return res.status(400).json({ msg: "Missing required field 'tag'" });
+    }
+
+    const doesExist = await Tag.findOne({ tag });
+    if(doesExist) {
+      return res.status(400).json({ msg: "Tag already exists" });
+    }
+  
+    const newTag = await Tag.create({ tag });
+    
+    return res.status(200).json({tag: newTag});
+  } catch (err: any) {
+    console.error(`Error while adding tag : ${err}`);
+    return res.status(500).json({ msg: "Error while adding tag" });
+  }
+}
