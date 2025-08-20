@@ -7,7 +7,7 @@ export type PostDetailsType = {
   description: string;
   tags: string[];
   locationSpecific: boolean;
-  image: number | string | null;
+  image: File | number | string | null;
 }
 
 export type MapDetailsType = {

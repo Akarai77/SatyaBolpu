@@ -9,6 +9,7 @@ import Footer from './components/Footer.tsx'
 import { AuthProvider } from './context/AuthContext.tsx'
 import { DialogBoxProvider } from './context/DialogBoxContext.tsx'
 import { PostProvider } from './context/PostContext.tsx'
+import { InputBoxProvider } from './context/InputBoxContext.tsx'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
@@ -16,11 +17,13 @@ createRoot(document.getElementById('root')!).render(
     <AuthProvider>
      <PostProvider>
       <DialogBoxProvider>
-       <Navbar />
-        <LoadingProvider>
-         <App />
-        </LoadingProvider>
-       <Footer />
+        <InputBoxProvider>
+         <Navbar />
+          <LoadingProvider>
+           <App />
+          </LoadingProvider>
+         <Footer />
+        </InputBoxProvider>
       </DialogBoxProvider>
      </PostProvider>
     </AuthProvider>

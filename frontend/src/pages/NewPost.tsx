@@ -107,6 +107,12 @@ const NewPost = () => {
     }
     if(postsApi.error) console.log(postsApi.error)
   },[postsApi.data, postsApi.error])
+
+  const handleClearProgress = () => {
+    postDispatch({
+      type: 'CLEAR_POST'
+    })
+  }
   
   if(!authState.token || authState.user?.role !== 'admin')
     return <Navigate to={'/404'} replace/>
@@ -157,15 +163,22 @@ const NewPost = () => {
         }
       </div>
 
-      {
-        progress > 100 &&
-          <Button 
-            content="Upload Post" 
-            onClick={handleUpload}
-            loading={postsApi.loading || uploadApi.loading}
-            loadingText="Uploading"
-          />
-      }
+      <div>
+        {
+          progress > 100 &&
+            <Button 
+              content="Upload Post" 
+              onClick={handleUpload}
+              loading={postsApi.loading || uploadApi.loading}
+              loadingText="Uploading"
+            />
+        }
+        
+        <Button 
+          content="Clear Progress"
+          onClick={handleClearProgress}
+        />
+      </div>
     </div>
   )
 }

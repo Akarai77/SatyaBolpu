@@ -416,8 +416,7 @@ const PostDetails = () => {
 
       <div className="flex w-screen items-center justify-between p-10">
         <div 
-          className={` text-[1.75rem]
-          ${submitted ? 'hover:text-primary text-white cursor-pointer' : 'text-gray-500 cursor-not-allowed'}`}
+          className={` text-[1.75rem] hover:text-primary text-white cursor-pointer`}
           onClick={() => navigate('/new-post')}>
             {`< Progress`}
         </div>

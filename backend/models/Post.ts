@@ -13,7 +13,7 @@ export interface IPost extends Document {
   shortTitle: string;
   culture: "daivaradhane" | "nagaradhane" | "yakshagana" | "kambala";
   description: string;
-  tags: string[];
+  tags: Schema.Types.ObjectId[];
   image: string;
   content: string;
   location?: ILocation;
@@ -46,11 +46,16 @@ const postSchema = new Schema<IPost>({
     required: true
   },
   tags: {
-    type: [String],
+    type: [{ type: Schema.Types.ObjectId, ref: 'Tag' }],
     required: true,
-    validate: [(val: string[]) => val.length > 0, 'At least one tag required']
+    validate: {
+      validator: function (val: Schema.Types.ObjectId[]) {
+        return val && val.length > 0;
+      },
+      message: 'At least one tag required'
+    }
   },
-  image: {
+image: {
     type: String,
     required: true
   },

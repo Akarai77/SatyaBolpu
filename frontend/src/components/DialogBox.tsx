@@ -1,5 +1,5 @@
 import gsap from "gsap";
-import { useEffect, useLayoutEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import { FaInfoCircle } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import Button from "./Button";
@@ -89,14 +89,6 @@ const DialogBox: React.FC<DialogBoxOptions> = (props) => {
                     {props.title}
                 </h1>
             </div>
-
-            {
-              props.children && (
-                <div>
-                {props.children}
-                </div>
-              )
-            }
 
             <div className="w-[90%] text-white flex items-center justify-center text-wrap">
                 {props.descr}

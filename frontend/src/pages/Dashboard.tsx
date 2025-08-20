@@ -1,8 +1,10 @@
 import { Navigate } from "react-router-dom";
 import { useAuth } from "../context/AuthContext";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
-import { FaPencilAlt, FaStar, FaHandsHelping } from "react-icons/fa";
+import { FaPencilAlt, FaStar, FaHandsHelping, FaHashtag } from "react-icons/fa";
 import Button from "../components/Button";
+import { useInputBox } from "../context/InputBoxContext";
+import { ChangeEvent, useState } from "react";
 
 const data = [
   { month: 'Jan 2025', posts: 4 },
@@ -15,28 +17,58 @@ const data = [
 
 const Dashboard = () => {
     const { state } = useAuth();
+    const input = useInputBox();
+    const [tag,setTag] = useState<string>('');
+
+    const handleTagChange = (e: ChangeEvent<HTMLInputElement>) => {
+      console.log(e.target.value)
+      setTag(e.target.value);
+    }
+
+    const handleAddTag = () => {
+      input.popup({
+        title: "New Tag",
+        fields: [
+          {
+            label: 'Tag',
+            input: 'text',
+            value: tag,
+            onChange: (e) => setTag(e.target.value)
+          }
+        ],
+        onConfirm: () => {}
+      })
+    }
 
     if(!state.token) return <Navigate to='/login' replace/>
     return (
-        <div className="max-w-screen xl:px-10 text-primary my-20 flex flex-col gap-10 xl:gap-0 xl:flex-row flex-wrap items-center  justify-center">
+        <div className="max-w-screen xl:px-10 text-primary my-20 flex flex-col 
+          gap-10 xl:gap-0 xl:flex-row flex-wrap items-center  justify-center">
 
           <div className="w-full xl:w-2/3 flex flex-col items-center justify-between gap-5">
             <div className="w-[95%] flex items-center gap-5 p-5 xl:text-nowrap">
-              <div className="relative w-1/3 min-h-36 lg:min-h-24 xl:min-h-fit flex flex-col justify-center text-center p-3 outline outline-white rounded-2xl 
-                  cursor-pointer hover:-mt-5 transition-all duration-300">
+
+              <div className="relative w-1/3 min-h-36 lg:min-h-24 xl:min-h-fit flex flex-col
+                justify-center text-center p-3 outline outline-white rounded-2xl 
+                cursor-pointer hover:-mt-5 transition-all duration-300">
                 <h1 className="text-[1.5rem]">All Time Posts</h1>
                 <p className="text-white text-[2rem]">1902</p>
               </div>
-              <div className="relative w-1/3 min-h-36 lg:min-h-24 xl:min-h-fit flex flex-col justify-center text-center p-3 outline outline-white rounded-2xl 
-                  cursor-pointer hover:-mt-5 transition-all duration-300">
+
+              <div className="relative w-1/3 min-h-36 lg:min-h-24 xl:min-h-fit flex
+                flex-col justify-center text-center p-3 outline outline-white rounded-2xl 
+                cursor-pointer hover:-mt-5 transition-all duration-300">
                 <h1 className="text-[1.5rem]">Regions Covered</h1>
                 <p className="text-white text-[2rem]">1902</p>
               </div>
-              <div className="relative w-1/3 min-h-36 lg:min-h-24 xl:min-h-fit flex flex-col justify-center text-center p-3 outline outline-white rounded-2xl 
-                  cursor-pointer hover:-mt-5 transition-all duration-300">
+
+              <div className="relative w-1/3 min-h-36 lg:min-h-24 xl:min-h-fit flex flex-col
+                justify-center text-center p-3 outline outline-white rounded-2xl 
+                cursor-pointer hover:-mt-5 transition-all duration-300">
                 <h1 className="text-[1.5rem]">Active Users</h1>
                 <p className="text-white text-[2rem]">1902</p>
               </div>
+
             </div>
 
             <div className="w-[90%] h-[50vh] p-5 mx-auto border-5 border-solid border-white rounded-2xl">
@@ -132,7 +164,8 @@ const Dashboard = () => {
 
           </div>
 
-          <div className="w-full flex flex-wrap items-center justify-evenly gap-5 mt-20 text-[1.5rem] text-center font-semibold text-black">
+          <div className="w-full flex flex-wrap items-center justify-evenly gap-5 mt-20
+            text-[1.5rem] text-center font-semibold text-black">
 
             <div className="w-2/5 xl:w-1/5 relative outline outline-white rounded-2xl bg-white p-5 flex 
               items-center justify-center gap-1 cursor-pointer transition-all duration-150 
@@ -154,6 +187,18 @@ const Dashboard = () => {
               <FaHandsHelping />
               <p>Contribute</p>
             </div>
+
+            {
+              state.user?.role === 'admin' &&
+                <div className="w-2/5 xl:w-1/5 relative outline outline-white rounded-2xl bg-white p-5 flex 
+                  items-center justify-center gap-1 cursor-pointer transition-all duration-150 
+                  hover:bg-black hover:text-primary"
+                  onClick={handleAddTag}
+                  >
+                  <FaHashtag />
+                  <p>Add Tag</p>
+                </div>
+            }
             
           </div>
 
