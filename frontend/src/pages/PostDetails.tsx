@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, MouseEvent, MouseEventHandler, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Title from "../components/Title";
 import { MdCancel } from "react-icons/md";
 import { FaUpload } from "react-icons/fa6";
@@ -9,6 +9,8 @@ import { toast } from "react-toastify";
 import { PostDetailsType, usePost } from "../context/PostContext";
 import { FaEdit } from "react-icons/fa";
 import { getFile, saveFile } from "../utils/FileStore";
+import useApi from "../hooks/useApi";
+import { useLoading } from "../context/LoadingContext";
 
 type formErrorType = {
   mainTitle: string;
@@ -44,12 +46,25 @@ const PostDetails = () => {
   const { state: authState } = useAuth();
   const { state: postState, dispatch: postDispatch } = usePost();
   const navigate = useNavigate();
+  const [allowedTags,setAllowedTags] = useState<string[]>([]);
   const [formData, setFormData] = useState<PostDetailsType>(initialFormData);
   const [errors,setErrors] = useState<formErrorType>(initialFormErrors);
   const descrRef = useRef<HTMLTextAreaElement | null>(null);
   const tagRef = useRef<HTMLInputElement | null>(null);
+  const [showTags, setShowTags] = useState<boolean>(false);
   const [tag,setTag] = useState<string>('');
   const [submitted, setSubmitted] = useState(false);
+  const tagsApi = useApi('/tags');
+  const { setLoading } = useLoading();
+
+  useEffect(() => {
+    setLoading(tagsApi.loading);
+  },[tagsApi.loading]);
+
+  useEffect(() => {
+    if(tagsApi.data && tagsApi.data.tags)
+      setAllowedTags(tagsApi.data.tags)
+  },[tagsApi.data])
 
   useLayoutEffect(() => {
     if(!postState.details)
@@ -62,6 +77,17 @@ const PostDetails = () => {
     })();
     setSubmitted(true);
   },[])
+
+  useEffect(() => {
+    const handleClickOutside = (e: Event) => {
+      if (tagRef.current && !tagRef.current.contains(e.target as Node)) {
+        setShowTags(false);
+      }
+    }
+
+    window.addEventListener("click", handleClickOutside)
+    return () => window.removeEventListener("click", handleClickOutside)
+  }, [])
 
   const handleFormChange = (e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     const {name, value} = e.target;
@@ -83,13 +109,18 @@ const PostDetails = () => {
     el.style.height = `${el.scrollHeight}px`;
   },[formData.description])
 
-  const handleAddTag = (e: React.KeyboardEvent) => {
-    if(!tag.trim())
-      return 
+  const handleTagChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const tag = e.target.value.toLowerCase();
+    console.log(tag)
+    if(!tag)
+      setAllowedTags(tagsApi.data.tags);
+    else
+      setAllowedTags(tagsApi.data.tags.filter((t) => t.tag.startsWith(tag)))
+    setTag(tag);
+  }
 
-    const key = e.key;
-    if(key === 'Enter' && tagRef.current) {
-      e.preventDefault();
+  const handleAddTag = (tag: string) => {
+    if(tagRef.current) {
       if(!formData.tags.includes(tag)) {
         setFormData((prev) => ({
           ...prev,
@@ -98,6 +129,17 @@ const PostDetails = () => {
         tagRef.current.value = '';
         setTag('');
       }
+    }
+  }
+
+  const handleKeyDown = (e: React.KeyboardEvent) => {
+    if(!tag.trim())
+      return 
+
+    const key = e.key;
+    if(key === 'Enter') {
+      e.preventDefault();
+      handleAddTag(tag);
     }
 
     setErrors((prev) => ({
@@ -221,7 +263,7 @@ const PostDetails = () => {
       <Title title="Post Details" />
 
       <form 
-        className="w-4/5 md:w-2/3 lg:w-1/2 flex flex-col gap-20 mx-auto py-10 items-center justify-center" 
+        className="w-4/5 md:w-2/3 lg:w-1/2 flex flex-col gap-20 mx-auto py-10 justify-center" 
         onSubmit={handleFormSubmit}>
         <div className="flex flex-col w-full gap-3">
           <label className="text-primary font-semibold text-[1.5rem]" htmlFor="mainTitle">
@@ -291,7 +333,7 @@ const PostDetails = () => {
           {errors.description && <p className="text-red-500">{errors.description}</p>}
         </div>
 
-        <div className="flex flex-col w-full gap-3">
+        <div className="flex flex-col w-full gap-3 relative">
           <label className="text-primary font-semibold text-[1.5rem]" htmlFor="tags">
             Tags
           </label>
@@ -311,15 +353,31 @@ const PostDetails = () => {
           }
           </div>
           <input
-            className="text-black font-semibold p-2 overflow-hidden resize-none disabled:bg-gray-400"
+            className="text-black w-1/2 font-semibold p-2 overflow-hidden resize-none disabled:bg-gray-400"
             type="text"
             id="tags"
             disabled={submitted}
             name="tags"
             ref={tagRef}
-            onKeyDown={handleAddTag}
-            onChange={(e) => setTag((e.target as HTMLInputElement).value.toLowerCase())}
+            autoComplete="off"
+            onKeyDown={handleKeyDown}
+            onFocus={() => setShowTags(true)}
+            value={tag}
+            onChange={handleTagChange}
           />
+          <div className={`bg-white w-1/2 flex flex-col items-center justify-center absolute top-full 
+            ${showTags ? 'visible' : 'hidden'}`}>
+            {
+              allowedTags.length > 0 && allowedTags.map((tagObj) => (
+                <div 
+                  key={tagObj._id} 
+                  className="w-full flex items-center justify-center cursor-pointer hover:bg-primary"
+                  onClick={() => handleAddTag(tagObj.tag)}>
+                  {tagObj.tag}
+                </div>
+              ))
+            }
+          </div>
           {errors.tags && <p className="text-red-500">{errors.tags}</p>}
         </div>
 
@@ -406,7 +464,7 @@ const PostDetails = () => {
             :
             <Button 
               content="Save"
-              className="text-[1.5rem]"
+              className="text-[1.5rem] w-1/5 mx-auto"
               type="submit"
               />
         }

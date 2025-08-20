@@ -56,6 +56,7 @@ const Dashboard = () => {
       toast.success(`'${tag}' tag successfully added`);
     }
 
+    setTag('');
   },[tagsApi.data, tagsApi.error])
 
   if(!state.token) return <Navigate to='/login' replace/>

@@ -137,7 +137,7 @@ const useApi = <T = any>(endpoint: string, initOptions: ApiOptions = {}): ApiSta
         if (initOptions.auto !== false) {
             fetchData();
         }
-    }, [fetchData]);
+    }, []);
 
     const refetch = useCallback((opts?: Partial<ApiOptions>) => {
         return fetchData(opts);
