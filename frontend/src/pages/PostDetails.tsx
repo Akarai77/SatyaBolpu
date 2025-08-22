@@ -1,4 +1,4 @@
-import { ChangeEvent, FormEvent, MouseEvent, MouseEventHandler, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { ChangeEvent, FormEvent, useEffect, useLayoutEffect, useRef, useState } from "react";
 import Title from "../components/Title";
 import { MdCancel } from "react-icons/md";
 import { FaUpload } from "react-icons/fa6";
@@ -46,13 +46,16 @@ const PostDetails = () => {
   const { state: authState } = useAuth();
   const { state: postState, dispatch: postDispatch } = usePost();
   const navigate = useNavigate();
-  const [allowedTags,setAllowedTags] = useState<string[]>([]);
   const [formData, setFormData] = useState<PostDetailsType>(initialFormData);
   const [errors,setErrors] = useState<formErrorType>(initialFormErrors);
   const descrRef = useRef<HTMLTextAreaElement | null>(null);
   const tagRef = useRef<HTMLInputElement | null>(null);
   const [showTags, setShowTags] = useState<boolean>(false);
-  const [tag,setTag] = useState<string>('');
+  const [allowedTags,setAllowedTags] = useState<string[]>([]);
+  const [activeTag,setActiveTag] = useState<string>('');
+  const [activeIndex, setActiveIndex] = useState<number>(0); 
+  const [visibleStart, setVisibleStart] = useState<number>(0);
+  const pageSize = 10;
   const [submitted, setSubmitted] = useState(false);
   const tagsApi = useApi('/tags');
   const { setLoading } = useLoading();
@@ -63,7 +66,7 @@ const PostDetails = () => {
 
   useEffect(() => {
     if(tagsApi.data && tagsApi.data.tags)
-      setAllowedTags(tagsApi.data.tags)
+      setAllowedTags(tagsApi.data.tags.sort())
   },[tagsApi.data])
 
   useLayoutEffect(() => {
@@ -111,12 +114,11 @@ const PostDetails = () => {
 
   const handleTagChange = (e: ChangeEvent<HTMLInputElement>) => {
     const tag = e.target.value.toLowerCase();
-    console.log(tag)
     if(!tag)
-      setAllowedTags(tagsApi.data.tags);
+      setAllowedTags(tagsApi.data.tags.filter((t: string) => !formData.tags.includes(t)))
     else
-      setAllowedTags(tagsApi.data.tags.filter((t) => t.tag.startsWith(tag)))
-    setTag(tag);
+      setAllowedTags(tagsApi.data.tags.filter((t: string) => t.startsWith(tag) && !formData.tags.includes(t)).sort())
+    setActiveTag(tag);
   }
 
   const handleAddTag = (tag: string) => {
@@ -127,28 +129,54 @@ const PostDetails = () => {
           tags: [...prev.tags, tag]
         }));
         tagRef.current.value = '';
-        setTag('');
+        setActiveTag('');
       }
     }
   }
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
-    if(!tag.trim())
-      return 
+    if (!allowedTags.length) return;
 
-    const key = e.key;
-    if(key === 'Enter') {
+    if (e.key === "ArrowDown") {
       e.preventDefault();
-      handleAddTag(tag);
+      const newIndex = (activeIndex + 1) % allowedTags.length;
+      setActiveIndex(newIndex);
+ 
+      if(newIndex === 0) {
+        setVisibleStart(0);
+      } else if (newIndex >= visibleStart + pageSize) {
+        setVisibleStart(visibleStart + 1);
+      }
     }
 
-    setErrors((prev) => ({
+    if (e.key === "ArrowUp") {
+      e.preventDefault();
+      const newIndex = (activeIndex - 1 + allowedTags.length) % allowedTags.length;
+      setActiveIndex(newIndex);
+
+      if(newIndex === allowedTags.length-1) {
+        setVisibleStart(Math.max(0,allowedTags.length-pageSize));
+      } else if (newIndex < visibleStart) {
+        setVisibleStart(visibleStart - 1);
+      }
+    }
+
+    if (e.key === "Enter" && allowedTags[activeIndex]) {
+      e.preventDefault();
+      handleAddTag(allowedTags[activeIndex]);
+      setAllowedTags(prev => prev.filter((_, i) => i !== activeIndex));
+      setActiveIndex(0);
+      setVisibleStart(0);
+    }
+
+    setErrors(prev => ({
       ...prev,
-      tags: ''
+      tags: ""
     }));
-  }
+  };
 
   const handleRemoveTag = (index: number) => {
+    setAllowedTags((prev) => [...prev, formData.tags[index]].sort());
     setFormData((prev) => ({
       ...prev,
       tags: prev.tags.filter((_,id) => id !== index )
@@ -255,7 +283,7 @@ const PostDetails = () => {
     })
   }
 
-  if(!authState.token && authState.user?.role !== 'admin') 
+  if(!authState.token || authState.user?.role !== 'admin') 
     return <Navigate to={'/404'} replace/>
 
   return (
@@ -333,50 +361,59 @@ const PostDetails = () => {
           {errors.description && <p className="text-red-500">{errors.description}</p>}
         </div>
 
-        <div className="flex flex-col w-full gap-3 relative">
-          <label className="text-primary font-semibold text-[1.5rem]" htmlFor="tags">
-            Tags
-          </label>
-          <div className="w-full flex gap-1 flex-wrap">
-          {
-            formData.tags.length > 0 && formData.tags.map((tag,index) => (
-              <div key={index} className="text-white max-w-full flex items-center justify-evenly gap-1 bg-gray-600 px-2 rounded-lg">
-                <p className="max-w-full break-words">{tag}</p>
-                {
-                  !submitted &&
-                    <MdCancel 
-                      className="fill-gray-400 cursor-pointer hover:fill-white"
-                      onClick={() => handleRemoveTag(index)}/>
-                }
-              </div>
-            ))
-          }
-          </div>
-          <input
-            className="text-black w-1/2 font-semibold p-2 overflow-hidden resize-none disabled:bg-gray-400"
-            type="text"
-            id="tags"
-            disabled={submitted}
-            name="tags"
-            ref={tagRef}
-            autoComplete="off"
-            onKeyDown={handleKeyDown}
-            onFocus={() => setShowTags(true)}
-            value={tag}
-            onChange={handleTagChange}
-          />
-          <div className={`bg-white w-1/2 flex flex-col items-center justify-center absolute top-full 
-            ${showTags ? 'visible' : 'hidden'}`}>
+        <div className="flex flex-col w-full gap-3">
+          <div className="w-full relative flex flex-col gap-3">
+            <label className="text-primary font-semibold text-[1.5rem]" htmlFor="tags">
+              Tags
+            </label>
+            <div className="w-full flex gap-1 flex-wrap">
             {
-              allowedTags.length > 0 && allowedTags.map((tagObj) => (
-                <div 
-                  key={tagObj._id} 
-                  className="w-full flex items-center justify-center cursor-pointer hover:bg-primary"
-                  onClick={() => handleAddTag(tagObj.tag)}>
-                  {tagObj.tag}
+              formData.tags.length > 0 && formData.tags.map((tag,index) => (
+                <div key={index} className="text-white max-w-full flex items-center justify-evenly gap-1 bg-gray-600 px-2 rounded-lg">
+                  <p className="max-w-full break-words">{tag}</p>
+                  {
+                    !submitted &&
+                      <MdCancel 
+                        className="fill-gray-400 cursor-pointer hover:fill-white"
+                        onClick={() => handleRemoveTag(index)}/>
+                  }
                 </div>
               ))
             }
+            </div>
+            <input
+              className="text-black w-1/2 font-semibold p-2 overflow-hidden resize-none disabled:bg-gray-400"
+              type="text"
+              id="tags"
+              disabled={submitted}
+              name="tags"
+              ref={tagRef}
+              autoComplete="off"
+              onKeyDown={handleKeyDown}
+              onFocus={() => setShowTags(true)}
+              value={activeTag}
+              onChange={handleTagChange}
+            />
+            <div 
+              className={`bg-white w-1/2 flex flex-col items-center justify-center absolute top-full 
+                ${showTags ? "visible" : "hidden"}`}
+            >
+              {allowedTags
+                .slice(visibleStart, visibleStart + pageSize)
+                .map((tag, index) => {
+                  const globalIndex = visibleStart + index;
+                  return (
+                    <div
+                      key={globalIndex}
+                      className={`w-full flex items-center justify-center cursor-pointer hover:bg-primary
+                        ${globalIndex === activeIndex ? "bg-primary" : ""}`}
+                      onClick={() => handleAddTag(tag)}
+                    >
+                      {tag}
+                    </div>
+                  );
+                })}
+            </div>
           </div>
           {errors.tags && <p className="text-red-500">{errors.tags}</p>}
         </div>

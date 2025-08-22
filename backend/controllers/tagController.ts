@@ -9,7 +9,7 @@ export const getTags = async (req: Request, res: Response) => {
     }
 
     return res.status(200).json({
-      tags: tags
+      tags: tags.map((tagObj) => tagObj.tag)
     })
   } catch (err: any) {
     console.error("Error while fetching tags: " + err);
