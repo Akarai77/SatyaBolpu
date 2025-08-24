@@ -1,4 +1,8 @@
-import mongoose, { Schema } from "mongoose";
+import mongoose, { Document, Schema } from "mongoose";
+
+export interface ITag extends Document {
+  tag: string;
+}
 
 const tagSchema = new Schema({
   tag: {

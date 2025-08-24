@@ -9,7 +9,7 @@ export interface AuthRequest extends Request {
 export const authMiddleware = async (req: AuthRequest, res: Response, next: NextFunction) => {
   const token = req.cookies?.jwt;
   if (!token) {
-    return res.status(401).json({ msg: "Unauthorized, no cookie bruv." });
+    return res.status(401).json({ msg: "Unauthorized!" });
   }
 
   try {

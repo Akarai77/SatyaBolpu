@@ -31,7 +31,6 @@ export const addTag = async (req: Request, res: Response) => {
     }
   
     const newTag = await Tag.create({ tag });
-    
     return res.status(200).json({tag: newTag});
   } catch (err: any) {
     console.error(`Error while adding tag : ${err}`);

@@ -6,7 +6,6 @@ export const uploadPost = async (req: Request, res: Response) => {
     const { details, content, mapDetails } = req.body;
     
     if (!details || !content) {
-      console.error('Missing required files.');
       return res.status(400).json({ msg: 'Missing Required Field' });
     }
 
@@ -25,8 +24,8 @@ export const uploadPost = async (req: Request, res: Response) => {
     return res.status(201).json({ post: { id: _id, ...rest } });
 
   } catch (err: any) {
-    console.error('Error while uploading Post:', err);
-    return res.status(500).json({ msg: 'Something went wrong...' });
+    console.error('Error while uploading Post: ', err.message);
+    return res.status(500).json({ msg: 'Internal Server error while uploading post.' });
   }
 };
 
