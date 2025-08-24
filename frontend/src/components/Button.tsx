@@ -5,10 +5,10 @@ type ButtonProps = {
   className?: string;
   type?: "submit" | "reset" | "button";
   onClick?: () => void;
+  theme?: "light" | "dark";
   loading?: boolean;
   loadingText?: string;
 };
-
 
 const Button: React.FC<ButtonProps> = ({
   content,
@@ -17,12 +17,14 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   loading = false,
   loadingText,
+  theme
 }) => {
   return (
     <button
       className={cn(
         `p-2 rounded-md flex items-center justify-center gap-2 text-primary bg-white font-semibold cursor-pointer
-        transition-all duration-150 hover:text-white hover:bg-primary hover:scale-110 
+        ${theme === 'light' ? 'text-white bg-primary hover:bg-orange-600' : 'text-primary bg-white hover:text-white hover:bg-primary'}
+        transition-all duration-150  hover:scale-110 
         disabled:cursor-not-allowed disabled:scale-100 disabled:bg-primary/70 disabled:text-white`,
         className
       )}

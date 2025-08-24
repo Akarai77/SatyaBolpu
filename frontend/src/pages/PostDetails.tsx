@@ -18,7 +18,6 @@ type formErrorType = {
   culture: string;
   description: string;
   tags: string;
-  locationSpecific: string;
   image: string;
 }
 
@@ -38,7 +37,6 @@ const initialFormErrors: formErrorType = {
   culture: '',
   description: '',
   tags: '',
-  locationSpecific: '',
   image: ''
 }
 

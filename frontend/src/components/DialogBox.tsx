@@ -4,6 +4,7 @@ import { FaInfoCircle } from "react-icons/fa";
 import { IoIosWarning } from "react-icons/io";
 import Button from "./Button";
 import { DialogBoxOptions } from "../context/DialogBoxContext";
+import Form from "./Form";
 
 const DialogBox: React.FC<DialogBoxOptions> = (props) => {
   const dialogRef = useRef<HTMLDivElement | null>(null);
@@ -93,6 +94,11 @@ const DialogBox: React.FC<DialogBoxOptions> = (props) => {
             <div className="w-[90%] text-white flex items-center justify-center text-wrap">
                 {props.descr}
             </div>
+
+            {
+              props.form &&
+                <Form {...props.form}/>
+            }
 
             <div className="flex gap-3">
                 <Button 

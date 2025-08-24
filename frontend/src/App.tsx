@@ -14,8 +14,36 @@ import Dashboard from './pages/Dashboard'
 import Updates from './pages/Updates'
 import NewPost from './pages/NewPost'
 import PostDetails from './pages/PostDetails'
+import Culture from './pages/Culture'
+import Lenis from "@studio-freight/lenis";
+import { useLayoutEffect } from 'react'
+import gsap from 'gsap'
+import { ScrollTrigger } from 'gsap/all'
+export const BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
+gsap.registerPlugin(ScrollTrigger);
 
 function App() {
+  useLayoutEffect(() => {
+    const lenis = new Lenis({
+      smoothWheel: true,
+      lerp: 0.1,
+      wheelMultiplier: 1, 
+    });
+
+    function raf(time: number) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+    requestAnimationFrame(raf);
+
+    lenis.on("scroll", ScrollTrigger.update);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, []);
+
   return (
     <>
       <ToastContainer
@@ -47,6 +75,7 @@ function App() {
         <Route path='/profile' element={<Profile/>}/>
         <Route path='/dashboard' element={<Dashboard />}/>
         <Route path='/explore' element={<Explore/>}/>
+        <Route path='/explore/:culture' element={<Culture/>}/>
         <Route path='/new-post' element={<NewPost />}/>
         <Route path='/new-post/post-details' element={<PostDetails/>}/>
         <Route path='/new-post/editor' element={<Editor/>}/>

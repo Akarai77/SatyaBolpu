@@ -1,11 +1,13 @@
 import { createContext, ReactNode, useContext, useRef, useState } from "react";
 import DialogBox from "../components/DialogBox";
+import { FormProps } from "../components/Form";
 
 export type DialogBoxOptions = {
     title: string;
-    descr: string;
+    descr?: string;
     severity?: "irreversible" | "risky" | "default";
-    onConfirm: () => void;
+    form?: FormProps;
+    onConfirm?: () => void;
     onCancel?: () => void;
 }
 
@@ -30,7 +32,7 @@ export const DialogBoxProvider = ({children} : {children: ReactNode}) => {
             close();
         },
         onConfirm: () => {
-            opts.onConfirm();
+            opts.onConfirm?.();
             close();
         }
     });
