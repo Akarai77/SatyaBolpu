@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { CSSProperties, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { NavLink, useLocation } from 'react-router-dom';
 import { MdOutlineMenu } from "react-icons/md";
 import { MdOutlineHorizontalRule } from "react-icons/md";
@@ -12,6 +12,21 @@ const Navbar = () => {
   const location = useLocation();
   const { isLoading } = useLoading();
   const { state } = useAuth();
+  const [navbarStyles,setNavbarStyles] = useState<CSSProperties>({
+    position: 'relative',
+    backgroundColor: 'black'
+  })
+
+  useLayoutEffect(() => {
+    const path = location.pathname;
+    console.log(path)
+    if(path === '/' || path.startsWith('/explore/')) {
+      setNavbarStyles({
+        position: 'fixed',
+        backgroundColor: 'transparent'
+      })
+    }
+  },[location.pathname])
 
   useEffect(() => {
     if (isMenuOpen) {
@@ -109,8 +124,8 @@ const Navbar = () => {
   return (
     <>
       <nav
-        className={`navbar z-[9995] text-white w-screen flex p-7 items-center justify-between 
-          ${location.pathname === '/' && !isLoading ? 'absolute bg-transparent' : 'relative bg-black'}`}
+        className={`navbar z-[9995] text-white w-screen flex p-7 items-center justify-between`}
+        style={navbarStyles}
       >
         <div className="brand flex gap-2 items-center justify-center">
           <NavLink to="/">
