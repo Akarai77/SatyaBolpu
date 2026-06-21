@@ -13,6 +13,7 @@ import { BASE_URL } from '../App';
 import useApi from '../hooks/useApi';
 import { toast } from 'react-toastify';
 import { cn } from '../utils/merge';
+import MAP from '../pages/MAP';
 
 const Form = <T extends {}>({
   fields,
@@ -817,6 +818,22 @@ const Form = <T extends {}>({
                   );
                 })}
             </div>
+          </div>
+        );
+      }
+
+      case 'map': {
+        return (
+          <div key={field.name} className="flex flex-col w-full gap-3">
+            <label
+              htmlFor={field.name}
+              className="text-primary font-semibold text-[1.5rem]"
+            >
+              {field.label}{' '}
+              {field.required && <span className="text-red-500">*</span>}
+            </label>
+            <MAP editMode />
+            {fieldError && <p className="text-red-500">{fieldError}</p>}
           </div>
         );
       }

@@ -4,6 +4,7 @@ import { FaGooglePay } from 'react-icons/fa';
 import { useState } from 'react';
 import { toast } from 'react-toastify';
 import useApi from '../hooks/useApi';
+import { RazorpayWindow } from '../types/globals';
 
 const donationAmounts = [
   { amount: '₹100', label: 'Supporter', value: 100 },
@@ -17,15 +18,16 @@ const Donate = () => {
   const [customAmount, setCustomAmount] = useState<string>('');
   const [isProcessing, setIsProcessing] = useState(false);
 
-  const donationApi = useApi('/api/donate/create-order', { auto: false });
-  const verifyApi = useApi('/api/donate/verify', { auto: false });
+  const donationApi = useApi('/donate/create-order', { auto: false });
+  const verifyApi = useApi('/donate/verify', { auto: false });
 
   const handleDonateClick = async () => {
     try {
       setIsProcessing(true);
 
-      // Determine final amount
-      const finalAmount = customAmount ? parseFloat(customAmount) : selectedAmount;
+      const finalAmount = customAmount
+        ? parseFloat(customAmount)
+        : selectedAmount;
 
       if (!finalAmount || finalAmount <= 0) {
         toast.error('Please enter a valid amount');
@@ -33,10 +35,9 @@ const Donate = () => {
         return;
       }
 
-      // Step 1: Create order on backend
       const orderResponse = await donationApi.post(
         { amount: finalAmount },
-        { globalLoad: false }
+        { globalLoad: false },
       );
 
       if (!orderResponse || !orderResponse.success) {
@@ -47,7 +48,6 @@ const Donate = () => {
 
       const order = orderResponse.order;
 
-      // Step 2: Open Razorpay checkout
       const options = {
         key: import.meta.env.VITE_RAZORPAY_KEY_ID,
         amount: order.amount,
@@ -57,7 +57,6 @@ const Donate = () => {
         image: '/vite.svg',
         order_id: order.id,
         handler: async (response: any) => {
-          // Step 3: Verify payment on backend
           try {
             const verifyResponse = await verifyApi.post(
               {
@@ -66,7 +65,7 @@ const Donate = () => {
                 razorpay_signature: response.razorpay_signature,
                 amount: finalAmount,
               },
-              { globalLoad: false }
+              { globalLoad: false },
             );
 
             if (verifyResponse?.success) {
@@ -91,7 +90,7 @@ const Donate = () => {
         },
       };
 
-      const rzp = new window.Razorpay(options);
+      const rzp = new (window as unknown as RazorpayWindow).Razorpay(options);
       rzp.open();
 
       rzp.on('payment.failed', (response: any) => {
@@ -106,14 +105,13 @@ const Donate = () => {
   };
 
   return (
-    <div className="min-h-screen bg-black px-6 py-8 text-white md:px-12 w-full">
+    <div className="bg-black px-6 py-8 mb-32 text-white md:px-12 w-full">
       <div className="mx-auto max-w-7xl space-y-6">
-        {/* Hero Section */}
         <section className="relative overflow-hidden rounded-3xl border border-orange-500/20 bg-zinc-950">
-          <div className="absolute inset-0 bg-gradient-to-r from-black via-black/90 to-transparent z-10" />
+          <div className="absolute inset-0 bg-linear-to-r from-black via-black/90 to-transparent z-10" />
 
           <img
-            src="/images/daiva-hero.jpg"
+            src="/assets/Explore/daivaradhane.jpg"
             alt="Daiva performance"
             className="absolute right-0 top-0 h-full w-full object-cover opacity-40 md:w-1/2"
           />
@@ -144,9 +142,7 @@ const Donate = () => {
           </div>
         </section>
 
-        {/* Donation Section */}
         <div className="grid gap-6 lg:grid-cols-3">
-          {/* Amounts */}
           <div className="rounded-3xl border border-orange-500/20 bg-zinc-950 p-8 lg:col-span-2">
             <h2 className="mb-6 text-3xl font-semibold">Choose an amount</h2>
 
@@ -158,11 +154,12 @@ const Donate = () => {
                     setSelectedAmount(item.value);
                     setCustomAmount('');
                   }}
-                  className={`rounded-2xl border p-6 text-center transition-all duration-200 hover:border-orange-500 hover:bg-orange-500/10 ${
-                    selectedAmount === item.value && !customAmount
-                      ? 'border-orange-500 bg-orange-500/10'
-                      : 'border-zinc-800'
-                  }`}
+                  className={`rounded-2xl border p-6 text-center transition-all duration-200 hover:border-orange-500 hover:bg-orange-500/10
+                    cursor-pointer ${
+                      selectedAmount === item.value && !customAmount
+                        ? 'border-orange-500 bg-orange-500/10'
+                        : 'border-zinc-800'
+                    }`}
                 >
                   <h3 className="text-3xl font-bold text-white">
                     {item.amount}
@@ -197,7 +194,6 @@ const Donate = () => {
             </div>
           </div>
 
-          {/* Payment Card */}
           <div className="rounded-3xl border border-orange-500/20 bg-zinc-950 p-8">
             <h2 className="mb-6 text-3xl font-semibold">
               Complete your donation
@@ -207,7 +203,9 @@ const Donate = () => {
               <button
                 onClick={handleDonateClick}
                 disabled={isProcessing}
-                className="flex w-full items-center justify-between rounded-2xl border border-zinc-800 px-5 py-4 transition hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full items-center justify-between rounded-2xl border border-zinc-800 
+                  px-5 py-4 transition hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed
+                  cursor-pointer"
               >
                 <div className="flex items-center gap-4">
                   <FaGooglePay className="text-3xl text-orange-500" />
@@ -220,11 +218,15 @@ const Donate = () => {
               <button
                 onClick={handleDonateClick}
                 disabled={isProcessing}
-                className="flex w-full items-center justify-between rounded-2xl border border-zinc-800 px-5 py-4 transition hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed"
+                className="flex w-full items-center justify-between rounded-2xl border border-zinc-800
+                  px-5 py-4 transition hover:border-orange-500 disabled:opacity-50 disabled:cursor-not-allowed
+                  cursor-pointer"
               >
                 <div className="flex items-center gap-4">
                   <FiCreditCard className="text-xl text-orange-500" />
-                  <span>{isProcessing ? 'Processing...' : 'Debit / Credit Card'}</span>
+                  <span>
+                    {isProcessing ? 'Processing...' : 'Debit / Credit Card'}
+                  </span>
                 </div>
 
                 <span className="text-zinc-500">›</span>
@@ -242,7 +244,6 @@ const Donate = () => {
           </div>
         </div>
 
-        {/* Features */}
         <section className="grid gap-6 rounded-3xl border border-orange-500/20 bg-zinc-950 p-8 md:grid-cols-3">
           <div className="flex gap-4">
             <FiUsers className="mt-1 text-4xl text-orange-500" />

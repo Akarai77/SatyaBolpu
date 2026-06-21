@@ -21,10 +21,10 @@ const fields = {
       'description',
       'tags',
       'coverImage',
+      'location',
       'files',
     ],
     content: ['content'],
-    location: ['location'],
   },
 
   culture: {
@@ -33,9 +33,8 @@ const fields = {
   },
 
   blog: {
-    details: ['title', 'description', 'coverImage', 'files'],
+    details: ['title', 'description', 'coverImage', 'location', 'files'],
     content: ['content'],
-    location: ['location'],
   },
 
   location: {
@@ -78,7 +77,7 @@ export const getDrafts = async (req: AuthRequest, res: Response) => {
 
     const drafts = (await Draft.find({ userId }).sort({ createdAt: -1 })).map(
       (d) => ({
-        id: d._id as string,
+        id: d._id.toString(),
         title:
           d.draftType === 'location' ? (d as ILocation).name : (d as any).title,
       }),

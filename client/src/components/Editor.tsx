@@ -32,7 +32,7 @@ import { Navigate, useParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
 import Title from './Title';
 import useApi from '../hooks/useApi';
-import { CultureState, PostState } from '../types/globals';
+import { BlogState, CultureState, PostState } from '../types/globals';
 import { BASE_URL } from '../App';
 import DOMPurify from 'dompurify';
 import { CustomKeyboardExtensions } from './EditorExtensions/CustomKeyboardExtensions';
@@ -42,7 +42,7 @@ const Editor = ({
   setState,
   endpoint,
 }: {
-  state: PostState | CultureState;
+  state: PostState | CultureState | BlogState;
   setState: React.Dispatch<React.SetStateAction<typeof state>>;
   endpoint: string;
 }) => {

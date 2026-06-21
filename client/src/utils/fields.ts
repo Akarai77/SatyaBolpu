@@ -1,4 +1,5 @@
 import {
+  BlogState,
   CultureState,
   EventState,
   FormField,
@@ -47,6 +48,12 @@ export const initialDetailsConfig = (state: NewState | null) => ({
     name: '',
     attachments: [],
   },
+  blog: (state as BlogState)?.details ?? {
+    title: '',
+    description: '',
+    locationSpecific: false,
+    location: null,
+  },
   'post-type': (state as OtherState) ?? {
     name: '',
   },
@@ -68,6 +75,7 @@ const titleField = (existingValues: string[]): FormField => ({
   type: 'text',
   required: true,
   unique: true,
+  minLength: 5,
   existingValues,
 });
 
@@ -111,6 +119,32 @@ const filesField = (label: string, name: string): FormField => ({
   accept: 'image/*,application/pdf',
 });
 
+const locationSpecificField = {
+  label: 'Is the post location specific?',
+  name: 'locationSpecific',
+  type: 'radio',
+  defaultValue: 'false',
+  options: [
+    {
+      label: 'Yes',
+      value: 'true',
+    },
+    {
+      label: 'No',
+      value: 'false',
+    },
+  ],
+};
+
+const locationField = (options: FormFieldOption[]) => ({
+  label: 'Location',
+  name: 'location',
+  type: 'select',
+  options,
+  renderCondition: (formData: any) => formData.locationSpecific === 'true',
+  required: true,
+});
+
 const fieldConfigs = {
   post: (options: Record<string, FormFieldOption[] | string[]>) => [
     titleField(options.titles as string[]),
@@ -147,30 +181,8 @@ const fieldConfigs = {
       options: options.tags as FormFieldOption[],
       minItems: 1,
     },
-    {
-      label: 'Is the post location specific?',
-      name: 'locationSpecific',
-      type: 'radio',
-      defaultValue: 'false',
-      options: [
-        {
-          label: 'Yes',
-          value: 'true',
-        },
-        {
-          label: 'No',
-          value: 'false',
-        },
-      ],
-    },
-    {
-      label: 'Location',
-      name: 'location',
-      type: 'select',
-      options: options.locations,
-      renderCondition: (formData: any) => formData.locationSpecific === 'true',
-      required: true,
-    },
+    locationSpecificField,
+    locationField(options.locations as FormFieldOption[]),
     coverImageField,
     filesField('Related Files', 'files'),
   ],
@@ -234,6 +246,18 @@ const fieldConfigs = {
   location: (options: Record<string, string[] | FormFieldOption[]>) => [
     nameField(options.names as string[]),
     filesField('Attachments', 'attachments'),
+  ],
+  blog: (options: Record<string, string[] | FormFieldOption[]>) => [
+    titleField(options.titles as string[]),
+    descriptionField,
+    locationSpecificField,
+    locationField(options.locations as FormFieldOption[]),
+    {
+      label: 'Location',
+      value: 'location',
+      type: 'map',
+      required: true,
+    },
   ],
   'post-type': (options: Record<string, string[] | FormFieldOption[]>) => [
     nameField(options.names as string[]),

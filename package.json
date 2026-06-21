@@ -11,7 +11,8 @@
     "build:client": "npm run build --prefix client",
     "build:server": "npm run build --prefix server",
     "app": "concurrently \"npm run client\" \"npm run server\"",
-    "build": "concurrently \"npm run build:client\" \"npm run build:server\""
+    "build": "concurrently \"npm run build:client\" \"npm run build:server\"",
+    "seed": "npm run seed --prefix server"
   },
   "repository": {
     "type": "git",

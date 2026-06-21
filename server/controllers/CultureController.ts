@@ -49,10 +49,10 @@ export const getCulture = async (req: Request, res: Response) => {
 
     return res.status(200).json({ culture });
   } catch (err: any) {
-    console.error('Get Cultures Error: ' + err.message);
+    console.error('Get Culture Error: ' + err.message);
     return res
       .status(500)
-      .json({ msg: 'Internal Server Error while fetching cultures.' });
+      .json({ msg: 'Internal Server Error while fetching culture.' });
   }
 };
 

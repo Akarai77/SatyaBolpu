@@ -1,5 +1,6 @@
 import { useEffect } from 'react';
 import {
+  validateBlogDetails,
   validateCultureDetails,
   validateLocationDetails,
   validateLocationFields,
@@ -38,6 +39,11 @@ const useDraftLoader = (
       setState({
         details: validateLocationDetails(data.details) ? data.details : null,
         location: validateLocationFields(data.location) ? data.location : null,
+      });
+    } else if (type === 'blog') {
+      setState({
+        details: validateBlogDetails(data.details) ? data.details : null,
+        content: data.content ?? '',
       });
     } else {
       setState(null);

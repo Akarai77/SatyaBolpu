@@ -6,6 +6,7 @@ import {
   LocationState,
   NewState,
   PostState,
+  BlogState,
 } from '../../types/globals';
 import ProgressBar from '../../components/ProgressBar';
 import Editor from '../../components/Editor';
@@ -26,16 +27,12 @@ const New = ({ type }: { type: NewType }) => {
   const [progress, setProgress] = useState<number>(0);
   const [step, setShowStep] = useState<string>('');
   const draftable =
-    type === 'culture' || type === 'post' || type === 'location';
-  const multipleSteps =
-    type === 'post' || type === 'culture' || type === 'location';
+    type === 'culture' ||
+    type === 'post' ||
+    type === 'location' ||
+    type === 'blog';
   const [state, setState] = useState<NewState | null>(() => {
-    if (type === 'post') {
-      return {
-        details: null,
-        content: '',
-      };
-    } else if (type === 'culture') {
+    if (type === 'post' || type === 'culture' || type === 'blog') {
       return {
         details: null,
         content: '',
@@ -90,14 +87,14 @@ const New = ({ type }: { type: NewType }) => {
           toastMsg={`${type.charAt(0).toUpperCase() + type.slice(1)} details saved successfully`}
         />
       ),
-      ...(type === 'post' || type === 'culture'
+      ...(type === 'post' || type === 'culture' || type === 'blog'
         ? {
             Editor: (
               <Editor
-                state={state as PostState | CultureState}
+                state={state as PostState | CultureState | BlogState}
                 setState={
                   setState as React.Dispatch<
-                    React.SetStateAction<PostState | CultureState>
+                    React.SetStateAction<PostState | CultureState | BlogState>
                   >
                 }
                 endpoint={`/drafts/${type}/${id}/content`}
@@ -160,7 +157,7 @@ const New = ({ type }: { type: NewType }) => {
   return (
     <div className="w-full mt-20 mb-40 flex flex-col gap-20 items-center justify-center">
       <div className="w-full flex flex-col items-center justify-center gap-10">
-        {multipleSteps ? (
+        {draftable ? (
           <ProgressBar
             steps={steps}
             progress={progress}
@@ -173,7 +170,7 @@ const New = ({ type }: { type: NewType }) => {
         )}
 
         {state &&
-          multipleSteps &&
+          draftable &&
           Object.values(state).every((v) => Boolean(v)) && (
             <Button
               content={`Upload ${type}`}

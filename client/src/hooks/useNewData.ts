@@ -7,6 +7,7 @@ import {
   IOther,
   NewData,
   NewType,
+  IBlog,
 } from '../types/globals';
 import useApi from './useApi';
 
@@ -24,7 +25,11 @@ const useNewData = <T extends NewType>(type: T): NewData<T> | null => {
       type === 'location' ||
       type === 'post' ||
       type === 'event' ||
-      type === 'culture',
+      type === 'blog',
+  });
+
+  const blogsApi = useApi('/blogs?fields=title', {
+    auto: type === 'blog',
   });
 
   const tagsApi = useApi('/others/tags', {
@@ -50,6 +55,7 @@ const useNewData = <T extends NewType>(type: T): NewData<T> | null => {
   const postGroupSubmitApi = useApi('/others/post-groups', { auto: false });
   const postTypeSubmitApi = useApi('/others/post-types', { auto: false });
   const locationSubmitApi = useApi('/locations', { auto: false });
+  const blogSubmitApi = useApi('/blogs', { auto: false });
 
   return useMemo(() => {
     const submitApis = {
@@ -57,6 +63,7 @@ const useNewData = <T extends NewType>(type: T): NewData<T> | null => {
       culture: cultureSubmitApi,
       event: eventSubmitApi,
       location: locationSubmitApi,
+      blog: blogSubmitApi,
       tag: tagSubmitApi,
       'post-group': postGroupSubmitApi,
       'post-type': postTypeSubmitApi,
@@ -64,24 +71,8 @@ const useNewData = <T extends NewType>(type: T): NewData<T> | null => {
 
     switch (type) {
       case 'post': {
-        const { titles, shortTitles } = postsApi.data?.posts?.reduce(
-          (acc: { titles: string[]; shortTitles: string[] }, post: IPost) => {
-            acc.titles.push(post.title);
-            acc.shortTitles.push(post.shortTitle);
-            return acc;
-          },
-          {
-            titles: [],
-            shortTitles: [],
-          },
-        ) ?? {
-          titles: [],
-          shortTitles: [],
-        };
-
         return {
-          titles,
-          shortTitles,
+          titles: postsApi.data?.posts?.map((post: IPost) => post.title),
           tags:
             tagsApi.data?.tags?.map((tag: IOther) => ({
               label: tag.name,
@@ -149,6 +140,17 @@ const useNewData = <T extends NewType>(type: T): NewData<T> | null => {
               (location: ILocation) => location.name,
             ) ?? [],
           submitApi: submitApis.location,
+        };
+
+      case 'blog':
+        return {
+          titles: blogsApi.data?.blogs.map((blog: IBlog) => blog.title) ?? [],
+          locations:
+            locationsApi.data?.locations?.map((location: ILocation) => ({
+              label: location.name,
+              value: location.id,
+            })) ?? [],
+          submitApi: submitApis.blog,
         };
 
       case 'tag':

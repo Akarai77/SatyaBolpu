@@ -2,6 +2,10 @@ import { CardType } from '../components/CardList';
 import { ReactNode } from 'react';
 import { FilterGroups } from '../components/Filters';
 
+declare interface RazorpayWindow {
+  Razorpay: any;
+}
+
 export type Image = {
   src: string;
   alt: string;
@@ -72,7 +76,8 @@ export type FormField = {
     | 'number'
     | 'radio'
     | 'multi-select'
-    | 'date';
+    | 'date'
+    | 'map';
   placeholder?: string;
   options?: FormFieldOption[];
   accept?: string;
@@ -113,7 +118,7 @@ export type FormProps<T> = {
   className?: string;
 };
 
-export type User = {
+export type IUser = {
   id: string;
   name: string;
   uname: string;
@@ -127,7 +132,7 @@ export type User = {
   verified: boolean;
 };
 
-export type Location = Omit<ILocation, 'id' | 'name' | 'attachments'>;
+export type Location = Omit<ILocation, 'id' | 'name' | 'attachments' | 'user'>;
 
 export type AuthState = {
   user: User | null;
@@ -170,7 +175,8 @@ export type DetailsType =
   | CultureDetailsType
   | EventState
   | OtherState
-  | LocationDetailsType;
+  | LocationDetailsType
+  | BlogDetailsType;
 
 export type PostState = {
   details: PostDetailsType | null;
@@ -178,10 +184,19 @@ export type PostState = {
   location?: string | ILocation | null;
 };
 
-export type EventState = Omit<IEvent, 'id' | 'location'> & { location: string };
+export type EventState = Omit<IEvent, 'id' | 'location' | 'user'> & {
+  location: string;
+};
 
 export type CultureState = {
   details: CultureDetailsType | null;
+  content: string;
+};
+
+export type BlogDetailsType = Omit<IBlog, 'id' | 'user' | 'content'>;
+
+export type BlogState = {
+  details: BlogDetailsType;
   content: string;
 };
 
@@ -214,6 +229,7 @@ export type LoginProps = {
 
 export interface ICulture {
   id: string;
+  user: IUser;
   title: string;
   description: string;
   coverImage: string | File | null;
@@ -223,10 +239,14 @@ export interface ICulture {
   posts: number;
 }
 
-export type CultureDetailsType = Omit<ICulture, 'id' | 'content' | 'posts'>;
+export type CultureDetailsType = Omit<
+  ICulture,
+  'id' | 'user' | 'content' | 'posts'
+>;
 
 export interface ILocation {
   id: string;
+  user: IUser;
   name: string;
   district: string;
   taluk: string;
@@ -238,6 +258,7 @@ export interface ILocation {
 
 export interface IPost {
   id: string;
+  user: IUser;
   title: string;
   shortTitle: string;
   culture: string;
@@ -251,13 +272,14 @@ export interface IPost {
   location?: ILocation;
 }
 
-export type PostDetailsType = Omit<IPost, 'id' | 'content'> & {
+export type PostDetailsType = Omit<IPost, 'id' | 'user' | 'content'> & {
   locationSpecific: boolean;
   location?: string;
 };
 
 export interface IEvent {
   id: string;
+  user: IUser;
   title: string;
   description: string;
   duration: {
@@ -269,6 +291,18 @@ export interface IEvent {
   files: string[] | File[];
   location: ILocation;
 }
+
+export type IBlog = {
+  id: string;
+  user: IUser;
+  title: string;
+  description?: string;
+  locationSpecific: boolean;
+  location?: ILocation;
+  content: string;
+};
+
+export type BlogDetailsType = Omit<IBlog, 'id' | 'user' | 'content'>;
 
 export type LocationDetailsType = Pick<
   ILocation,

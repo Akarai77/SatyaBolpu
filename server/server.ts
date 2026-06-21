@@ -1,62 +1,65 @@
-import express from "express";
-import authRoutes from "./routes/AuthRoutes.js";
-import uploadRoutes from "./routes/UploadRoutes.js";
-import postRoutes from "./routes/PostRoutes.js";
-import otherRoutes from "./routes/OtherRoutes.js";
-import cultureRoutes from "./routes/CultureRoutes.js";
-import eventRoutes from "./routes/EventRoutes.js";
-import draftRoutes from "./routes/DraftRoutes.js";
-import feedRoutes from "./routes/FeedRoutes.js";
-import blogRoutes from "./routes/BlogRoutes.js";
-import locationRoutes from "./routes/LocationRoutes.js";
-import userRoutes from "./routes/UserRoutes.js";
-import donationRoutes from "./routes/donation.routes.js";
-import cors from "cors";
-import dotenv from "dotenv";
-import { connectDB } from "./utils/db.js";
-import cookieParser from "cookie-parser";
-import path, { dirname } from "path";
-import { fileURLToPath } from "url";
+import express from 'express';
+import authRoutes from './routes/AuthRoutes.js';
+import uploadRoutes from './routes/UploadRoutes.js';
+import postRoutes from './routes/PostRoutes.js';
+import otherRoutes from './routes/OtherRoutes.js';
+import cultureRoutes from './routes/CultureRoutes.js';
+import eventRoutes from './routes/EventRoutes.js';
+import draftRoutes from './routes/DraftRoutes.js';
+import feedRoutes from './routes/FeedRoutes.js';
+import blogRoutes from './routes/BlogRoutes.js';
+import locationRoutes from './routes/LocationRoutes.js';
+import userRoutes from './routes/UserRoutes.js';
+import donationRoutes from './routes/DonationRoutes.js';
+import cors from 'cors';
+import dotenv from 'dotenv';
+import { connectDB } from './utils/db.js';
+import cookieParser from 'cookie-parser';
+import path, { dirname } from 'path';
+import { fileURLToPath } from 'url';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-dotenv.config()
-const PORT = process.env.PORT
+dotenv.config();
+const PORT = process.env.PORT;
 
 const app = express();
-app.use(cors({
-  origin: true,
-  credentials: true
-}));
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  }),
+);
 app.use(express.json());
 app.use(cookieParser());
 
 app.use((req, res, next) => {
-  console.log("-----");
-  console.log("Time:", new Date().toISOString());
-  console.log("Method:", req.method);
-  console.log("URL:", req.url);
-  console.log("IP:", req.ip);
-  console.log("Body:", req.body);
+  console.log('-----');
+  console.log('Time:', new Date().toISOString());
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  console.log('IP:', req.ip);
+  console.log('Body:', req.body);
   next();
 });
 
-app.use("/api/uploads", express.static(path.join(__dirname, "uploads")));
-connectDB()
+app.use('/api/uploads', express.static(path.join(__dirname, 'uploads')));
+app.use('/api/assets', express.static(path.join(__dirname, 'assets')));
+connectDB();
 
-app.get("/api", (req, res) => res.send("Hello World!"));
-app.use("/api/auth", authRoutes);
-app.use("/api/upload", uploadRoutes);
-app.use("/api/feed", feedRoutes);
-app.use("/api/blogs", blogRoutes);
-app.use("/api/posts", postRoutes);
-app.use("/api/cultures", cultureRoutes);
-app.use("/api/events", eventRoutes);
-app.use("/api/others", otherRoutes);
-app.use("/api/drafts", draftRoutes);
-app.use("/api/locations", locationRoutes);
-app.use("/api/users", userRoutes);
-app.use("/api/donate", donationRoutes);
+app.get('/api', (req, res) => res.send('Hello World!'));
+app.use('/api/auth', authRoutes);
+app.use('/api/upload', uploadRoutes);
+app.use('/api/feed', feedRoutes);
+app.use('/api/blogs', blogRoutes);
+app.use('/api/posts', postRoutes);
+app.use('/api/cultures', cultureRoutes);
+app.use('/api/events', eventRoutes);
+app.use('/api/others', otherRoutes);
+app.use('/api/drafts', draftRoutes);
+app.use('/api/locations', locationRoutes);
+app.use('/api/users', userRoutes);
+app.use('/api/donate', donationRoutes);
 
 app.listen(PORT, () => console.log(`Server running on port ${PORT}`));

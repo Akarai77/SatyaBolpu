@@ -8,7 +8,7 @@ export type PostCardProps = BaseCardProps & {
   title: string;
   shortTitle: string;
   description: string;
-  coverImage: string;
+  image: string;
 };
 
 export const PostSkeletonCard = () => (
@@ -25,7 +25,7 @@ const PostCard = ({
   id,
   title,
   description,
-  coverImage,
+  image,
   handleEdit,
 }: PostCardProps) => {
   const navigate = useNavigate();
@@ -40,7 +40,7 @@ const PostCard = ({
       <div className="w-[40%] h-80 overflow-hidden">
         <img
           className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-          src={`${BASE_URL}${coverImage}`}
+          src={`${BASE_URL}${image}`}
           alt={title}
         />
       </div>

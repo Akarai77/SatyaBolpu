@@ -1,23 +1,6 @@
 import mongoose, { Model, Schema } from 'mongoose';
 import 'dotenv/config';
 
-import { Culture } from '../models/Culture.js';
-import { PostGroup } from '../models/PostGroup.js';
-import { PostType } from '../models/PostType.js';
-import { Tag } from '../models/Tag.js';
-import { Location } from '../models/Location.js';
-import { User } from '../models/User.js';
-import {
-  IBlog,
-  ICulture,
-  IEvent,
-  ILocation,
-  IPost,
-  IPostGroup,
-  IPostType,
-  ITag,
-} from '../types/globals.js';
-
 type envProps = {
   MONGO_URI: string;
 };
