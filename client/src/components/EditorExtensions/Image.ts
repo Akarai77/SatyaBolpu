@@ -4,7 +4,8 @@ import ImageComponent from "./ImageComponent"
 
 export const ResizableImage = Image.extend({
   name: "image",
-  group: "block",
+  inline: true,
+  group: "inline",
   atom: true,
 
   addAttributes() {
@@ -69,6 +70,22 @@ export const ResizableImage = Image.extend({
           }
         },
       },
+      {
+        tag: "span.file",
+        priority: 100,
+        getAttrs: (el: HTMLElement) => {
+          const img = el.querySelector("img")
+          if (!img) return false
+
+          return {
+            src: img.getAttribute("src"),
+            alt: img.getAttribute("alt"),
+            width: el.getAttribute("width") || el.style.width || "300px",
+            align: el.getAttribute("align") ?? "left",
+            mode: el.getAttribute("mode") ?? "float",
+          }
+        },
+      },
     ]
   },
 
@@ -100,11 +117,13 @@ export const ResizableImage = Image.extend({
       ])
     }
 
+    const tag = mode === "float" ? "span" : "div";
+
     return [
-      "div",
+      tag,
       {
         class: "file",
-        style: `width: ${width}; display: block; ${alignStyle}`,
+        style: `width: ${width}; display: ${mode === "float" ? "inline-block" : "block"}; ${alignStyle}`,
         mode,
         align,
       },

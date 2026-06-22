@@ -66,6 +66,8 @@ const Form = <T extends {}>({
       .reduce((current, key) => (current as any)?.[key], obj);
   };
 
+  useEffect(() => console.log(formData), [formData]);
+
   const setValue = (obj: Record<string, any>, path: string, value: any) => {
     const keys = path.split('.');
 
@@ -832,7 +834,13 @@ const Form = <T extends {}>({
               {field.label}{' '}
               {field.required && <span className="text-red-500">*</span>}
             </label>
-            <MAP editMode />
+            <MAP
+              state={formData}
+              setState={setFormData}
+              classname="w-full h-96"
+              editMode
+              formField
+            />
             {fieldError && <p className="text-red-500">{fieldError}</p>}
           </div>
         );

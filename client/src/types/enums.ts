@@ -2,13 +2,13 @@ export enum Mode {
   POST,
   CULTURE,
   EVENT,
-  LOCATION
-};
+  LOCATION,
+}
 
 export enum CardType {
   NORMAL_CARD,
   ROTATING_CARD,
   COLLAPSING_CARD,
   MINIMAL_CARD,
-  POST_GROUP_CARD
-};
+  POST_GROUP_CARD,
+}

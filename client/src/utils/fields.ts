@@ -14,7 +14,6 @@ import {
 export const initialDetailsConfig = (state: NewState | null) => ({
   post: (state as PostState)?.details ?? {
     title: '',
-    shortTitle: '',
     culture: '',
     postGroup: '',
     postType: '',
@@ -148,15 +147,6 @@ const locationField = (options: FormFieldOption[]) => ({
 const fieldConfigs = {
   post: (options: Record<string, FormFieldOption[] | string[]>) => [
     titleField(options.titles as string[]),
-    {
-      label: 'Short title',
-      name: 'shortTitle',
-      type: 'text',
-      required: true,
-      unique: true,
-      existingValues: options.shortTitles,
-      minLength: 3,
-    },
     cultureField(options.cultures as FormFieldOption[]),
     {
       label: 'Post group',
@@ -254,7 +244,7 @@ const fieldConfigs = {
     locationField(options.locations as FormFieldOption[]),
     {
       label: 'Location',
-      value: 'location',
+      name: 'location',
       type: 'map',
       required: true,
     },

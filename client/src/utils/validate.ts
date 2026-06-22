@@ -12,7 +12,6 @@ export const validateCultureDetails = (culture: ICulture) => {
 export const validatePostDetails = (post: IPost) => {
   return (
     post.title &&
-    post.shortTitle &&
     post.postGroup &&
     post.postType &&
     post.description &&

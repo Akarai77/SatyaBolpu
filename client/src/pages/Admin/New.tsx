@@ -52,7 +52,9 @@ const New = ({ type }: { type: NewType }) => {
   if (draftable) {
     useDraftLoader(id, type, setState);
   }
-  const data = useNewData(type);
+
+  const _ = `${type}` as const;
+  const data = useNewData<typeof _>(type);
 
   const { state: authState } = useAuth();
   const draftsApi = useApi('/drafts', { auto: false });

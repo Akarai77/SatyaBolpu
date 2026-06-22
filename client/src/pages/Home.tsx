@@ -83,7 +83,7 @@ const Home = () => {
   const [isHovering, setHovering] = useState<boolean>(false);
 
   const recentPostsApi = useApi(
-    '/posts?fields=shortTitle,description,coverImage&limit=5',
+    '/posts?fields=title,description,coverImage&limit=5',
   );
   const upcomingEventsApi = useApi(
     '/events?fields=title,duration,coverImage&limit=5&sortBy=duration.start',
@@ -367,7 +367,11 @@ const Home = () => {
           </div>
         </div>
         <div className="w-full lg:w-2/3 xl:w-1/2 h-100 lg:h-125">
-          <MAP minimal ref={mapRef}>
+          <MAP
+            classname="w-full h-full relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-3xl overflow-hidden"
+            minimal
+            ref={mapRef}
+          >
             <Marker position={[13.3409, 74.7421]}>
               <Popup>Udupi - The Heart of Tulunadu</Popup>
             </Marker>

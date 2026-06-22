@@ -245,12 +245,14 @@ const Editor = ({
     const content = await uploadFiles(editor.getHTML());
     if (title !== state.details?.title) {
       await api.refetch({
-        endpoint,
+        endpoint: endpoint.replace('/content', '/details'),
         method: 'POST',
         body: {
-          details: {
-            ...state.details,
-            title,
+          data: {
+            details: {
+              ...state.details,
+              title,
+            },
           },
         },
       });

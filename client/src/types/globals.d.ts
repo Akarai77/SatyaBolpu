@@ -260,7 +260,6 @@ export interface IPost {
   id: string;
   user: IUser;
   title: string;
-  shortTitle: string;
   culture: string;
   postGroup: string;
   postType: string;
@@ -356,7 +355,6 @@ export type NewState =
 
 export type NewPostData = {
   titles: string[];
-  shortTitles: string[];
   tags: FormFieldOption[];
   cultures: FormFieldOption[];
   postTypes: FormFieldOption[];
@@ -386,11 +384,21 @@ export type NewPostGroupData = {
   postGroups: string[];
 };
 
+export type NewLocationData = {
+  names: string[];
+};
+
+export type NewBlogData = {
+  titles: string[];
+  locations: FormFieldOption[];
+};
+
 type NewDataMap = {
   post: NewPostData;
   culture: NewCultureData;
   event: NewEventData;
-  location: {};
+  location: NewLocationData;
+  blog: NewBlogData;
   tag: {
     tags: string[];
   };
@@ -408,11 +416,11 @@ export type NewData<T extends NewType> = NewDataMap[T] & {
 
 export type MapProps = {
   minimal?: boolean;
+  classname?: string;
+  formField?: boolean;
   children?: ReactNode;
   ref?: React.RefObject<HTMLDivElement | null>;
   editMode?: boolean;
-  state?: PostState | EventState | LocationState;
-  setState?: React.Dispatch<
-    React.SetStateAction<EventState | PostState | LocationState>
-  >;
+  state?: LocationState | MapProps['state'];
+  setState?: React.Dispatch<React.SetStateAction<typeof state>>;
 };

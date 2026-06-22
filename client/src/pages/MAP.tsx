@@ -43,6 +43,7 @@ import markerIcon from 'leaflet/dist/images/marker-icon.png';
 import markerShadow from 'leaflet/dist/images/marker-shadow.png';
 import useApi from '../hooks/useApi';
 import { validateLocationFields } from '../utils/validate';
+import { cn } from '../utils/merge';
 
 //the below line is because someone caches something
 delete (L.Icon.Default.prototype as any)._getIconUrl;
@@ -87,7 +88,9 @@ const MAP_INITIAL_ZOOM = 9;
 
 const MAP = ({
   minimal = false,
+  classname,
   children,
+  formField = false,
   ref,
   editMode = false,
   state,
@@ -96,7 +99,6 @@ const MAP = ({
   const { id } = useParams();
 
   const [map, setMap] = useState<Map | null>(null);
-  const [lock, setLock] = useState<boolean>(false);
   const [zoom, setZoom] = useState<number>(MAP_INITIAL_ZOOM);
   const [fullScreen, setFullScreen] = useState<boolean>(false);
   const [activeVillage, setActiveVillage] = useState<GeoJSON.Feature | null>(
@@ -202,6 +204,10 @@ const MAP = ({
         toolTipPane.current.innerHTML = '';
       }
     });
+
+    if (state?.location && validateLocationFields(state?.location)) {
+      setNewLocation(state.location);
+    }
   };
 
   const styles = {
@@ -297,13 +303,26 @@ const MAP = ({
     if (editMode) {
       layer.on({
         click: (e: LeafletMouseEvent) => {
-          setNewLocation({
-            district: feature.properties?.DISTRICT,
-            taluk: feature.properties?.TALUK,
-            maagane: feature.properties?.MAAGANE,
-            village: feature.properties?.VILLAGE,
-            coordinates: [e.latlng.lat, e.latlng.lng],
-          });
+          if (formField) {
+            setState?.((prev: typeof state) => ({
+              ...prev,
+              location: {
+                district: feature.properties?.DISTRICT,
+                taluk: feature.properties?.TALUK,
+                maagane: feature.properties?.MAAGANE,
+                village: feature.properties?.VILLAGE,
+                coordinates: [e.latlng.lat, e.latlng.lng],
+              },
+            }));
+          } else {
+            setNewLocation({
+              district: feature.properties?.DISTRICT,
+              taluk: feature.properties?.TALUK,
+              maagane: feature.properties?.MAAGANE,
+              village: feature.properties?.VILLAGE,
+              coordinates: [e.latlng.lat, e.latlng.lng],
+            });
+          }
         },
       });
     }
@@ -499,7 +518,7 @@ const MAP = ({
   const handleSubmit = async () => {
     if (!editMode) return;
 
-    if (editMode && !(state as LocationState)?.location?.district) {
+    if (editMode && !newLocation) {
       toast.error('You need to submit the location details first.');
       return;
     }
@@ -513,8 +532,9 @@ const MAP = ({
         },
       },
     });
+
     setState?.(
-      (prev) =>
+      (prev: typeof state) =>
         ({
           ...prev,
           location: {
@@ -586,23 +606,6 @@ const MAP = ({
       };
     }, [leafletMap]);
 
-    useEffect(() => {
-      if (leafletMap) {
-        if (lock) {
-          leafletMap.dragging.disable();
-          leafletMap.touchZoom.disable();
-          leafletMap.scrollWheelZoom.disable();
-          leafletMap.boxZoom.disable();
-          leafletMap.keyboard.disable();
-        } else {
-          leafletMap.dragging.enable();
-          leafletMap.touchZoom.enable();
-          leafletMap.boxZoom.enable();
-          leafletMap.keyboard.enable();
-        }
-      }
-    }, [leafletMap, lock]);
-
     return null;
   };
 
@@ -651,11 +654,7 @@ const MAP = ({
 
   return (
     <div
-      className={
-        minimal
-          ? 'w-full h-full relative top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-3xl overflow-hidden'
-          : 'w-screen h-screen relative'
-      }
+      className={cn('w-screen h-screen relative', classname)}
       ref={minimal ? ref : mapRef}
     >
       {!minimal && (
@@ -701,10 +700,10 @@ const MAP = ({
               onClick={() => setFullScreen(true)}
             />
           )}
-          {editMode !== undefined && location && (
+          {editMode && newLocation && !formField && (
             <IoMdDoneAll
               className={`text-[2.5rem] 
-                  ${activeLocation?.district || newLocation?.district ? 'text-white hover:scale-110' : 'cursor-not-allowed text-gray-400'}`}
+                  ${newLocation?.district ? 'text-white hover:scale-110' : 'cursor-not-allowed text-gray-400'}`}
               onClick={handleSubmit}
             />
           )}
@@ -816,46 +815,28 @@ const MAP = ({
         className="z-0 relative w-full h-full"
       >
         <div className="z-10 absolute flex flex-col justify-center items-center gap-2 left-7 top-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer">
-          <div
-            className={`flex h-14 flex-col gap-2 bg-slate-100 rounded-md ${lock ? 'pointer-events-none' : ''}`}
-          >
+          <div className={`flex h-14 flex-col gap-2 bg-slate-100 rounded-md`}>
             <div
               className="h-1/2 p-1 pl-2 pr-2"
               onClick={() => handleZoomChange(1)}
             >
-              <FaPlus className={`${lock ? 'text-slate-300' : 'text-black'}`} />
+              <FaPlus className="text-black" />
             </div>
             <div
               className="h-1/2 p-1 pl-2 pr-2"
               onClick={() => handleZoomChange(-1)}
             >
-              <FaMinus
-                className={`${lock ? 'text-slate-300' : 'text-black'}`}
-              />
+              <FaMinus className="text-black" />
             </div>
           </div>
           <IoLocationSharp
-            className={`${lock ? 'text-slate-300 pointer-events-none' : 'text-red-500'}`}
+            className="text-red-500"
             size={32}
             onClick={() =>
               map &&
               map.setView(MAP_CENTER, MAP_INITIAL_ZOOM, { animate: true })
             }
           />
-
-          {lock ? (
-            <FaLock
-              className="text-slate-500"
-              size={24}
-              onClick={() => setLock(false)}
-            />
-          ) : (
-            <FaLockOpen
-              className="text-slate-500"
-              size={24}
-              onClick={() => setLock(true)}
-            />
-          )}
         </div>
 
         <MapContainer
@@ -891,23 +872,20 @@ const MAP = ({
             zoom >= 11 &&
             (zoom > 15 ? uninteractiveVillageLayers : villageLayers)}
 
-          {!minimal &&
-            editMode !== undefined &&
-            state?.location &&
-            validateLocationFields(state.location as ILocation) && (
-              <Marker
-                eventHandlers={{
-                  mouseover: () =>
-                    handleMarkerHover(state?.location as ILocation),
-                }}
-                position={[
-                  activeLocation?.coordinates?.[0] ||
-                    newLocation?.coordinates?.[0],
-                  activeLocation?.coordinates?.[1] ||
-                    newLocation?.coordinates?.[1],
-                ]}
-              />
-            )}
+          {!minimal && editMode && (newLocation || state?.location) && (
+            <Marker
+              icon={blueMarker}
+              position={[
+                formField
+                  ? state?.location?.coordinates?.[0]
+                  : newLocation?.coordinates?.[0],
+                formField
+                  ? state?.location?.coordinates?.[1]
+                  : newLocation?.coordinates?.[1],
+              ]}
+            />
+          )}
+
           {!minimal &&
             activeVillage &&
             zoom >= 14 &&

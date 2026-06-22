@@ -168,8 +168,8 @@ export const getDraft = async (req: Request, res: Response) => {
 export const updateDraft = async (req: AuthRequest, res: Response) => {
   try {
     const userId = req.user?._id;
-    const { id, type, step } = req.params;
     const { data }: { data: CreateData } = req.body;
+    const { id, type, step } = req.params;
 
     if (!id || !type || !step) {
       return res.status(400).json({ msg: 'Missing required field.' });
@@ -192,8 +192,22 @@ export const updateDraft = async (req: AuthRequest, res: Response) => {
           | CreateData['location'],
       ) => boolean
     >;
-    if (!validator[step](data)) {
+    if (
+      !validator[step](
+        step === 'content' ? data : data[step as keyof typeof data],
+      )
+    ) {
       return res.status(404).json({ msg: 'Validation failed.' });
+    }
+
+    let finalData = { ...data };
+    if (step === 'details') {
+      finalData = {
+        details: {
+          userId,
+          ...finalData['details'],
+        },
+      } as CreateData & { userId: string };
     }
 
     const foreignValidator = validateForeignFields[type as CreateType] as (
@@ -202,7 +216,10 @@ export const updateDraft = async (req: AuthRequest, res: Response) => {
         | CreateData['content']
         | CreateData['location'],
     ) => Promise<boolean>;
-    if (data.details && !(await foreignValidator(data))) {
+    if (
+      step === 'details' &&
+      !(await foreignValidator(finalData[step as keyof typeof finalData]))
+    ) {
       return res.status(404).json({ msg: 'Foreign validation failed.' });
     }
 
@@ -210,19 +227,18 @@ export const updateDraft = async (req: AuthRequest, res: Response) => {
       return res.json(404).json({ msg: 'Missing draft id.' });
     }
 
-    let finalData = { ...data };
-    if (data.details) {
-      finalData = {
-        userId,
-        ...finalData,
-      } as CreateData & { userId: string };
-    }
     const DraftModel = DraftModelMap[
       type as keyof typeof DraftModelMap
     ] as Model<any>;
-    const draft = await DraftModel.findByIdAndUpdate(id, finalData, {
-      new: true,
-    });
+    const draft = await DraftModel.findByIdAndUpdate(
+      id,
+      step === 'content'
+        ? finalData
+        : (finalData[step as keyof typeof finalData] as {}),
+      {
+        new: true,
+      },
+    );
 
     if (!draft) {
       return res.status(500).json({ msg: 'Error whie updating draft.' });

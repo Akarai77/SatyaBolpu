@@ -120,7 +120,7 @@ const BaseComponent = ({
   const isLeft = node.attrs.align === "left";
   const isRight = node.attrs.align === "right";
   const wrapperStyle: React.CSSProperties = {
-    display: "block",
+    display: isFloat ? "inline-block" : "block",
     float:
       isFloat && node.attrs.align !== "center"
         ? node.attrs.align
@@ -134,6 +134,7 @@ const BaseComponent = ({
   return (
     <NodeViewWrapper 
       className="relative"
+      as={node.attrs.mode === "float" ? "span" : "div"}
     >
       <div
         ref={wrapperRef}

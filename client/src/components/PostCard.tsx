@@ -6,7 +6,6 @@ import { useAuth } from '../context/AuthContext';
 
 export type PostCardProps = BaseCardProps & {
   title: string;
-  shortTitle: string;
   description: string;
   image: string;
 };

@@ -126,7 +126,7 @@ const Posts = () => {
           orientation="column"
           filterGroups={filterGroups}
           sortOptions={{
-            Title: 'shortTitle',
+            Title: 'title',
             Date: 'createdAt',
           }}
         />

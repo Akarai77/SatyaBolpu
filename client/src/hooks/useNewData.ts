@@ -12,7 +12,7 @@ import {
 import useApi from './useApi';
 
 const useNewData = <T extends NewType>(type: T): NewData<T> | null => {
-  const postsApi = useApi('/posts?fields=title,shortTitle', {
+  const postsApi = useApi('/posts?fields=title', {
     auto: type === 'post',
   });
 
