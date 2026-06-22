@@ -5,13 +5,22 @@ import { TfiWrite } from 'react-icons/tfi';
 import { FaArrowUpLong } from 'react-icons/fa6';
 import { MdOutlineExplore } from 'react-icons/md';
 import { VscFileSubmodule } from 'react-icons/vsc';
-import FilterTable from '../components/FilterTable';
 import Map from './MAP';
 import Button from '../components/Button';
+import useApi from '../hooks/useApi';
+import { useEffect, useState } from 'react';
+import { FeedCardProps } from '../types/globals';
+import { FeedCard } from '../components/FeedCard';
 
 const Dashboard = () => {
   const { state } = useAuth();
   const navigate = useNavigate();
+  const feedApi = useApi('/feed');
+  const [feedData, setFeedData] = useState<FeedCardProps[]>([]);
+
+  useEffect(() => {
+    if (feedApi.data) setFeedData(feedApi.data.feed);
+  }, [feedApi.data]);
 
   if (!state.token) return <Navigate to="/login" replace />;
 
@@ -102,7 +111,7 @@ const Dashboard = () => {
                     <span className="ml-2">Create</span>
                   </>
                 }
-                onClick={() => navigate("/create")}
+                onClick={() => navigate('/create')}
               />
               <Button
                 className="px-4 py-3 rounded-full"
@@ -147,31 +156,9 @@ const Dashboard = () => {
 
           <div className="p-4 rounded-2xl bg-white/5 border border-primary/20">
             <div className="text-white font-semibold mb-4">Recent Updates</div>
-            <FilterTable
-              filters={[
-                { name: 'All', endpoint: 'feed', key: 'feed' },
-                {
-                  name: 'Posts',
-                  endpoint: 'posts?fields=title,coverImage,userId&limit=5',
-                  key: 'posts',
-                },
-                {
-                  name: 'Cultures',
-                  endpoint: 'cultures?fields=title,coverImage,userId&limit=5',
-                  key: 'cultures',
-                },
-                {
-                  name: 'Events',
-                  endpoint: 'events?fields=title,coverImage,userId&limit=5',
-                  key: 'events',
-                },
-                {
-                  name: 'Blogs',
-                  endpoint: 'blogs?fields=title,coverImage,userId&limit=5',
-                  key: 'blogs',
-                },
-              ]}
-            />
+            {feedData.map((feed) => (
+              <FeedCard {...feed} />
+            ))}
           </div>
         </div>
 

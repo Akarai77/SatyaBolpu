@@ -845,9 +845,9 @@ const MAP = ({
           zoom={MAP_INITIAL_ZOOM}
           maxBounds={MAP_MAX_BOUNDS}
           minZoom={MAP_MIN_ZOOM}
-          scrollWheelZoom={false}
+          scrollWheelZoom={true}
           zoomControl={false}
-          doubleClickZoom={false}
+          doubleClickZoom={true}
           touchZoom={true}
         >
           <MapEvents />

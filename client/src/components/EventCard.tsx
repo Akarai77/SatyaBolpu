@@ -1,9 +1,9 @@
-import { useNavigate } from "react-router-dom";
-import { BaseCardProps } from "../types/globals";
-import { BASE_URL } from "../App";
-import { RiEdit2Fill } from "react-icons/ri";
-import { useAuth } from "../context/AuthContext";
-import { FaRegCalendar } from "react-icons/fa";
+import { useNavigate } from 'react-router-dom';
+import { BaseCardProps } from '../types/globals';
+import { BASE_URL } from '../App';
+import { RiEdit2Fill } from 'react-icons/ri';
+import { useAuth } from '../context/AuthContext';
+import { FaRegCalendar } from 'react-icons/fa';
 
 export type EventCardProps = BaseCardProps & {
   title: string;
@@ -26,18 +26,29 @@ export const EventSkeletonCard = () => (
   </div>
 );
 
-const EventCard = ({ id, title, description, image, duration, handleEdit }: EventCardProps) => {
+const EventCard = ({
+  id,
+  title,
+  description,
+  image,
+  duration,
+  handleEdit,
+}: EventCardProps) => {
   const navigate = useNavigate();
   const { state: authState } = useAuth();
 
   const formatDate = (date: string | null | undefined) => {
-    if (!date) return "";
-    return new Date(date).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" });
+    if (!date) return '';
+    return new Date(date).toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric',
+    });
   };
 
   return (
     <div
-      className="w-[90%] lg:w-2/3 flex border border-white/10 rounded-2xl overflow-hidden
+      className="w-full flex border border-white/10 rounded-2xl overflow-hidden
         hover:border-primary/30 hover:shadow-lg hover:shadow-primary/5 transition-all duration-300 cursor-pointer group"
       onClick={() => navigate(id)}
     >
@@ -53,17 +64,29 @@ const EventCard = ({ id, title, description, image, duration, handleEdit }: Even
         {duration && (
           <div className="flex items-center gap-2 text-white/50 text-sm">
             <FaRegCalendar className="text-primary" />
-            <span>{formatDate(duration.start)}{duration.end && duration.end !== duration.start ? ` — ${formatDate(duration.end)}` : ""}</span>
+            <span>
+              {formatDate(duration.start)}
+              {duration.end && duration.end !== duration.start
+                ? ` — ${formatDate(duration.end)}`
+                : ''}
+            </span>
           </div>
         )}
-        <p className="text-white/70 text-sm leading-relaxed line-clamp-3">{description}</p>
+        <p className="text-white/70 text-sm leading-relaxed line-clamp-3">
+          {description}
+        </p>
         <div className="flex items-center gap-2">
-          <span className="text-primary text-sm font-semibold group-hover:underline">View details</span>
-          {authState.user?.role === "admin" && (
+          <span className="text-primary text-sm font-semibold group-hover:underline">
+            View details
+          </span>
+          {authState.user?.role === 'admin' && (
             <div
               className="border border-primary/30 text-primary rounded-lg p-1.5 hover:bg-primary hover:text-black
                 cursor-pointer transition-all"
-              onClick={(e) => { e.stopPropagation(); handleEdit?.(id); }}
+              onClick={(e) => {
+                e.stopPropagation();
+                handleEdit?.(id);
+              }}
             >
               <RiEdit2Fill className="text-lg" />
             </div>

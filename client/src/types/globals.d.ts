@@ -1,4 +1,3 @@
-import { CardType } from '../components/CardList';
 import { ReactNode } from 'react';
 import { FilterGroups } from '../components/Filters';
 
@@ -29,6 +28,18 @@ export type BaseCardProps = {
   id: string;
   handleEdit?: (id: string) => {};
   handleDelete?: (id: string) => {};
+};
+
+export type FeedCardProps = {
+  title: string;
+  type: 'post' | 'culture' | 'event' | 'blog';
+  image: string;
+  createdAt: string;
+  author: {
+    id: string;
+    name: string;
+    image: string;
+  };
 };
 
 export type PostGroupProps = BaseCardProps & {

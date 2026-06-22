@@ -22,10 +22,11 @@ export const getCultures = async (req: Request, res: Response) => {
     }
 
     const cultures = culturesData.map((culture) => {
-      const { _id, ...rest } = culture;
+      const { _id, coverImage, ...rest } = culture;
 
       return {
         ...rest,
+        image: coverImage,
         id: _id,
       };
     });
