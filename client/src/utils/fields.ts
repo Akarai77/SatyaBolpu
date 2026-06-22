@@ -141,7 +141,7 @@ const locationField = (options: FormFieldOption[]) => ({
   type: 'select',
   options,
   renderCondition: (formData: any) => formData.locationSpecific === 'true',
-  required: true,
+  required: (formData: any) => formData.locationSpecific === 'true',
 });
 
 const fieldConfigs = {

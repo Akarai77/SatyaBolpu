@@ -33,7 +33,7 @@ export const validateData = {
       post.tags &&
       post.tags.length >= 1,
     content: (post: Partial<IPost>) =>
-      post.content && post.content.split(' ').length > 300,
+      post.content && post.content.split(' ').length > 20,
   },
   culture: {
     details: (culture: Partial<ICulture>) =>
@@ -54,7 +54,7 @@ export const validateData = {
   },
   event: (event: Partial<IEvent>) =>
     event.title &&
-    event.title.length > 5 &&
+    event.title.length >= 5 &&
     event.culture &&
     event.description &&
     event.description.split(' ').length > 20 &&

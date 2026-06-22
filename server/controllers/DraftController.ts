@@ -127,17 +127,8 @@ export const getDraft = async (req: Request, res: Response) => {
     const DraftModel = DraftModelMap[
       type as keyof typeof DraftModelMap
     ] as Model<any>;
-    const refs = Object.keys(DraftModel.schema.paths).filter(
-      (path) => DraftModel.schema.paths[path].options?.ref,
-    );
 
-    let query = Draft.findById(id);
-    refs.forEach((path) => {
-      if (path === 'userId') return;
-      query = query.populate(path);
-    });
-
-    const draft = await query.lean<Record<string, any>>();
+    const draft = await Draft.findById(id).lean<Record<string, any>>();
     if (!draft) {
       return res.status(400).json({ msg: 'Draft not found.' });
     }

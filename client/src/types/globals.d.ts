@@ -84,7 +84,7 @@ export type FormField = {
   rows?: number;
   minValue?: number;
   maxValue?: number;
-  required?: boolean;
+  required?: boolean | ((formData: any) => boolean);
   unique?: boolean;
   existingValues?: any[];
   defaultValue?: FormFieldOption['value'];

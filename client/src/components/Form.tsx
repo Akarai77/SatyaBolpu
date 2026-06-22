@@ -66,8 +66,6 @@ const Form = <T extends {}>({
       .reduce((current, key) => (current as any)?.[key], obj);
   };
 
-  useEffect(() => console.log(formData), [formData]);
-
   const setValue = (obj: Record<string, any>, path: string, value: any) => {
     const keys = path.split('.');
 
@@ -190,7 +188,8 @@ const Form = <T extends {}>({
 
     setActiveIndex((prev) => setValue(prev, name, 0));
     setVisibleStart((prev) => setValue(prev, name, 0));
-    setShowOptions((prev) => setValue(prev, name, false));
+    if (fieldType === 'select')
+      setShowOptions((prev) => setValue(prev, name, false));
   };
 
   const handleKeyDown = (
@@ -259,9 +258,13 @@ const Form = <T extends {}>({
     fields.forEach((field) => {
       const name = field.name;
       const value = getValue(formData, name);
+      const required =
+        typeof field.required === 'function'
+          ? field.required(formData)
+          : !!field.required;
 
       if (
-        field.required &&
+        required &&
         (!value || (typeof value === 'string' && !value.trim()))
       ) {
         newErrors = setValue(newErrors, name, `${field.label} is required.`);
@@ -436,9 +439,13 @@ const Form = <T extends {}>({
   };
 
   const renderField = (field: FormField) => {
+    if (!(field.renderCondition?.(formData) ?? true)) return;
     const fieldError = getValue(errors, field.name);
     const fieldValue = getValue(formData, field.name);
-    if (!(field.renderCondition?.(formData) ?? true)) return;
+    const required =
+      typeof field.required === 'function'
+        ? field.required(formData)
+        : !!field.required;
 
     switch (field.type) {
       case 'textarea':
@@ -449,7 +456,7 @@ const Form = <T extends {}>({
               className="text-primary font-semibold text-[1.5rem]"
             >
               {field.label}{' '}
-              {field.required && <span className="text-red-500">*</span>}
+              {required && <span className="text-red-500">*</span>}
             </label>
             <textarea
               id={field.name}
@@ -482,7 +489,7 @@ const Form = <T extends {}>({
               className="text-primary font-semibold text-[1.5rem]"
             >
               {field.label}{' '}
-              {field.required && <span className="text-red-500">*</span>}
+              {required && <span className="text-red-500">*</span>}
             </label>
             <input
               className="text-black w-1/2 font-semibold bg-white p-2 overflow-hidden resize-none disabled:bg-gray-400"
@@ -545,7 +552,7 @@ const Form = <T extends {}>({
               htmlFor={field.name}
             >
               {field.label}{' '}
-              {field.required && <span className="text-red-500">*</span>}
+              {required && <span className="text-red-500">*</span>}
             </label>
             <input
               className={`text-black font-semibold p-2 cursor-pointer bg-white disabled:bg-gray-400`}
@@ -568,7 +575,7 @@ const Form = <T extends {}>({
               htmlFor={field.name}
             >
               {field.label}{' '}
-              {field.required && <span className="text-red-500">*</span>}
+              {required && <span className="text-red-500">*</span>}
             </label>
             <label htmlFor={field.name} className="w-fit">
               <div
@@ -611,7 +618,7 @@ const Form = <T extends {}>({
           <div key={field.name} className="flex flex-col w-full gap-3">
             <label className="text-primary font-semibold text-[1.5rem]">
               {field.label}{' '}
-              {field.required && <span className="text-red-500">*</span>}
+              {required && <span className="text-red-500">*</span>}
             </label>
             <label htmlFor={field.name} className="w-fit">
               <div
@@ -686,7 +693,7 @@ const Form = <T extends {}>({
           <div key={field.name} className="flex flex-col w-full gap-3">
             <label className="text-primary font-semibold text-[1.5rem]">
               {field.label}{' '}
-              {field.required && <span className="text-red-500">*</span>}
+              {required && <span className="text-red-500">*</span>}
             </label>
 
             <div className="flex gap-10">
@@ -725,7 +732,7 @@ const Form = <T extends {}>({
               className="text-primary font-semibold text-[1.5rem]"
             >
               {field.label}{' '}
-              {field.required && <span className="text-red-500">*</span>}
+              {required && <span className="text-red-500">*</span>}
             </label>
             <input
               type="number"
@@ -753,7 +760,7 @@ const Form = <T extends {}>({
               className="text-primary font-semibold text-[1.5rem]"
             >
               {field.label}{' '}
-              {field.required && <span className="text-red-500">*</span>}
+              {required && <span className="text-red-500">*</span>}
             </label>
             <div className="w-full flex gap-1 flex-wrap">
               {fieldValue.length > 0 &&
@@ -832,7 +839,7 @@ const Form = <T extends {}>({
               className="text-primary font-semibold text-[1.5rem]"
             >
               {field.label}{' '}
-              {field.required && <span className="text-red-500">*</span>}
+              {required && <span className="text-red-500">*</span>}
             </label>
             <MAP
               state={formData}
@@ -854,7 +861,7 @@ const Form = <T extends {}>({
               className="text-primary font-semibold text-[1.5rem]"
             >
               {field.label}{' '}
-              {field.required && <span className="text-red-500">*</span>}
+              {required && <span className="text-red-500">*</span>}
             </label>
             <input
               type={field.type}

@@ -16,8 +16,7 @@ export const validatePostDetails = (post: IPost) => {
     post.postType &&
     post.description &&
     post.coverImage &&
-    post.tags.length >= 1 &&
-    post.location
+    post.tags.length >= 1
   );
 };
 

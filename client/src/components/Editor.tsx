@@ -205,10 +205,14 @@ const Editor = ({
     }
   };
 
-  const formatHtml = (html: string) => {
+  const cleanHtml = (html: string) => {
+    const blockTags = 'div|figure|video|audio|iframe|blockquote';
     return html
-      .replace(/<p>(.*?)<\/p>/gi, (_, content) =>
-        content.trim() === '' ? '<br>' : `${content}<br>`,
+      .replace(/<p>([\s\S]*?)<\/p>/gi, '$1')
+      .replace(new RegExp(`<br\\s*\\/?>\\s*(?=<(?:${blockTags}))`, 'gi'), '')
+      .replace(
+        new RegExp(`</(?:${blockTags})>\\s*<br\\s*\\/?>`, 'gi'),
+        (m) => m.split('<br')[0],
       )
       .replace(/(<br>\s*)+$/g, '');
   };
@@ -220,6 +224,19 @@ const Editor = ({
     const parser = new DOMParser();
     const doc = parser.parseFromString(content, 'text/html');
     if (!doc.body.innerText.trim()) return '';
+
+    doc.querySelectorAll('p').forEach((p) => {
+      const next = p.nextElementSibling;
+      const prev = p.previousElementSibling;
+      const isNearBlock =
+        (next &&
+          /^(DIV|FIGURE|VIDEO|AUDIO|IFRAME|BLOCKQUOTE)$/.test(next.tagName)) ||
+        (prev &&
+          /^(DIV|FIGURE|VIDEO|AUDIO|IFRAME|BLOCKQUOTE)$/.test(prev.tagName));
+      if (p.textContent?.trim() === '' && isNearBlock) {
+        p.remove();
+      }
+    });
 
     const elements = doc.querySelectorAll('img, video, audio');
     for (const el of elements) {
@@ -256,6 +273,17 @@ const Editor = ({
           },
         },
       });
+
+      setState(
+        (prev) =>
+          ({
+            ...prev,
+            details: {
+              ...prev.details,
+              title,
+            },
+          }) as typeof state,
+      );
     }
 
     const res = await api.refetch({
@@ -367,7 +395,7 @@ const Editor = ({
             />
           </div>
         )}
-        <div className="w-full flex flex-col justify-center items-center">
+        <div className="w-full flex flex-col justify-center items-center gap-3">
           <textarea
             style={{
               padding: 0,
@@ -375,20 +403,25 @@ const Editor = ({
               border: 'none',
               outline: 'none',
               boxSizing: 'content-box',
-              lineHeight: 1,
             }}
-            className="text-primary w-4/5 text-4xl sm:text-6xl text-center font-bold bg-black overflow-hidden
-              text-wrap focus:outline-none resize-none whitespace-pre-wrap wrap-break-word"
+            className="text-4xl sm:text-5xl md:text-6xl text-center font-black tracking-tight
+              text-transparent bg-clip-text bg-linear-to-r from-primary via-amber-400 to-primary
+              whitespace-pre-wrap wrap-break-word text-wrap leading-tight caret-white focus:outline-none
+              overflow-hidden resize-none"
+            // className="text-primary w-4/5 text-4xl sm:text-6xl text-center font-bold bg-black overflow-hidden
+            //   text-wrap focus:outline-none resize-none whitespace-pre-wrap wrap-break-word"
             value={title}
             rows={1}
             ref={titleRef}
             onChange={handleChangeTitle}
           />
 
-          <div className="flex items-center justify-center w-4/5 sm:w-2/3 lg:w-1/2 mx-auto">
-            <div className="w-1/2 border-t-2 border-solid border-primary"></div>
-            <span className="mx-4 text-xl text-primary font-bold">ॐ</span>
-            <div className="w-1/2 border-t-2 border-solid border-primary grow"></div>
+          <div className="flex items-center justify-center gap-3 w-4/5 sm:w-2/3 lg:w-1/2">
+            <div className="flex-1 h-px bg-linear-to-r from-transparent to-primary/60" />
+            <span className="text-lg sm:text-xl text-primary/80 font-bold drop-shadow-[0_0_8px_rgba(232,129,54,0.4)]">
+              ॐ
+            </span>
+            <div className="flex-1 h-px bg-linear-to-l from-transparent to-primary/60" />
           </div>
         </div>
 
@@ -543,7 +576,7 @@ const Editor = ({
         <div
           className="text-white text-[1.5rem]/[1.75rem] w-[90%] p-5 wrap-break-word whitespace-pre-wrap text-justify"
           dangerouslySetInnerHTML={{
-            __html: DOMPurify.sanitize(formatHtml(body)),
+            __html: DOMPurify.sanitize(cleanHtml(body)),
           }}
         ></div>
       </div>
