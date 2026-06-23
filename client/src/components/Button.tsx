@@ -1,6 +1,7 @@
 import React from 'react';
 import { cn } from '../utils/merge';
 import { ButtonProps } from '../types/globals';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const Button: React.FC<ButtonProps> = ({
   content,
@@ -11,15 +12,18 @@ const Button: React.FC<ButtonProps> = ({
   onClick,
   loading = false,
   loadingText,
-  theme,
+  theme: themeProp,
 }) => {
+  const theme = useThemeClasses();
+  const isDark = themeProp === 'dark';
+  
   return (
     <button
       className={cn(
-        `p-2 rounded-md border hover:bg-white hover:text-black transition flex
+        `p-2 rounded-md border transition flex
         items-center justify-center gap-2 text-primary font-semibold cursor-pointer
         text-[0.75rem] md:text-[1rem]
-        ${theme === 'light' ? 'bg-white hover:text-white hover:bg-primary' : 'bg-black hover:text-black hover:bg-primary'}
+        ${isDark ? theme.authBtnBg + ' hover:text-black hover:bg-primary' : theme.bg + ' hover:text-white hover:bg-primary'}
         disabled:cursor-not-allowed disabled:scale-100 disabled:bg-primary/70 disabled:text-white`,
         className,
       )}

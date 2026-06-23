@@ -32,7 +32,7 @@ import { IoMdDoneAll } from 'react-icons/io';
 import { toast } from 'react-toastify';
 import { useParams } from 'react-router-dom';
 import { ILocation, Location, LocationState, MapProps } from '../types/globals';
-import { FaLock, FaLockOpen, FaPlus, FaMinus } from 'react-icons/fa';
+import { FaPlus, FaMinus } from 'react-icons/fa';
 import { IoLocationSharp } from 'react-icons/io5';
 
 //this is beacuse icons dont load in prod, some bs idk

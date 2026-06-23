@@ -11,6 +11,8 @@ import { MdOutlineHorizontalRule } from 'react-icons/md';
 import { useAuth } from '../context/AuthContext';
 import { CgProfile } from 'react-icons/cg';
 import { IoIosArrowDropdownCircle } from 'react-icons/io';
+import { useThemeClasses } from '../hooks/useThemeClasses';
+import ThemeToggle from './ThemeToggle';
 
 const AuthLinks = ({
   extraClass = '',
@@ -22,12 +24,13 @@ const AuthLinks = ({
   onCloseMenu: () => void;
 }) => {
   const { state } = useAuth();
+  const theme = useThemeClasses();
 
   if (!state.token) {
     return (
       <div
         className={`flex rounded-3xl overflow-hidden cursor-pointer text-sm sm:text-xl
-          ${pathname !== '/' ? 'bg-white text-black' : 'bg-black text-white'}
+          ${pathname !== '/' ? theme.textSecondary + ' ' + theme.bg : theme.bg + ' ' + theme.text}
           ${extraClass}`}
       >
         <NavLink to="/login" className="hover:bg-primary p-1 sm:p-2">
@@ -120,9 +123,10 @@ const Navbar = () => {
   const navbarRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const { pathname } = useLocation();
+  const theme = useThemeClasses();
   const [navbarStyles, setNavbarStyles] = useState<CSSProperties>({
     position: 'relative',
-    backgroundColor: 'black',
+    backgroundColor: pathname === '/' ? 'transparent' : '#000',
   });
 
   useLayoutEffect(() => {
@@ -134,7 +138,7 @@ const Navbar = () => {
     } else {
       setNavbarStyles({
         position: 'relative',
-        backgroundColor: 'black',
+        backgroundColor: '#000',
       });
     }
   }, [pathname]);
@@ -224,6 +228,7 @@ const Navbar = () => {
             pathname={pathname}
             onCloseMenu={() => setIsMenuOpen(false)}
           />
+          <ThemeToggle />
           <AuthLinks
             pathname={pathname}
             onCloseMenu={() => setIsMenuOpen(false)}
@@ -235,7 +240,7 @@ const Navbar = () => {
       </nav>
 
       <div
-        className={`links lg:hidden text-xl font-semibold text-white text-center bg-black w-screen
+        className={`links lg:hidden text-xl font-semibold ${theme.text} ${theme.bg} w-screen
             overflow-hidden flex flex-col items-center justify-center gap-3 fixed top-0 right-0 z-9998
             transition-all duration-500 ${isMenuOpen ? 'h-screen' : 'h-0'}`}
         ref={menuRef}
@@ -244,6 +249,9 @@ const Navbar = () => {
           pathname={pathname}
           onCloseMenu={() => setIsMenuOpen(false)}
         />
+        <div className="mt-4">
+          <ThemeToggle />
+        </div>
       </div>
 
       {isCollapsed && (

@@ -11,6 +11,7 @@ import PostCard, {
 } from '../components/PostCard';
 import PostGroupCard, { PostGroupSkeleton } from '../components/PostGroupCard';
 import DropDown from '../components/DropDown';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const Posts = () => {
   const navigate = useNavigate();
@@ -84,11 +85,13 @@ const Posts = () => {
     }
   }, [displayType]);
 
+  const theme = useThemeClasses();
+
   return (
-    <div className="w-full min-h-screen py-20">
+    <div className={`w-full min-h-screen py-20 ${theme.bg}`}>
       <Title title="All Posts" />
       <div className="w-2/3 mx-auto flex items-center justify-end">
-        <DropDown<'posts' | 'postGroups'>
+        <DropDown
           options={[
             { name: 'Post', value: 'posts' },
             { name: 'Post group', value: 'postGroups' },

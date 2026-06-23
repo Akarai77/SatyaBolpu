@@ -11,6 +11,7 @@ import useApi from '../hooks/useApi';
 import { useEffect, useState } from 'react';
 import { FeedCardProps } from '../types/globals';
 import { FeedCard } from '../components/FeedCard';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const Dashboard = () => {
   const { state } = useAuth();
@@ -24,10 +25,12 @@ const Dashboard = () => {
 
   if (!state.token) return <Navigate to="/login" replace />;
 
+  const theme = useThemeClasses();
+
   return (
-    <div className="w-full min-h-screen px-6 md:px-10 py-10 bg-black text-white">
+    <div className={`w-full min-h-screen px-6 md:px-10 py-10 ${theme.bg} ${theme.text}`}>
       <div className="w-full mb-8">
-        <div className="w-full rounded-2xl bg-linear-to-r from-black/60 via-black/40 to-black/60 backdrop-blur-sm border border-primary/30 p-6 flex flex-col md:flex-row items-center gap-6">
+        <div className={`w-full rounded-2xl ${theme.bgSubtle} backdrop-blur-sm border border-primary/30 p-6 flex flex-col md:flex-row items-center gap-6`}>
           <div className="flex-1">
             <div className="text-primary text-lg font-semibold">
               Welcome back
@@ -35,7 +38,7 @@ const Dashboard = () => {
             <div className="text-white text-3xl md:text-4xl font-extrabold tracking-tight">
               {state.user?.name ?? 'SatyaBolpu User'}
             </div>
-            <p className="mt-3 text-sm text-slate-300 max-w-2xl">
+            <p className={`mt-3 text-sm ${theme.textSecondary} max-w-2xl`}>
               Explore contributions, manage content, and discover new cultural
               highlights from Tulunadu. Your dashboard gives a quick launchpad
               for publishing, mapping, and moderation.
@@ -43,16 +46,16 @@ const Dashboard = () => {
           </div>
 
           <div className="w-full md:w-72 flex flex-col gap-3">
-            <div className="w-full p-4 rounded-xl bg-white/5 border border-primary/20">
-              <div className="text-sm text-slate-300">Membership</div>
+            <div className={`w-full p-4 rounded-xl ${theme.bgSubtle} border border-primary/20`}>
+              <div className={`text-sm ${theme.textSecondary}`}>Membership</div>
               <div className="text-primary font-bold text-2xl">
                 {state.user?.role ?? 'member'}
               </div>
             </div>
-            <div className="w-full p-4 rounded-xl bg-white/5 border border-primary/20 flex items-center justify-between">
+            <div className={`w-full p-4 rounded-xl ${theme.bgSubtle} border border-primary/20 flex items-center justify-between`}>
               <div>
-                <div className="text-sm text-slate-300">Reputation</div>
-                <div className="text-white font-bold text-xl">42</div>
+                <div className={`text-sm ${theme.textSecondary}`}>Reputation</div>
+                <div className={`${theme.text} font-bold text-xl`}>42</div>
               </div>
               <div className="text-primary text-3xl font-extrabold">ॐ</div>
             </div>
@@ -60,48 +63,48 @@ const Dashboard = () => {
         </div>
       </div>
 
-      <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
+        <div className="w-full grid grid-cols-1 lg:grid-cols-3 gap-6">
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-            <div className="p-4 rounded-2xl bg-white/5 border border-primary/20 shadow-md flex flex-col">
+            <div className={`p-4 rounded-2xl ${theme.bgSubtle} border border-primary/20 shadow-md flex flex-col`}>
               <div className="text-primary text-sm font-semibold">Posts</div>
-              <div className="text-white text-2xl font-bold">0</div>
-              <div className="text-slate-400 text-xs mt-2 flex items-center gap-1">
+              <div className={`${theme.text} text-2xl font-bold`}>0</div>
+              <div className={`${theme.textTertiary} text-xs mt-2 flex items-center gap-1`}>
                 <FaArrowUpLong className="text-green-400" /> 8 this week
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white/5 border border-primary/20 shadow-md flex flex-col">
+            <div className={`p-4 rounded-2xl ${theme.bgSubtle} border border-primary/20 shadow-md flex flex-col`}>
               <div className="text-primary text-sm font-semibold">Events</div>
-              <div className="text-white text-2xl font-bold">0</div>
-              <div className="text-slate-400 text-xs mt-2 flex items-center gap-1">
+              <div className={`${theme.text} text-2xl font-bold`}>0</div>
+              <div className={`${theme.textTertiary} text-xs mt-2 flex items-center gap-1`}>
                 <FaArrowUpLong className="text-green-400" /> 3 upcoming
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white/5 border border-primary/20 shadow-md flex flex-col">
+            <div className={`p-4 rounded-2xl ${theme.bgSubtle} border border-primary/20 shadow-md flex flex-col`}>
               <div className="text-primary text-sm font-semibold">
                 Community
               </div>
-              <div className="text-white text-2xl font-bold">0</div>
-              <div className="text-slate-400 text-xs mt-2">
+              <div className={`${theme.text} text-2xl font-bold`}>0</div>
+              <div className={`${theme.textTertiary} text-xs mt-2`}>
                 Active contributors: 12
               </div>
             </div>
 
-            <div className="p-4 rounded-2xl bg-white/5 border border-primary/20 shadow-md flex flex-col">
+            <div className={`p-4 rounded-2xl ${theme.bgSubtle} border border-primary/20 shadow-md flex flex-col`}>
               <div className="text-primary text-sm font-semibold">
                 Mapped Places
               </div>
-              <div className="text-white text-2xl font-bold">0</div>
-              <div className="text-slate-400 text-xs mt-2">
+              <div className={`${theme.text} text-2xl font-bold`}>0</div>
+              <div className={`${theme.textTertiary} text-xs mt-2`}>
                 Explore the map for hotspots
               </div>
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white/3 border border-primary/10 backdrop-blur-sm">
-            <div className="text-white font-semibold mb-3">Quick Actions</div>
+          <div className={`p-4 rounded-2xl ${theme.bgSubtle} border border-primary/10 backdrop-blur-sm`}>
+            <div className={`${theme.text} font-semibold mb-3`}>Quick Actions</div>
             <div className="flex gap-3 flex-wrap">
               <Button
                 className="px-4 py-3 rounded-full"
@@ -154,8 +157,8 @@ const Dashboard = () => {
             </div>
           </div>
 
-          <div className="p-4 rounded-2xl bg-white/5 border border-primary/20">
-            <div className="text-white font-semibold mb-4">Recent Updates</div>
+          <div className={`p-4 rounded-2xl ${theme.bgSubtle} border border-primary/20`}>
+            <div className={`${theme.text} font-semibold mb-4`}>Recent Updates</div>
             {feedData.map((feed) => (
               <FeedCard {...feed} />
             ))}
@@ -163,10 +166,10 @@ const Dashboard = () => {
         </div>
 
         <div className="flex flex-col gap-6">
-          <div className="p-4 rounded-3xl bg-white/5 border border-primary/20 shadow-lg">
+          <div className={`p-4 rounded-3xl ${theme.bgSubtle} border border-primary/20 shadow-lg`}>
             <div className="flex items-center justify-between mb-3">
               <div className="text-primary font-semibold">Nearby Map</div>
-              <div className="text-slate-400 text-sm">Interactive</div>
+              <div className={`${theme.textTertiary} text-sm`}>Interactive</div>
             </div>
             <div className="w-full h-64 rounded-lg overflow-hidden">
               <Map minimal />

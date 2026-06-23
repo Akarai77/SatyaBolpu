@@ -7,6 +7,7 @@ import Title from '../components/Title';
 import useApi from '../hooks/useApi';
 import { FaRegCalendar } from 'react-icons/fa';
 import { FaLocationDot, FaEllipsis } from 'react-icons/fa6';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const cards = [
   {
@@ -88,10 +89,12 @@ const Create = () => {
     navigate(`${type}/${res.id}`);
   };
 
+  const theme = useThemeClasses();
+
   if (!authState.token) return <Navigate to={'/404'} replace />;
 
   return (
-    <div className="w-screen min-h-screen py-20 flex flex-col items-center">
+    <div className={`w-screen min-h-screen py-20 flex flex-col items-center ${theme.bg}`}>
       <Title title="Create" />
 
       <div className="w-[90%] sm:w-2/3 lg:w-1/2 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 mt-16">
@@ -105,7 +108,7 @@ const Create = () => {
             <div
               key={label}
               className={`group relative flex flex-col items-center justify-center gap-3
-              bg-linear-to-br ${accent} border border-white/10 rounded-2xl p-8
+              bg-linear-to-br ${accent} ${theme.border} rounded-2xl p-8
               cursor-pointer hover:border-primary/50 hover:scale-[1.03] hover:shadow-lg hover:shadow-primary/10
               transition-all duration-300
               ${i === cards.length - 1 && cards.length % 3 === 1 ? 'lg:col-start-2' : ''}`}
@@ -119,10 +122,10 @@ const Create = () => {
                 className={`${iconColor} text-4xl group-hover:text-primary transition-colors duration-300`}
                 strokeWidth={label === 'Event' ? '10px' : undefined}
               />
-              <p className="text-white font-bold text-xl group-hover:text-primary transition-colors duration-300">
+              <p className={`${theme.text} font-bold text-xl group-hover:text-primary transition-colors duration-300`}>
                 {label}
               </p>
-              <p className="text-white/50 text-sm text-center group-hover:text-white/70 transition-colors duration-300">
+              <p className={`${theme.textFaint} text-sm text-center group-hover:${theme.textSecondary} transition-colors duration-300`}>
                 {desc}
               </p>
             </div>

@@ -1,19 +1,22 @@
 import Title from '../components/Title';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const About = () => {
+  const theme = useThemeClasses();
+  
   return (
-    <div className="w-full min-h-screen bg-black py-20 px-4">
+    <div className={`w-full min-h-screen ${theme.bg} py-20 px-4`}>
       <Title title="About Us" />
 
-      <div className="max-w-3xl mx-auto mt-12 flex flex-col gap-10 text-zinc-400 text-lg leading-relaxed">
+      <div className={`max-w-3xl mx-auto mt-12 flex flex-col gap-10 ${theme.textSecondary} text-lg leading-relaxed`}>
         <p className="text-center">
           <span className="text-primary font-bold">SatyaBolpu</span> — Tuluva
           Satya Chitta — is a platform dedicated to preserving, documenting, and
           celebrating the rich cultural heritage of Tulunadu.
         </p>
 
-        <div className="flex flex-col gap-6 bg-[#111112]/60 border border-zinc-800 rounded-2xl p-8">
-          <h2 className="text-2xl font-bold text-white">Our Mission</h2>
+        <div className={`flex flex-col gap-6 ${theme.bgSubtle} ${theme.border} rounded-2xl p-8`}>
+          <h2 className={`text-2xl font-bold ${theme.text}`}>Our Mission</h2>
           <p>
             We aim to create a living archive of Tulunadu's traditions — from
             Daivaradhane and Nagaradhane to Yakshagana and Kambala — ensuring
@@ -22,27 +25,27 @@ const About = () => {
           </p>
         </div>
 
-        <div className="flex flex-col gap-6 bg-[#111112]/60 border border-zinc-800 rounded-2xl p-8">
-          <h2 className="text-2xl font-bold text-white">What We Offer</h2>
+        <div className={`flex flex-col gap-6 ${theme.bgSubtle} ${theme.border} rounded-2xl p-8`}>
+          <h2 className={`text-2xl font-bold ${theme.text}`}>What We Offer</h2>
           <ul className="list-disc list-inside flex flex-col gap-3">
             <li>
-              <span className="text-white font-semibold">Posts</span> — Articles
+              <span className={`${theme.text} font-semibold`}>Posts</span> — Articles
               and stories about Tulunadu's culture, history, and people.
             </li>
             <li>
-              <span className="text-white font-semibold">Cultures</span> — In-depth
+              <span className={`${theme.text} font-semibold`}>Cultures</span> — In-depth
               documentation of traditions, rituals, and practices.
             </li>
             <li>
-              <span className="text-white font-semibold">Events</span> — A calendar
+              <span className={`${theme.text} font-semibold`}>Events</span> — A calendar
               of cultural events, festivals, and gatherings.
             </li>
             <li>
-              <span className="text-white font-semibold">Blogs</span> — Personal
+              <span className={`${theme.text} font-semibold`}>Blogs</span> — Personal
               narratives and community voices.
             </li>
             <li>
-              <span className="text-white font-semibold">Map</span> — An
+              <span className={`${theme.text} font-semibold`}>Map</span> — An
               interactive map of culturally significant locations.
             </li>
           </ul>

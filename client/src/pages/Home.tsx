@@ -26,6 +26,7 @@ import { BASE_URL } from '../App';
 import MAP from './MAP';
 import { FaRegCalendar } from 'react-icons/fa';
 import { EventCardProps } from '../components/EventCard';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 gsap.registerPlugin(useGSAP);
 gsap.registerPlugin(ScrollTrigger);
@@ -68,7 +69,6 @@ const Home = () => {
   const headingRefs = useRef<HTMLDivElement[]>([]);
   const foliageRefs = useRef<HTMLImageElement[]>([]);
   const imgRefs = useRef<HTMLImageElement[]>([]);
-  // const buttonRefs = useRef<HTMLButtonElement[]>([]);
   const overlayRef = useRef<HTMLDivElement>(null);
   const mapRef = useRef<HTMLDivElement>(null);
   const swiperOverlayRef = useRef<HTMLDivElement>(null);
@@ -81,6 +81,7 @@ const Home = () => {
   const [recentPosts, setRecentPosts] = useState<PostCardProps[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<EventCardProps[]>([]);
   const [isHovering, setHovering] = useState<boolean>(false);
+  const theme = useThemeClasses();
 
   const recentPostsApi = useApi(
     '/posts?fields=title,description,coverImage&limit=5',
@@ -260,7 +261,7 @@ const Home = () => {
             }}
           />
           <div
-            className="fixed top-0 w-full h-full bg-black/50 z-10"
+            className={`fixed top-0 w-full h-full ${theme.bgSubtle} z-10`}
             ref={overlayRef}
           ></div>
           <div
@@ -278,7 +279,7 @@ const Home = () => {
             <p>Western Ghats</p>
           </div>
           <img
-            className="fixed top-0 left-0 w-full h-full object-cover object-center bg-white z-0"
+            className={`fixed top-0 left-0 w-full h-full object-cover object-center ${theme.bg} z-0`}
             src="/assets/Home/hero/mountain.png"
             alt="western ghats"
             ref={(el) => {
@@ -286,7 +287,7 @@ const Home = () => {
             }}
           />
           <img
-            className="fixed top-0 left-0 w-full h-full object-cover object-center bg-white z-0"
+            className={`fixed top-0 left-0 w-full h-full object-cover object-center ${theme.bg} z-0`}
             src="/assets/Home/hero/bg1.webp"
             alt="eastern coast"
             ref={(el) => {
@@ -401,7 +402,7 @@ const Home = () => {
 
         <div className="w-screen h-1/2 md:h-screen relative flex">
           <div
-            className="absolute top-0 w-screen h-full z-10 bg-black"
+            className={`absolute top-0 w-screen h-full z-10 ${theme.bg}`}
             ref={swiperOverlayRef}
           ></div>
 
@@ -447,7 +448,7 @@ const Home = () => {
                       >
                         {slide.title}
                       </h1>
-                      <p className="text-justify hidden md:block text-white/60 text-sm md:text-base p-6 lg:p-10 leading-relaxed">
+                      <p className={`text-justify hidden md:block ${theme.textTertiary} text-sm md:text-base p-6 lg:p-10 leading-relaxed`}>
                         {slide.descr}
                       </p>
                       <Button
@@ -629,7 +630,7 @@ const Home = () => {
         }}
       >
         <div className="sticky top-0 w-full h-screen">
-          <div className="overlay w-full h-screen absolute top-0 bg-black/60 z-10"></div>
+          <div className={`overlay w-full h-screen absolute top-0 ${theme.overlay}/60 z-10`}></div>
           <div
             className="w-screen h-1/4 md:w-1/4 md:h-screen top-0 left-0 absolute
               bg-[url('/assets/Home/cta/daivaradhane.jpg')] bg-no-repeat
@@ -664,7 +665,7 @@ const Home = () => {
           ></div>
         </div>
         <div className="sticky top-0 w-full h-screen flex flex-col items-center justify-center gap-6 text-center z-20 p-5">
-          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-white drop-shadow-lg">
+          <h1 className={`text-2xl sm:text-3xl md:text-4xl font-bold ${theme.text} drop-shadow-lg`}>
             {state.token
               ? 'Embrace The Land of Faith'
               : 'Fully Experience The World Of Faith'}
@@ -694,7 +695,7 @@ const Home = () => {
         >
           "Tuluva Manna Satyole Chitta"
         </h1>
-        <p className="md:text-right text-center font-cursive text-white/50 mt-2">
+        <p className={`md:text-right text-center font-cursive ${theme.textFaint} mt-2`}>
           - Vijeth M Shetty Manjanady
         </p>
       </div>

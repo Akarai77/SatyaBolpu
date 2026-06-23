@@ -11,6 +11,7 @@ import parsePhoneNumberFromString from 'libphonenumber-js/mobile';
 import { toast } from 'react-toastify';
 import { SignUpProps } from '../types/globals';
 import { BASE_URL } from '../App';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const initialFormData: SignUpProps = {
   name: '',
@@ -171,18 +172,20 @@ const SignUp = () => {
     }
   }, [data, error, loading]);
 
+  const theme = useThemeClasses();
+
   if (state.token) return <Navigate to={'/profile'} replace />;
 
   return (
-    <div className="relative w-full min-h-screen bg-black flex items-center justify-center px-4 py-16 overflow-hidden select-none">
+    <div className={`relative w-full min-h-screen ${theme.bg} flex items-center justify-center px-4 py-16 overflow-hidden select-none`}>
       <div className="absolute w-150 h-150 rounded-full bg-primary/10 blur-3xl" />
 
       <form
         onSubmit={handleSubmit}
-        className="relative w-full sm:w-[85%] md:w-2/3 lg:w-2/5 max-w-xl border border-zinc-600/60
-        rounded-3xl flex flex-col gap-6 px-8 py-12 bg-[#111112]/60 backdrop-blur-xl
+        className={`relative w-full sm:w-[85%] md:w-2/3 lg:w-2/5 max-w-xl ${theme.border}
+        rounded-3xl flex flex-col gap-6 px-8 py-12 ${theme.bgSubtle} backdrop-blur-xl
         shadow-2xl z-10
-      "
+      `}
       >
         <div className="flex flex-col items-center gap-2 text-center">
           <span className="text-xl text-primary font-bold tracking-widest drop-shadow-[0_0_8px_rgba(232,126,54,0.5)]">
@@ -190,7 +193,7 @@ const SignUp = () => {
           </span>
 
           <h1
-            className="text-4xl font-black uppercase tracking-tight text-white"
+            className={`text-4xl font-black uppercase tracking-tight ${theme.text}`}
             style={{
               WebkitTextStroke: '0.5px rgba(255,255,255,0.05)',
             }}
@@ -198,7 +201,7 @@ const SignUp = () => {
             Sign Up
           </h1>
 
-          <p className="text-zinc-400 text-sm">
+          <p className={`${theme.textTertiary} text-sm`}>
             Begin your journey through Tulunadu
           </p>
         </div>
@@ -214,7 +217,7 @@ const SignUp = () => {
                 ${
                   step === i
                     ? 'bg-primary text-black shadow-[0_0_20px_rgba(232,126,54,0.4)]'
-                    : 'border border-zinc-700 text-zinc-500'
+                    : `${theme.border} ${theme.textFaint}`
                 }
               `}
               >
@@ -224,7 +227,7 @@ const SignUp = () => {
               <span
                 className={`
                 hidden lg:block text-xs uppercase tracking-widest
-                ${step === i ? 'text-white' : 'text-zinc-500'}
+                ${step === i ? theme.text : theme.textFaint}
               `}
               >
                 {label}
@@ -236,16 +239,15 @@ const SignUp = () => {
         {step === 0 && (
           <>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs uppercase tracking-widest text-zinc-400">
+              <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
                 Full Name
               </label>
 
               <input
-                className="
-                w-full text-white bg-black/40 px-4 py-3.5 border border-zinc-800
-                rounded-xl focus:outline-none focus:border-primary/80 focus:ring-1
-                focus:ring-primary/40 transition-all duration-300
-              "
+                className={`
+                w-full ${theme.text} ${theme.input}
+                rounded-xl focus:outline-none ${theme.inputFocus} transition-all duration-300
+              `}
                 type="text"
                 name="name"
                 value={formData.name}
@@ -258,16 +260,15 @@ const SignUp = () => {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs uppercase tracking-widest text-zinc-400">
+              <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
                 Username (Optional)
               </label>
 
               <input
-                className="
-                w-full text-white bg-black/40 px-4 py-3.5 border border-zinc-800
-                rounded-xl focus:outline-none focus:border-primary/80 focus:ring-1
-                focus:ring-primary/40 transition-all duration-300
-              "
+                className={`
+                w-full ${theme.text} ${theme.input}
+                rounded-xl focus:outline-none ${theme.inputFocus} transition-all duration-300
+              `}
                 type="text"
                 name="uname"
                 value={formData.uname}
@@ -280,16 +281,15 @@ const SignUp = () => {
         {step === 1 && (
           <>
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs uppercase tracking-widest text-zinc-400">
+              <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
                 Email Address
               </label>
 
               <input
-                className="
-                w-full text-white bg-black/40 px-4 py-3.5 border border-zinc-800
-                rounded-xl focus:outline-none focus:border-primary/80 focus:ring-1
-                focus:ring-primary/40 transition-all duration-300
-              "
+                className={`
+                w-full ${theme.text} ${theme.input}
+                rounded-xl focus:outline-none ${theme.inputFocus} transition-all duration-300
+              `}
                 type="email"
                 name="email"
                 value={formData.email}
@@ -302,7 +302,7 @@ const SignUp = () => {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs uppercase tracking-widest text-zinc-400">
+              <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
                 Phone Number (Optional)
               </label>
 
@@ -320,15 +320,15 @@ const SignUp = () => {
                 inputStyle={{
                   width: '100%',
                   height: '52px',
-                  background: 'rgba(0,0,0,.4)',
-                  color: 'white',
-                  border: '1px solid rgb(39 39 42)',
+                  background: theme.bgSubtle.replace('bg-', '').includes('/') ? 'rgba(0,0,0,.4)' : '#f9fafb',
+                  color: theme.text === 'text-primary' ? 'white' : '#111827',
+                  border: `1px solid ${theme.text === 'text-primary' ? 'rgb(39 39 42)' : 'rgb(209 213 219)'}`,
                   borderRadius: '12px',
                   fontSize: '16px',
                 }}
                 buttonStyle={{
-                  background: 'rgba(0,0,0,.4)',
-                  border: '1px solid rgb(39 39 42)',
+                  background: theme.bgSubtle.replace('bg-', '').includes('/') ? 'rgba(0,0,0,.4)' : '#f9fafb',
+                  border: `1px solid ${theme.text === 'text-primary' ? 'rgb(39 39 42)' : 'rgb(209 213 219)'}`,
                 }}
               />
 
@@ -339,7 +339,7 @@ const SignUp = () => {
 
             <div className="flex flex-col gap-1.5">
               <label
-                className="text-xs uppercase tracking-widest text-zinc-400"
+                className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}
                 htmlFor="image"
               >
                 Profile image (Optional)
@@ -362,7 +362,7 @@ const SignUp = () => {
                 onChange={handleFormDataChange}
               />
               {formData.image && (
-                <div className="w-1/2 border-2 border-solid border-white flex">
+                <div className={`w-1/2 ${theme.border} border-2 border-solid flex`}>
                   <img
                     className="w-full aspect-square object-cover object-center"
                     src={
@@ -383,13 +383,13 @@ const SignUp = () => {
           <>
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between items-center">
-                <label className="text-xs uppercase tracking-widest text-zinc-400">
+                <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
                   Password
                 </label>
 
                 <button
                   type="button"
-                  className="text-zinc-500 hover:text-primary text-xl transition-colors"
+                  className={`${theme.textFaint} hover:text-primary text-xl transition-colors`}
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <GrFormViewHide /> : <GrFormView />}
@@ -414,7 +414,7 @@ const SignUp = () => {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className="text-xs uppercase tracking-widest text-zinc-400">
+              <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
                 Confirm Password
               </label>
 
@@ -442,11 +442,11 @@ const SignUp = () => {
             <button
               type="button"
               onClick={() => setStep((prev) => prev - 1)}
-              className="
+              className={`
               flex items-center gap-2 px-5 py-3 rounded-full border
-              border-zinc-700 text-zinc-300 hover:border-primary
+              ${theme.border} ${theme.textSecondary} hover:border-primary
               hover:text-primary transition-all
-            "
+            `}
             >
               <FaArrowLeft />
               Back
@@ -459,10 +459,10 @@ const SignUp = () => {
             <button
               type="button"
               onClick={() => handleNext(step + 1)}
-              className="
-              flex items-center gap-2 px-5 py-3 rounded-full border border-zinc-700
-              text-zinc-300 hover:border-primary hover:text-primary transition-all
-            "
+              className={`
+              flex items-center gap-2 px-5 py-3 rounded-full border ${theme.border}
+              ${theme.textSecondary} hover:border-primary hover:text-primary transition-all
+            `}
             >
               Next
               <FaArrowRight />
@@ -481,7 +481,7 @@ const SignUp = () => {
           )}
         </div>
 
-        <div className="flex items-center justify-center gap-2 text-xs text-zinc-500">
+        <div className={`flex items-center justify-center gap-2 text-xs ${theme.textFaint}`}>
           <span>Already have an account?</span>
 
           <a href="/login" className="text-primary hover:underline">

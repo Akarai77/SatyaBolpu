@@ -9,6 +9,7 @@ import { toast } from 'react-toastify';
 import { useDialog } from '../context/DialogBoxContext';
 import gsap from 'gsap';
 import { BASE_URL } from '../App';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const Profile = () => {
   const { state, dispatch } = useAuth();
@@ -57,21 +58,23 @@ const Profile = () => {
     }
   }, [error, loading]);
 
+  const theme = useThemeClasses();
+
   if (!state.token) return <Navigate to="/login" replace />;
 
   return (
-    <div className="relative w-full min-h-screen bg-black flex items-center justify-center px-4 py-20 overflow-hidden">
+    <div className={`relative w-full min-h-screen ${theme.bg} flex items-center justify-center px-4 py-20 overflow-hidden`}>
       <div className="absolute w-150 h-150 rounded-full bg-primary/10 blur-3xl" />
 
       <div
         ref={profileRef}
-        className="relative w-full sm:w-[85%] md:w-2/3 lg:w-1/2 xl:w-[42%] max-w-3xl border border-zinc-500/60
-          rounded-3xl px-8 py-14 flex flex-col items-center gap-8 overflow-hidden"
+        className={`relative w-full sm:w-[85%] md:w-2/3 lg:w-1/2 xl:w-[42%] max-w-3xl ${theme.border}
+          rounded-3xl px-8 py-14 flex flex-col items-center gap-8 overflow-hidden`}
       >
         <div className="flex flex-col items-center text-center relative">
           <div
-            className="w-32 h-32 rounded-full bg-black/40 border-2 border-primary/40
-              flex items-center justify-center overflow-hidden"
+            className={`w-32 h-32 rounded-full ${theme.bgSubtle} border-2 border-primary/40
+              flex items-center justify-center overflow-hidden`}
           >
             {state.user?.image ? (
               <img
@@ -86,7 +89,7 @@ const Profile = () => {
 
           <div className="mt-6">
             <div className="flex items-center justify-center gap-2">
-              <h1 className="text-3xl md:text-4xl font-black text-white">
+              <h1 className={`text-3xl md:text-4xl font-black ${theme.text}`}>
                 {state.user?.name}
               </h1>
 
@@ -95,7 +98,7 @@ const Profile = () => {
               )}
             </div>
 
-            <p className="text-zinc-400 italic mt-1">@{state.user?.uname}</p>
+            <p className={`${theme.textTertiary} italic mt-1`}>@{state.user?.uname}</p>
 
             {state.user?.role !== 'user' && (
               <div
@@ -113,24 +116,24 @@ const Profile = () => {
         </div>
 
         <div className="w-full grid gap-5">
-          <div className="bg-black/30 border border-zinc-800 rounded-2xl p-5">
-            <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">
+          <div className={`${theme.bgSubtle} ${theme.border} rounded-2xl p-5`}>
+            <p className={`text-xs uppercase tracking-widest ${theme.textFaint} mb-2`}>
               Email Address
             </p>
 
-            <p className="text-white break-all">{state.user?.email}</p>
+            <p className={`${theme.text} break-all`}>{state.user?.email}</p>
           </div>
 
-          <div className="bg-black/30 border border-zinc-800 rounded-2xl p-5">
-            <p className="text-xs uppercase tracking-widest text-zinc-500 mb-2">
+          <div className={`${theme.bgSubtle} ${theme.border} rounded-2xl p-5`}>
+            <p className={`text-xs uppercase tracking-widest ${theme.textFaint} mb-2`}>
               Phone Number
             </p>
 
-            <p className="text-white">
+            <p className={theme.text}>
               {state.user?.phone ? (
                 '+' + state.user.phone.dialCode + ' ' + state.user.phone.number
               ) : (
-                <span className="italic text-zinc-500">Not Provided</span>
+                <span className={`italic ${theme.textFaint}`}>Not Provided</span>
               )}
             </p>
           </div>

@@ -1,5 +1,6 @@
 import { BASE_URL } from '../App';
 import { FeedCardProps } from '../types/globals';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const typeStyles = {
   post: 'bg-primary/10 text-primary',
@@ -15,8 +16,10 @@ export const FeedCard = ({
   createdAt,
   author,
 }: FeedCardProps) => {
+  const theme = useThemeClasses();
+  
   return (
-    <article className="group flex gap-4 rounded-2xl border border-white/10 bg-white/5 p-4 transition-all duration-300 hover:border-primary/30 hover:bg-white/[0.07] hover:shadow-lg hover:shadow-primary/5">
+    <article className={`group flex gap-4 rounded-2xl ${theme.border} ${theme.bgSubtle} p-4 transition-all duration-300 hover:border-primary/30 ${theme.bgHover}/[0.07] hover:shadow-lg hover:shadow-primary/5`}>
       <div className="h-28 w-36 shrink-0 overflow-hidden rounded-xl">
         <img
           src={`${BASE_URL}${image}`}
@@ -26,7 +29,7 @@ export const FeedCard = ({
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col justify-center">
-        <h3 className="line-clamp-2 text-lg font-bold text-white group-hover:text-primary transition-colors">{title}</h3>
+        <h3 className="line-clamp-2 text-lg font-bold ${theme.text} group-hover:text-primary transition-colors">{title}</h3>
 
         <span
           className={`mt-2 inline-flex w-fit rounded-full px-3 py-1 text-xs font-semibold capitalize ${typeStyles[type]}`}
@@ -38,7 +41,7 @@ export const FeedCard = ({
       <div className="flex min-w-45 flex-col items-end justify-center">
         <div className="flex items-center gap-3">
           <div className="text-right">
-            <p className="font-semibold text-white/80">{author.name}</p>
+            <p className={`font-semibold ${theme.textSecondary}`}>{author.name}</p>
           </div>
 
           <img
@@ -48,7 +51,7 @@ export const FeedCard = ({
           />
         </div>
 
-        <p className="mt-2 text-sm text-white/50">
+        <p className={`mt-2 text-sm ${theme.textFaint}`}>
           {new Date(createdAt).toLocaleDateString('en-GB', {
             day: 'numeric',
             month: 'short',

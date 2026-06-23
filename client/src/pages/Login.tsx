@@ -6,6 +6,7 @@ import { useAuth } from "../context/AuthContext";
 import { Navigate, useNavigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 import { LoginProps } from "../types/globals";
+import { useThemeClasses } from "../hooks/useThemeClasses";
 
 const initialLoginData = {
   email: "",
@@ -101,22 +102,24 @@ const Login = () => {
     }
   }, [data, error, loading, dispatch, navigate]);
 
+  const theme = useThemeClasses();
+
   if (state.token) return <Navigate to={"/profile"} replace />;
 
   return (
-    <div className="relative w-full bg-black flex items-center justify-center px-4 py-16 overflow-hidden select-none">
+    <div className={`relative w-full ${theme.bg} flex items-center justify-center px-4 py-16 overflow-hidden select-none`}>
       
       <form
         onSubmit={handleSubmit}
-        className="relative w-full sm:w-[85%] md:w-2/3 lg:w-2/5 xl:w-[30%] max-w-lg border border-zinc-600/60 rounded-3xl 
-        flex flex-col items-stretch gap-6 px-8 py-12 bg-[#111112]/60 backdrop-blur-xl shadow-2xl z-10"
+        className={`relative w-full sm:w-[85%] md:w-2/3 lg:w-2/5 xl:w-[30%] max-w-lg ${theme.border} rounded-3xl 
+        flex flex-col items-stretch gap-6 px-8 py-12 ${theme.bgSubtle} backdrop-blur-xl shadow-2xl z-10`}
       >
         <div className="flex flex-col items-center gap-2 mb-2 text-center">
           <span className="text-xl text-primary font-bold tracking-widest drop-shadow-[0_0_8px_rgba(232,126,54,0.5)]">
             ॐ
           </span>
           <h1 
-            className="text-4xl font-black uppercase tracking-tight text-white"
+            className={`text-4xl font-black uppercase tracking-tight ${theme.text}`}
             style={{ WebkitTextStroke: '0.5px rgba(255, 255, 255, 0.05)' }}
           >
             Welcome Back
@@ -130,12 +133,12 @@ const Login = () => {
         )}
 
         <div className="w-full flex flex-col gap-1.5">
-          <label htmlFor="email" className="text-xs uppercase tracking-widest text-zinc-400">
+          <label htmlFor="email" className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
             Email Address
           </label>
           <input
-            className="w-full text-white bg-black/40 px-4 py-3.5 text-base border border-zinc-800 rounded-xl 
-              focus:outline-none focus:border-primary/80 focus:ring-1 focus:ring-primary/40 transition-all duration-300"
+            className={`w-full ${theme.text} ${theme.input} px-4 py-3.5 text-base rounded-xl 
+              focus:outline-none ${theme.inputFocus} transition-all duration-300`}
             type="email"
             id="email"
             name="email"
@@ -148,20 +151,20 @@ const Login = () => {
 
         <div className="w-full flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className="text-xs uppercase tracking-widest text-zinc-400">
+            <label htmlFor="password" className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
               Password
             </label>
             <button
               type="button"
-              className="text-zinc-500 hover:text-primary text-xl transition-colors focus:outline-none"
+              className={`${theme.textFaint} hover:text-primary text-xl transition-colors focus:outline-none`}
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <GrFormViewHide /> : <GrFormView />}
             </button>
           </div>
           <input
-            className="w-full text-white bg-black/40 px-4 py-3.5 text-base border border-zinc-800 rounded-xl 
-              focus:outline-none focus:border-primary/80 focus:ring-1 focus:ring-primary/40 transition-all duration-300"
+            className={`w-full ${theme.text} ${theme.input} px-4 py-3.5 text-base rounded-xl 
+              focus:outline-none ${theme.inputFocus} transition-all duration-300`}
             type={showPassword ? "text" : "password"}
             id="password"
             name="password"
@@ -173,8 +176,8 @@ const Login = () => {
           {errors.password && <p className="text-red-500 text-xs mt-0.5">{errors.password}</p>}
         </div>
 
-        <div className="flex items-center justify-between text-xs text-zinc-500 px-1 -mt-1">
-          <Link to="/forgot-password" className="hover:text-white transition-colors">
+        <div className={`flex items-center justify-between text-xs ${theme.textFaint} px-1 -mt-1`}>
+          <Link to="/forgot-password" className={`${theme.textSecondary} hover:text-white transition-colors`}>
             Forgot Password?
           </Link>
           <div className="flex items-center gap-1">

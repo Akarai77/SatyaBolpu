@@ -1,6 +1,7 @@
 import { ChangeEvent, useEffect, useState } from 'react';
 import { Option } from './DropDown';
 import { MdArrowDropDown, MdCancel } from 'react-icons/md';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 export type FilterGroups = Record<
   string,
@@ -33,6 +34,7 @@ const FilterGroup = ({
   setSelectedFilters,
   parentRef,
 }: FilterGroupProps) => {
+  const theme = useThemeClasses();
   const [dropped, setDropped] = useState<boolean>(false);
 
   useEffect(() => {
@@ -59,10 +61,10 @@ const FilterGroup = ({
   };
 
   return (
-    <div className="text-white">
+    <div className={theme.text}>
       <div
-        className="flex gap-2 items-center justify-center cursor-pointer text-white/70 font-medium
-          hover:text-primary transition-colors duration-200"
+        className={`flex gap-2 items-center justify-center cursor-pointer ${theme.textSecondary} font-medium
+          hover:text-primary transition-colors duration-200`}
         onClick={() => setDropped(!dropped)}
       >
         {name}
@@ -75,14 +77,14 @@ const FilterGroup = ({
         />
       </div>
       <div
-        className="transition-all text-white overflow-y-scroll max-h-60 overscroll-none"
+        className={`transition-all ${theme.text} overflow-y-scroll max-h-60 overscroll-none`}
         style={{
           height: dropped ? 'auto' : '0',
           scrollbarWidth: 'none',
         }}
       >
         {options.map((opt) => (
-          <label key={opt.value} className="flex items-center gap-2 cursor-pointer py-1.5 px-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
+          <label key={opt.value} className={`flex items-center gap-2 cursor-pointer py-1.5 px-2 rounded-lg ${theme.bgHover} transition-colors duration-200`}>
             <input
               type="checkbox"
               checked={selected.some((s) => s.value === opt.value)}
