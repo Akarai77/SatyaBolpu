@@ -1,5 +1,5 @@
 import { BaseCardProps, CardListProps } from '../types/globals';
-import { useEffect, useRef, useState } from 'react';
+import { ChangeEvent, KeyboardEvent, useEffect, useRef, useState } from 'react';
 import { GrFormNext, GrFormPrevious } from 'react-icons/gr';
 import useApi from '../hooks/useApi';
 import { Option } from './DropDown';
@@ -7,6 +7,54 @@ import { FaSortAmountDown } from 'react-icons/fa';
 import Filters from './Filters';
 import { MdFilterAlt, MdFilterAltOff } from 'react-icons/md';
 import SortOptions from './SortOptions';
+
+const toCamelCase = (str: string) => {
+  str = str.toLowerCase();
+  return (
+    str.split(' ')[0] +
+    str
+      .split(' ')
+      .slice(1)
+      .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
+      .join('')
+  );
+};
+
+const buildEndpoint = (
+  apiEndpoint: string,
+  pagination: boolean,
+  pageNo: string,
+  cardsPerPage: number | undefined,
+  selectFields: string | undefined,
+) => {
+  const params = new URLSearchParams();
+  if (pagination && cardsPerPage) {
+    params.set('page', pageNo);
+    params.set('limit', cardsPerPage.toString());
+  }
+  if (selectFields) {
+    const existing = new URLSearchParams(selectFields);
+    existing.forEach((value, key) => params.set(key, value));
+  }
+  const qs = params.toString();
+  return `/${apiEndpoint}${qs ? `?${qs}` : ''}`;
+};
+
+const buildFilterQueryString = (
+  selectedFilters: Record<string, Option<string>[]>,
+  selectedSortOption: string,
+  order: 'asc' | 'desc',
+) => {
+  const params = new URLSearchParams();
+  Object.entries(selectedFilters)
+    .filter(([, values]) => values.length > 0)
+    .forEach(([key, values]) => {
+      params.set(`${toCamelCase(key)}s`, values.map((v) => v.value).join(','));
+    });
+  params.set('sortBy', selectedSortOption);
+  params.set('orderBy', order);
+  return params.toString();
+};
 
 const Pagination = ({
   pageNo,
@@ -19,40 +67,76 @@ const Pagination = ({
   handleArrows: (action: '+' | '-') => void;
   handlePageChange: (val: string) => void;
 }) => {
+  const [inputPageNo, setInputPageNo] = useState(pageNo);
   const isPrevDisabled = Number(pageNo) <= 1;
   const isNextDisabled = Number(pageNo) >= totalPages;
 
+  useEffect(() => {
+    setInputPageNo(pageNo);
+  }, [pageNo]);
+
+  const handleKeyDown = (e: KeyboardEvent<HTMLInputElement>) => {
+    if (['e', 'E', '-', '+'].includes(e.key)) {
+      e.preventDefault();
+    }
+  };
+
+  const handleInputPageChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const val = (e.target as HTMLInputElement).value;
+    if (!val) {
+      setInputPageNo('');
+      return;
+    }
+    const num = parseInt(val);
+    if (isNaN(num) || num < 1 || num > totalPages) return;
+    setInputPageNo(val);
+  };
+
+  const commitPageChange = () => {
+    const num = parseInt(inputPageNo);
+    if (!inputPageNo || isNaN(num) || num < 1 || num > totalPages) {
+      setInputPageNo(pageNo);
+    } else {
+      handlePageChange(inputPageNo);
+    }
+  };
+
   return (
     <div className="w-full flex items-center justify-center">
-      <div className="text-[2rem] text-black flex items-center justify-center gap-3">
+      <div className="text-[2rem] text-white flex items-center justify-center gap-3">
         <GrFormPrevious
-          className={`bg-white py-2 rounded-2xl cursor-pointer transition-colors 
+          className={`bg-white/5 border border-white/10 py-2 rounded-2xl cursor-pointer transition-all duration-200
             ${
               isPrevDisabled
                 ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-primary'
+                : 'hover:border-primary/30 hover:text-primary'
             }`}
           onClick={() => !isPrevDisabled && handleArrows('-')}
         />
         <div className="flex items-center gap-2">
           <input
-            type="text"
+            type="number"
             min={1}
             max={totalPages}
-            className="bg-white text-[1.5rem] w-10 h-10 text-center rounded-full hover:bg-primary cursor-pointer"
-            value={pageNo}
-            onChange={(e) =>
-              handlePageChange((e.target as HTMLInputElement).value)
-            }
+            className="bg-white/5 border border-white/30 text-white text-[1.5rem] w-10 h-10 text-center rounded-full
+              [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none
+              hover:border-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all duration-200"
+            value={inputPageNo}
+            onKeyDownCapture={handleKeyDown}
+            onChange={handleInputPageChange}
+            onBlur={commitPageChange}
+            onKeyDown={(e) => {
+              if (e.key === 'Enter') e.currentTarget.blur();
+            }}
           />
-          <span className="text-white text-lg">/ {totalPages}</span>
+          <span className="text-white/50 text-lg">/ {totalPages}</span>
         </div>
         <GrFormNext
-          className={`bg-white py-2 rounded-2xl cursor-pointer transition-colors 
+          className={`bg-white/5 border border-white/10 py-2 rounded-2xl cursor-pointer transition-all duration-200
             ${
               isNextDisabled
                 ? 'opacity-50 cursor-not-allowed'
-                : 'hover:bg-primary'
+                : 'hover:border-primary/30 hover:text-primary'
             }`}
           onClick={() => !isNextDisabled && handleArrows('+')}
         />
@@ -63,13 +147,13 @@ const Pagination = ({
 
 const PaginationSkeleton = () => (
   <div className="w-full flex items-center justify-center">
-    <div className="text-[2rem] text-black flex items-center justify-center gap-3">
-      <GrFormPrevious className="bg-gray-700 w-8 h-8 py-2 rounded-2xl cursor-pointer transition-colors" />
+    <div className="text-[2rem] text-white flex items-center justify-center gap-3">
+      <GrFormPrevious className="bg-white/10 w-8 h-8 py-2 rounded-2xl" />
       <div className="flex items-center gap-2">
-        <div className="w-10 h-10 bg-gray-700 animate-pulse rounded-full"></div>
-        <span className="text-white text-lg">/ ...</span>
+        <div className="w-10 h-10 bg-white/10 animate-pulse rounded-full"></div>
+        <span className="text-white/50 text-lg">/ ...</span>
       </div>
-      <GrFormNext className="bg-gray-700 w-8 h-8 py-2 rounded-2xl cursor-pointer transition-colors" />
+      <GrFormNext className="bg-white/10 w-8 h-8 py-2 rounded-2xl" />
     </div>
   </div>
 );
@@ -91,12 +175,8 @@ const CardList = <T extends BaseCardProps>({
 }: CardListProps<T>) => {
   const [data, setData] = useState<T[]>([]);
   const [pageNo, setPageNo] = useState<string>('1');
-  const [showFilters, setShowFilters] = useState<boolean>(
-    sessionStorage.getItem('showFilters') === 'true' || false,
-  );
-  const [showSortOptions, setShowSortOptions] = useState<boolean>(
-    sessionStorage.getItem('showSortOptions') === 'true' || false,
-  );
+  const [showFilters, setShowFilters] = useState<boolean>(false);
+  const [showSortOptions, setShowSortOptions] = useState<boolean>(false);
   const [selectedFilters, setSelectedFilters] = useState<
     Record<string, Option<string>[]>
   >(JSON.parse(sessionStorage.getItem('filters') ?? '{}'));
@@ -109,16 +189,19 @@ const CardList = <T extends BaseCardProps>({
 
   const filtersRef = useRef<HTMLDivElement>(null);
 
-  const endpoint =
-    `/${apiEndpoint}` +
-    `${pagination ? `?page=${pageNo}&limit=${cardsPerPage}` : ''}` +
-    `${selectFields ? `${pagination ? '&' : '?'}${selectFields}` : ''}`;
+  const endpoint = buildEndpoint(
+    apiEndpoint,
+    pagination,
+    pageNo,
+    cardsPerPage,
+    selectFields,
+  );
   const api = useApi(endpoint, { auto: false });
 
   useEffect(() => {
     if (!pageNo) return;
     api.refetch();
-  }, [pageNo, apiEndpoint]);
+  }, [pageNo, apiEndpoint, endpoint]);
 
   const handleInternalDelete = (id: string) => {
     setData((prev) => prev.filter((d) => d.id !== id));
@@ -128,9 +211,6 @@ const CardList = <T extends BaseCardProps>({
   const toggleSortOptions = () => {
     if (showSortOptions) {
       setSelectedSortOption('createdAt');
-      sessionStorage.removeItem('showSortOptions');
-    } else {
-      sessionStorage.setItem('showSortOptions', 'true');
     }
     setShowSortOptions(!showSortOptions);
   };
@@ -138,44 +218,23 @@ const CardList = <T extends BaseCardProps>({
   const toggleFilters = () => {
     if (showFilters) {
       setSelectedFilters({});
-      sessionStorage.removeItem('showFilters');
-    } else {
-      sessionStorage.setItem('showFilters', 'true');
     }
     setShowFilters(!showFilters);
   };
 
-  const toCamelCase = (str: string) => {
-    str = str.toLowerCase();
-    return (
-      str.split(' ')[0] +
-      str
-        .split(' ')
-        .slice(1)
-        .map((w) => w.charAt(0).toUpperCase() + w.slice(1))
-        .join('')
-    );
-  };
-
   useEffect(() => {
     const fetchFilteredData = async () => {
-      let queryString = Object.entries(selectedFilters)
-        .filter((entry) => entry[1].length > 0)
-        .map(
-          (entry) =>
-            `${toCamelCase(entry[0])}s=${entry[1]
-              .map((v) => v.value)
-              .join(',')}`,
-        )
-        .join('&');
+      const filterQs = buildFilterQueryString(
+        selectedFilters,
+        selectedSortOption,
+        order,
+      );
 
-      queryString +=
-        (queryString ? '&' : '') +
-        `sortBy=${selectedSortOption}&orderBy=${order}`;
+      if (!filterQs) return;
+
+      const sep = pagination || selectFields ? '&' : '?';
       await api.refetch({
-        endpoint:
-          endpoint +
-          `${queryString ? `${pagination ? '&' : `${selectFields ? '&' : '?'}`}${queryString}` : ''}`,
+        endpoint: `${endpoint}${sep}${filterQs}`,
         method: 'GET',
       });
     };
@@ -187,7 +246,7 @@ const CardList = <T extends BaseCardProps>({
     }
 
     fetchFilteredData();
-  }, [selectedFilters, selectedSortOption, order]);
+  }, [selectedFilters, selectedSortOption, order, endpoint]);
 
   useEffect(() => {
     if (selectedSortOption === 'createdAt') {
@@ -244,13 +303,29 @@ const CardList = <T extends BaseCardProps>({
     }
   };
 
+  const paginationEl =
+    pagination &&
+    (api.loading && data.length === 0 ? (
+      <PaginationSkeleton />
+    ) : (
+      data.length > 0 && (
+        <Pagination
+          pageNo={pageNo}
+          totalPages={totalPages}
+          handleArrows={handleArrows}
+          handlePageChange={handlePageChange}
+        />
+      )
+    ));
+
   return (
     <div className="w-full flex flex-col gap-5">
       <div className="w-2/3 flex items-center justify-between mx-auto">
         {searchBar && (
           <div className="w-2/3 flex items-center gap-2">
             <input
-              className="w-full rounded-2xl bg-white p-2"
+              className="w-full rounded-2xl bg-white/5 border border-white/30 text-white placeholder-white/40 p-2
+                focus:border-primary focus:outline-none transition-all duration-200"
               placeholder="Search..."
               type="text"
             />
@@ -319,19 +394,7 @@ const CardList = <T extends BaseCardProps>({
         </div>
       )}
 
-      {pagination &&
-        (api.loading ? (
-          <PaginationSkeleton />
-        ) : (
-          data.length > 0 && (
-            <Pagination
-              pageNo={pageNo}
-              totalPages={totalPages}
-              handleArrows={handleArrows}
-              handlePageChange={handlePageChange}
-            />
-          )
-        ))}
+      {paginationEl}
 
       <div
         className="w-full my-10 flex flex-wrap gap-10 items-center justify-center"
@@ -343,26 +406,18 @@ const CardList = <T extends BaseCardProps>({
           Array.from({ length: pagination ? cardsPerPage! : data.length }).map(
             (_, id) => <SkeletonCard key={id} />,
           )
+        ) : api.error ? (
+          <p className="text-red-400 text-lg">
+            Something went wrong. Please try again.
+          </p>
         ) : data.length > 0 ? (
-          data.map((cardProps, id) => <Card {...cardProps} key={id} />)
+          data.map((cardProps) => <Card {...cardProps} key={cardProps.id} />)
         ) : (
-          <p className="text-gray-400">No Data available</p>
+          <p className="text-white/40 text-lg">No Data available</p>
         )}
       </div>
 
-      {pagination &&
-        (api.loading ? (
-          <PaginationSkeleton />
-        ) : (
-          data.length > 0 && (
-            <Pagination
-              pageNo={pageNo}
-              totalPages={totalPages}
-              handleArrows={handleArrows}
-              handlePageChange={handlePageChange}
-            />
-          )
-        ))}
+      {paginationEl}
     </div>
   );
 };

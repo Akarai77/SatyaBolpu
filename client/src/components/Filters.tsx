@@ -61,7 +61,8 @@ const FilterGroup = ({
   return (
     <div className="text-white">
       <div
-        className="flex gap-2 items-center justify-center cursor-pointer"
+        className="flex gap-2 items-center justify-center cursor-pointer text-white/70 font-medium
+          hover:text-primary transition-colors duration-200"
         onClick={() => setDropped(!dropped)}
       >
         {name}
@@ -80,8 +81,8 @@ const FilterGroup = ({
           scrollbarWidth: 'none',
         }}
       >
-        {options.map((opt, id) => (
-          <label key={id} className="flex items-center gap-2 cursor-pointer">
+        {options.map((opt) => (
+          <label key={opt.value} className="flex items-center gap-2 cursor-pointer py-1.5 px-2 rounded-lg hover:bg-white/5 transition-colors duration-200">
             <input
               type="checkbox"
               checked={selected.some((s) => s.value === opt.value)}
@@ -93,13 +94,13 @@ const FilterGroup = ({
             />
 
             <div
-              className="w-4 h-4 rounded border border-white peer-checked:bg-primary
+              className="w-4 h-4 rounded border border-white/30 peer-checked:bg-primary
                 peer-checked:border-primary after:content-['✓'] after:text-xs
                 after:text-white after:opacity-0 after:flex after:items-center after:justify-center
-                  peer-checked:after:opacity-100"
+                  peer-checked:after:opacity-100 transition-colors duration-200"
             />
 
-            <span>{opt.name}</span>
+            <span className="text-sm">{opt.name}</span>
           </label>
         ))}
       </div>
@@ -123,7 +124,7 @@ const Filters = ({
   return (
     <div className="w-full flex flex-col z-0">
       <div
-        className="w-full mx-auto text-black flex flex-wrap gap-2 overflow-hidden transition-all"
+        className="w-full mx-auto text-white flex flex-wrap gap-2 overflow-hidden transition-all"
         style={{
           height: Object.values(selectedFilters).some((f) => f.length > 0)
             ? 'auto'
@@ -133,16 +134,14 @@ const Filters = ({
         {Object.entries(selectedFilters).map((entry) =>
           entry[1].map((filter) => (
             <div
-              style={{
-                backgroundColor: filterGroups?.[entry[0]]?.color,
-              }}
-              className="rounded-lg p-1 font-bold flex items-center justify-between gap-1"
+              className="rounded-full px-3 py-1 text-xs font-semibold flex items-center justify-between gap-1
+                bg-primary/20 text-white border border-primary/30"
               key={filter.value}
             >
               {filter.name}
               <MdCancel
                 onClick={() => handleRemoveFilter(entry[0], filter.name)}
-                className="hover:scale-110 transition-all cursor-pointer"
+                className="hover:scale-110 transition-all cursor-pointer text-white/60 hover:text-white"
               />
             </div>
           )),
@@ -150,9 +149,9 @@ const Filters = ({
       </div>
 
       <div className="w-full flex p-2 gap-3 justify-center">
-        {Object.entries(filterGroups).map((entry, id) => (
+        {Object.entries(filterGroups).map((entry) => (
           <FilterGroup
-            key={id}
+            key={entry[0]}
             name={entry[0]}
             options={entry[1].options}
             selected={selectedFilters?.[entry[0]] ?? []}
