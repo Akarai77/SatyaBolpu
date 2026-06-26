@@ -1,39 +1,39 @@
-import { ChangeEvent, SubmitEvent, useEffect, useRef, useState } from "react";
-import Button from "../components/Button";
-import { GrFormView, GrFormViewHide } from "react-icons/gr";
-import useApi from "../hooks/useApi";
-import { useAuth } from "../context/AuthContext";
-import { Navigate, useNavigate, Link } from "react-router-dom";
-import { toast } from "react-toastify";
-import { LoginProps } from "../types/globals";
-import { useThemeClasses } from "../hooks/useThemeClasses";
+import { ChangeEvent, SubmitEvent, useEffect, useRef, useState } from 'react';
+import Button from '../components/Button';
+import { GrFormView, GrFormViewHide } from 'react-icons/gr';
+import useApi from '../hooks/useApi';
+import { useAuth } from '../context/AuthContext';
+import { Navigate, useNavigate, Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+import { LoginProps } from '../types/globals';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const initialLoginData = {
-  email: "",
-  password: ""
+  email: '',
+  password: '',
 };
 
 const Login = () => {
   const [formData, setFormData] = useState<LoginProps>(initialLoginData);
   const [errors, setErrors] = useState<LoginProps>(initialLoginData);
-  const [apiError, setApiError] = useState<string>("");
+  const [apiError, setApiError] = useState<string>('');
   const [showPassword, setShowPassword] = useState<boolean>(false);
   const [buttonLoad, setButtonLoad] = useState<boolean>(false);
   const passwordRef = useRef<HTMLInputElement | null>(null);
   const { state, dispatch } = useAuth();
-  const { data, error, loading, post } = useApi("/auth/login", { auto: false });
+  const { data, error, loading, post } = useApi('/auth/login', { auto: false });
   const navigate = useNavigate();
 
   const validateForm = () => {
     const newErrors: LoginProps = { ...initialLoginData };
     if (!formData.email.trim()) {
-      newErrors.email = "Email is required";
+      newErrors.email = 'Email is required';
     } else if (!/\S+@\S+\.\S+/.test(formData.email)) {
-      newErrors.email = "Invalid email format";
+      newErrors.email = 'Invalid email format';
     }
 
     if (!formData.password.trim()) {
-      newErrors.password = "Password is required";
+      newErrors.password = 'Password is required';
     }
 
     return newErrors;
@@ -44,7 +44,7 @@ const Login = () => {
 
     setErrors((prev) => ({
       ...prev,
-      [name]: ""
+      [name]: '',
     }));
 
     setFormData((prev) => ({
@@ -56,7 +56,7 @@ const Login = () => {
   const handleSubmit = async (e: SubmitEvent<HTMLFormElement>) => {
     e.preventDefault();
     const validationErrors = validateForm();
-    if (Object.values(validationErrors).some(err => err !== "")) {
+    if (Object.values(validationErrors).some((err) => err !== '')) {
       setErrors(validationErrors);
       return;
     }
@@ -70,56 +70,58 @@ const Login = () => {
     setButtonLoad(loading);
 
     if (error) {
-      console.error("Login error:", error);
+      console.error('Login error:', error);
       setApiError(error);
       return;
     }
 
     if (data && !loading) {
-      setApiError("");
+      setApiError('');
       dispatch({
-        type: "LOGIN",
+        type: 'LOGIN',
         payload: {
           user: data.user,
           token: data.accessToken,
         },
       });
 
-      const userName = data.user?.name || "Explorer";
-      const names: string[] = userName.split(" ");
+      const userName = data.user?.name || 'Explorer';
+      const names: string[] = userName.split(' ');
       let finalName = names[0];
 
       if (names.length >= 2) {
-        const structuralName = names.find(n => n.length > 5);
+        const structuralName = names.find((n) => n.length > 5);
         if (structuralName) finalName = structuralName;
       }
 
-      finalName = finalName.length > 10 ? `${finalName.slice(0, 10)}...` : finalName;
+      finalName =
+        finalName.length > 10 ? `${finalName.slice(0, 10)}...` : finalName;
       toast.success(`Welcome back ${finalName}`);
 
       setFormData(initialLoginData);
-      navigate("/profile");
+      navigate('/profile');
     }
   }, [data, error, loading, dispatch, navigate]);
 
-  const theme = useThemeClasses();
+  const { tm } = useThemeClasses();
 
-  if (state.token) return <Navigate to={"/profile"} replace />;
+  if (state.token) return <Navigate to={'/profile'} replace />;
 
   return (
-    <div className={`relative w-full ${theme.bg} flex items-center justify-center px-4 py-16 overflow-hidden select-none`}>
-      
+    <div
+      className={`relative w-full ${tm.bg} flex items-center justify-center px-4 py-16 overflow-hidden select-none`}
+    >
       <form
         onSubmit={handleSubmit}
-        className={`relative w-full sm:w-[85%] md:w-2/3 lg:w-2/5 xl:w-[30%] max-w-lg ${theme.border} rounded-3xl 
-        flex flex-col items-stretch gap-6 px-8 py-12 ${theme.bgSubtle} backdrop-blur-xl shadow-2xl z-10`}
+        className={`relative w-full sm:w-[85%] md:w-2/3 lg:w-2/5 xl:w-[30%] max-w-lg ${tm.border} rounded-3xl 
+        flex flex-col items-stretch gap-6 px-8 py-12 ${tm.bgSubtle} backdrop-blur-xl shadow-2xl z-10`}
       >
         <div className="flex flex-col items-center gap-2 mb-2 text-center">
           <span className="text-xl text-primary font-bold tracking-widest drop-shadow-[0_0_8px_rgba(232,126,54,0.5)]">
             ॐ
           </span>
-          <h1 
-            className={`text-4xl font-black uppercase tracking-tight ${theme.text}`}
+          <h1
+            className={`text-4xl font-black uppercase tracking-tight ${tm.text}`}
             style={{ WebkitTextStroke: '0.5px rgba(255, 255, 255, 0.05)' }}
           >
             Welcome Back
@@ -133,12 +135,15 @@ const Login = () => {
         )}
 
         <div className="w-full flex flex-col gap-1.5">
-          <label htmlFor="email" className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
+          <label
+            htmlFor="email"
+            className={`text-xs uppercase tracking-widest ${tm.textTertiary}`}
+          >
             Email Address
           </label>
           <input
-            className={`w-full ${theme.text} ${theme.input} px-4 py-3.5 text-base rounded-xl 
-              focus:outline-none ${theme.inputFocus} transition-all duration-300`}
+            className={`w-full ${tm.text} ${tm.input} px-4 py-3.5 text-base rounded-xl 
+              focus:outline-none ${tm.inputFocus} transition-all duration-300`}
             type="email"
             id="email"
             name="email"
@@ -146,26 +151,31 @@ const Login = () => {
             value={formData.email}
             onChange={handleFormDataChange}
           />
-          {errors.email && <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>}
+          {errors.email && (
+            <p className="text-red-500 text-xs mt-0.5">{errors.email}</p>
+          )}
         </div>
 
         <div className="w-full flex flex-col gap-1.5">
           <div className="flex items-center justify-between">
-            <label htmlFor="password" className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
+            <label
+              htmlFor="password"
+              className={`text-xs uppercase tracking-widest ${tm.textTertiary}`}
+            >
               Password
             </label>
             <button
               type="button"
-              className={`${theme.textFaint} hover:text-primary text-xl transition-colors focus:outline-none`}
+              className={`${tm.textFaint} hover:text-primary text-xl transition-colors focus:outline-none`}
               onClick={() => setShowPassword(!showPassword)}
             >
               {showPassword ? <GrFormViewHide /> : <GrFormView />}
             </button>
           </div>
           <input
-            className={`w-full ${theme.text} ${theme.input} px-4 py-3.5 text-base rounded-xl 
-              focus:outline-none ${theme.inputFocus} transition-all duration-300`}
-            type={showPassword ? "text" : "password"}
+            className={`w-full ${tm.text} ${tm.input} px-4 py-3.5 text-base rounded-xl 
+              focus:outline-none ${tm.inputFocus} transition-all duration-300`}
+            type={showPassword ? 'text' : 'password'}
             id="password"
             name="password"
             placeholder="••••••••"
@@ -173,11 +183,18 @@ const Login = () => {
             value={formData.password}
             onChange={handleFormDataChange}
           />
-          {errors.password && <p className="text-red-500 text-xs mt-0.5">{errors.password}</p>}
+          {errors.password && (
+            <p className="text-red-500 text-xs mt-0.5">{errors.password}</p>
+          )}
         </div>
 
-        <div className={`flex items-center justify-between text-xs ${theme.textFaint} px-1 -mt-1`}>
-          <Link to="/forgot-password" className={`${theme.textSecondary} hover:text-white transition-colors`}>
+        <div
+          className={`flex items-center justify-between text-xs ${tm.textFaint} px-1 -mt-1`}
+        >
+          <Link
+            to="/forgot-password"
+            className={`${tm.textSecondary} hover:text-white transition-colors`}
+          >
             Forgot Password?
           </Link>
           <div className="flex items-center gap-1">
@@ -197,7 +214,6 @@ const Login = () => {
             content="Log in"
           />
         </div>
-
       </form>
     </div>
   );

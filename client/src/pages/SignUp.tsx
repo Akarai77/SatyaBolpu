@@ -172,18 +172,20 @@ const SignUp = () => {
     }
   }, [data, error, loading]);
 
-  const theme = useThemeClasses();
+  const { tm } = useThemeClasses();
 
   if (state.token) return <Navigate to={'/profile'} replace />;
 
   return (
-    <div className={`relative w-full min-h-screen ${theme.bg} flex items-center justify-center px-4 py-16 overflow-hidden select-none`}>
+    <div
+      className={`relative w-full min-h-screen ${tm.bg} flex items-center justify-center px-4 py-16 overflow-hidden select-none`}
+    >
       <div className="absolute w-150 h-150 rounded-full bg-primary/10 blur-3xl" />
 
       <form
         onSubmit={handleSubmit}
-        className={`relative w-full sm:w-[85%] md:w-2/3 lg:w-2/5 max-w-xl ${theme.border}
-        rounded-3xl flex flex-col gap-6 px-8 py-12 ${theme.bgSubtle} backdrop-blur-xl
+        className={`relative w-full sm:w-[85%] md:w-2/3 lg:w-2/5 max-w-xl ${tm.border}
+        rounded-3xl flex flex-col gap-6 px-8 py-12 ${tm.bgSubtle} backdrop-blur-xl
         shadow-2xl z-10
       `}
       >
@@ -193,7 +195,7 @@ const SignUp = () => {
           </span>
 
           <h1
-            className={`text-4xl font-black uppercase tracking-tight ${theme.text}`}
+            className={`text-4xl font-black uppercase tracking-tight ${tm.text}`}
             style={{
               WebkitTextStroke: '0.5px rgba(255,255,255,0.05)',
             }}
@@ -201,7 +203,7 @@ const SignUp = () => {
             Sign Up
           </h1>
 
-          <p className={`${theme.textTertiary} text-sm`}>
+          <p className={`${tm.textTertiary} text-sm`}>
             Begin your journey through Tulunadu
           </p>
         </div>
@@ -217,7 +219,7 @@ const SignUp = () => {
                 ${
                   step === i
                     ? 'bg-primary text-black shadow-[0_0_20px_rgba(232,126,54,0.4)]'
-                    : `${theme.border} ${theme.textFaint}`
+                    : `${tm.border} ${tm.textFaint}`
                 }
               `}
               >
@@ -227,7 +229,7 @@ const SignUp = () => {
               <span
                 className={`
                 hidden lg:block text-xs uppercase tracking-widest
-                ${step === i ? theme.text : theme.textFaint}
+                ${step === i ? tm.text : tm.textFaint}
               `}
               >
                 {label}
@@ -239,14 +241,16 @@ const SignUp = () => {
         {step === 0 && (
           <>
             <div className="flex flex-col gap-1.5">
-              <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
+              <label
+                className={`text-xs uppercase tracking-widest ${tm.textTertiary}`}
+              >
                 Full Name
               </label>
 
               <input
                 className={`
-                w-full ${theme.text} ${theme.input}
-                rounded-xl focus:outline-none ${theme.inputFocus} transition-all duration-300
+                w-full ${tm.text} ${tm.input}
+                rounded-xl focus:outline-none ${tm.inputFocus} transition-all duration-300
               `}
                 type="text"
                 name="name"
@@ -260,14 +264,16 @@ const SignUp = () => {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
+              <label
+                className={`text-xs uppercase tracking-widest ${tm.textTertiary}`}
+              >
                 Username (Optional)
               </label>
 
               <input
                 className={`
-                w-full ${theme.text} ${theme.input}
-                rounded-xl focus:outline-none ${theme.inputFocus} transition-all duration-300
+                w-full ${tm.text} ${tm.input}
+                rounded-xl focus:outline-none ${tm.inputFocus} transition-all duration-300
               `}
                 type="text"
                 name="uname"
@@ -281,14 +287,16 @@ const SignUp = () => {
         {step === 1 && (
           <>
             <div className="flex flex-col gap-1.5">
-              <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
+              <label
+                className={`text-xs uppercase tracking-widest ${tm.textTertiary}`}
+              >
                 Email Address
               </label>
 
               <input
                 className={`
-                w-full ${theme.text} ${theme.input}
-                rounded-xl focus:outline-none ${theme.inputFocus} transition-all duration-300
+                w-full ${tm.text} ${tm.input}
+                rounded-xl focus:outline-none ${tm.inputFocus} transition-all duration-300
               `}
                 type="email"
                 name="email"
@@ -302,7 +310,9 @@ const SignUp = () => {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
+              <label
+                className={`text-xs uppercase tracking-widest ${tm.textTertiary}`}
+              >
                 Phone Number (Optional)
               </label>
 
@@ -320,15 +330,19 @@ const SignUp = () => {
                 inputStyle={{
                   width: '100%',
                   height: '52px',
-                  background: theme.bgSubtle.replace('bg-', '').includes('/') ? 'rgba(0,0,0,.4)' : '#f9fafb',
-                  color: theme.text === 'text-primary' ? 'white' : '#111827',
-                  border: `1px solid ${theme.text === 'text-primary' ? 'rgb(39 39 42)' : 'rgb(209 213 219)'}`,
+                  background: tm.bgSubtle.replace('bg-', '').includes('/')
+                    ? 'rgba(0,0,0,.4)'
+                    : '#f9fafb',
+                  color: tm.text === 'text-primary' ? 'white' : '#111827',
+                  border: `1px solid ${tm.text === 'text-primary' ? 'rgb(39 39 42)' : 'rgb(209 213 219)'}`,
                   borderRadius: '12px',
                   fontSize: '16px',
                 }}
                 buttonStyle={{
-                  background: theme.bgSubtle.replace('bg-', '').includes('/') ? 'rgba(0,0,0,.4)' : '#f9fafb',
-                  border: `1px solid ${theme.text === 'text-primary' ? 'rgb(39 39 42)' : 'rgb(209 213 219)'}`,
+                  background: tm.bgSubtle.replace('bg-', '').includes('/')
+                    ? 'rgba(0,0,0,.4)'
+                    : '#f9fafb',
+                  border: `1px solid ${tm.text === 'text-primary' ? 'rgb(39 39 42)' : 'rgb(209 213 219)'}`,
                 }}
               />
 
@@ -339,7 +353,7 @@ const SignUp = () => {
 
             <div className="flex flex-col gap-1.5">
               <label
-                className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}
+                className={`text-xs uppercase tracking-widest ${tm.textTertiary}`}
                 htmlFor="image"
               >
                 Profile image (Optional)
@@ -362,7 +376,9 @@ const SignUp = () => {
                 onChange={handleFormDataChange}
               />
               {formData.image && (
-                <div className={`w-1/2 ${theme.border} border-2 border-solid flex`}>
+                <div
+                  className={`w-1/2 ${tm.border} border-2 border-solid flex`}
+                >
                   <img
                     className="w-full aspect-square object-cover object-center"
                     src={
@@ -383,13 +399,15 @@ const SignUp = () => {
           <>
             <div className="flex flex-col gap-1.5">
               <div className="flex justify-between items-center">
-                <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
+                <label
+                  className={`text-xs uppercase tracking-widest ${tm.textTertiary}`}
+                >
                   Password
                 </label>
 
                 <button
                   type="button"
-                  className={`${theme.textFaint} hover:text-primary text-xl transition-colors`}
+                  className={`${tm.textFaint} hover:text-primary text-xl transition-colors`}
                   onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? <GrFormViewHide /> : <GrFormView />}
@@ -414,7 +432,9 @@ const SignUp = () => {
             </div>
 
             <div className="flex flex-col gap-1.5">
-              <label className={`text-xs uppercase tracking-widest ${theme.textTertiary}`}>
+              <label
+                className={`text-xs uppercase tracking-widest ${tm.textTertiary}`}
+              >
                 Confirm Password
               </label>
 
@@ -444,7 +464,7 @@ const SignUp = () => {
               onClick={() => setStep((prev) => prev - 1)}
               className={`
               flex items-center gap-2 px-5 py-3 rounded-full border
-              ${theme.border} ${theme.textSecondary} hover:border-primary
+              ${tm.border} ${tm.textSecondary} hover:border-primary
               hover:text-primary transition-all
             `}
             >
@@ -460,8 +480,8 @@ const SignUp = () => {
               type="button"
               onClick={() => handleNext(step + 1)}
               className={`
-              flex items-center gap-2 px-5 py-3 rounded-full border ${theme.border}
-              ${theme.textSecondary} hover:border-primary hover:text-primary transition-all
+              flex items-center gap-2 px-5 py-3 rounded-full border ${tm.border}
+              ${tm.textSecondary} hover:border-primary hover:text-primary transition-all
             `}
             >
               Next
@@ -481,7 +501,9 @@ const SignUp = () => {
           )}
         </div>
 
-        <div className={`flex items-center justify-center gap-2 text-xs ${theme.textFaint}`}>
+        <div
+          className={`flex items-center justify-center gap-2 text-xs ${tm.textFaint}`}
+        >
           <span>Already have an account?</span>
 
           <a href="/login" className="text-primary hover:underline">

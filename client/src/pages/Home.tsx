@@ -3,16 +3,7 @@ import { useLoading } from '../context/LoadingContext';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/all';
 import { useGSAP } from '@gsap/react';
-import { Swiper, SwiperSlide } from 'swiper/react';
-import {
-  Autoplay,
-  EffectCoverflow,
-  Keyboard,
-  Navigation,
-  Pagination,
-} from 'swiper/modules';
 import Button from '../components/Button';
-import { GrFormNextLink, GrFormPreviousLink } from 'react-icons/gr';
 import 'swiper/swiper-bundle.css';
 import { useAuth } from '../context/AuthContext';
 import { buildAnimationProps } from '../constants/Animations';
@@ -21,12 +12,12 @@ import { Marker, Popup } from 'react-leaflet';
 import SVGHeader2 from '../constants/SVGHeader2';
 import { PostCardProps } from '../components/PostCard';
 import useApi from '../hooks/useApi';
-import PostCard from '../components/PostCard';
 import { BASE_URL } from '../App';
 import MAP from './MAP';
 import { FaRegCalendar } from 'react-icons/fa';
 import { EventCardProps } from '../components/EventCard';
 import { useThemeClasses } from '../hooks/useThemeClasses';
+import RotatingCard from '../components/RotatingCard';
 
 gsap.registerPlugin(useGSAP);
 gsap.registerPlugin(ScrollTrigger);
@@ -80,8 +71,7 @@ const Home = () => {
   const [swiperData, setSwiperData] = useState<swiperDataType[]>([]);
   const [recentPosts, setRecentPosts] = useState<PostCardProps[]>([]);
   const [upcomingEvents, setUpcomingEvents] = useState<EventCardProps[]>([]);
-  const [isHovering, setHovering] = useState<boolean>(false);
-  const theme = useThemeClasses();
+  const { tm } = useThemeClasses();
 
   const recentPostsApi = useApi(
     '/posts?fields=title,description,coverImage&limit=5',
@@ -190,7 +180,7 @@ const Home = () => {
   ]);
 
   return (
-    <div className="home w-screen bg-black">
+    <div className={`home w-screen ${tm.bg}`}>
       <div className="relative w-full h-screen">
         <div
           className="w-full h-screen absolute grid place-items-center top-0 left-0 z-0"
@@ -261,7 +251,7 @@ const Home = () => {
             }}
           />
           <div
-            className={`fixed top-0 w-full h-full ${theme.bgSubtle} z-10`}
+            className={`fixed top-0 w-full h-full z-10`}
             ref={overlayRef}
           ></div>
           <div
@@ -279,7 +269,7 @@ const Home = () => {
             <p>Western Ghats</p>
           </div>
           <img
-            className={`fixed top-0 left-0 w-full h-full object-cover object-center ${theme.bg} z-0`}
+            className={`fixed top-0 left-0 w-full h-full object-cover object-center bg-white z-0`}
             src="/assets/Home/hero/mountain.png"
             alt="western ghats"
             ref={(el) => {
@@ -287,7 +277,7 @@ const Home = () => {
             }}
           />
           <img
-            className={`fixed top-0 left-0 w-full h-full object-cover object-center ${theme.bg} z-0`}
+            className={`fixed top-0 left-0 w-full h-full object-cover object-center z-0`}
             src="/assets/Home/hero/bg1.webp"
             alt="eastern coast"
             ref={(el) => {
@@ -342,7 +332,7 @@ const Home = () => {
       </div>
 
       <div
-        className="map w-full min-h-screen flex flex-col lg:flex-row gap-8 items-center justify-center p-10 lg:px-20"
+        className={`map w-full h-[200vh] flex flex-col lg:flex-row gap-8 items-center justify-center p-10 lg:px-20`}
         ref={(el) => {
           if (el) scrollWatcherRef.current[2] = el;
         }}
@@ -355,13 +345,15 @@ const Home = () => {
         >
           <div className="flex flex-col items-center gap-4">
             <h2
-              className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight
+              className={`text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-black tracking-tight
                 text-transparent bg-clip-text bg-linear-to-r from-primary via-amber-400 to-primary
-                leading-tight"
+                leading-tight`}
             >
               The Spiritual Hub
             </h2>
-            <p className="text-white/60 text-base md:text-lg lg:text-xl max-w-lg">
+            <p
+              className={`${tm.textTertiary} text-base md:text-lg lg:text-xl max-w-lg`}
+            >
               Spread across two states and three districts — Udupi, Dakshina
               Kannada & Kasaragod
             </p>
@@ -386,8 +378,8 @@ const Home = () => {
         </div>
       </div>
 
-      <div
-        className="cultures w-full h-[200vh] flex flex-col gap-10 items-center justify-center"
+      {/* <div
+        className={`cultures w-full flex flex-col gap-10 items-center justify-center`}
         ref={(el) => {
           if (el) scrollWatcherRef.current[3] = el;
         }}
@@ -399,124 +391,11 @@ const Home = () => {
         >
           <SectionHeading>Cultures And Traditions</SectionHeading>
         </div>
-
-        <div className="w-screen h-1/2 md:h-screen relative flex">
-          <div
-            className={`absolute top-0 w-screen h-full z-10 ${theme.bg}`}
-            ref={swiperOverlayRef}
-          ></div>
-
-          <Swiper
-            className="absolute top-0 z-0 w-screen h-full"
-            spaceBetween={50}
-            slidesPerView={1}
-            loop={swiperData.length > 1}
-            autoplay={{ delay: 10000 }}
-            keyboard={{ enabled: true, onlyInViewport: true }}
-            pagination={{
-              clickable: true,
-              type: 'bullets',
-              el: '.custom-pagination',
-              bulletClass:
-                'w-2 h-2 bg-white/40 z-10 transition-all duration-300 rounded-full',
-              bulletActiveClass: 'w-8 !bg-primary rounded-full',
-            }}
-            navigation={{
-              nextEl: '.custom-nav-next',
-              prevEl: '.custom-nav-prev',
-            }}
-            modules={[
-              Pagination,
-              Navigation,
-              Keyboard,
-              EffectCoverflow,
-              Autoplay,
-            ]}
-            effect="coverflow"
-          >
-            {swiperData &&
-              swiperData.map((slide, index) => (
-                <SwiperSlide key={index}>
-                  <div
-                    className="z-0 relative w-full h-full lg:flex-row flex flex-col-reverse justify-center
-                                    lg:justify-around items-center md:p-5"
-                  >
-                    <div className="lg:w-1/3 md:w-5/6 w-full lg:h-full h-1/3 flex flex-col items-center md:justify-center md:gap-5">
-                      <h1
-                        className="text-2xl lg:text-4xl font-black text-transparent 
-                        bg-clip-text bg-linear-to-r from-primary to-amber-400"
-                      >
-                        {slide.title}
-                      </h1>
-                      <p className={`text-justify hidden md:block ${theme.textTertiary} text-sm md:text-base p-6 lg:p-10 leading-relaxed`}>
-                        {slide.descr}
-                      </p>
-                      <Button
-                        content="Explore"
-                        onClick={() => navigate(`/explore/${slide.title}`)}
-                      />
-                    </div>
-                    <div
-                      className="flex lg:flex-col items-center justify-center lg:w-2/5 lg:h-full w-screen h-[65%]
-                        cursor-pointer"
-                      onMouseEnter={() => setHovering(true)}
-                      onClick={() => setHovering(!isHovering)}
-                      onMouseLeave={() => setHovering(false)}
-                    >
-                      <img
-                        loading="lazy"
-                        className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 
-                            rounded-lg shadow-xl transition-all duration-500
-                            ${
-                              isHovering
-                                ? 'lg:translate-y-0 lg:-rotate-12 lg:translate-x-0 -translate-y-28 -rotate-20 translate-x-[90%] '
-                                : '-translate-y-5 rotate-10 translate-x-[90%] lg:translate-x-0 lg:translate-24 lg:rotate-12'
-                            }`}
-                        src={slide.images[0]}
-                        alt={slide.title}
-                      />
-                      <img
-                        loading="lazy"
-                        className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-10 
-                            rounded-lg shadow-2xl`}
-                        src={slide.images[1]}
-                        alt={slide.title}
-                      />
-                      <img
-                        loading="lazy"
-                        className={`relative lg:w-3/5 md:w-[40%] w-[60%] aspect-video object-cover z-0 
-                            rounded-lg shadow-xl transition-all duration-500
-                            ${
-                              isHovering
-                                ? 'lg:translate-y-0 lg:-rotate-12 translate-y-28 -translate-x-[90%] -rotate-20 lg:translate-x-0'
-                                : 'translate-y-5 rotate-10 -translate-x-[90%] lg:translate-x-0 lg:-translate-y-24 lg:rotate-12'
-                            }`}
-                        src={slide.images[2]}
-                        alt={slide.title}
-                      />
-                    </div>
-                  </div>
-                </SwiperSlide>
-              ))}
-
-            <div className="flex relative bottom-20 md:bottom-16 gap-3 flex-col-reverse">
-              <div className="nav w-full text-black flex items-center justify-center gap-2 text-3xl">
-                <div className="custom-nav-prev z-10 cursor-pointer rounded-[999px] bg-white hover:bg-primary">
-                  <GrFormPreviousLink />
-                </div>
-                <div className="custom-nav-next z-10 cursor-pointer rounded-[9999px] bg-white hover:bg-primary">
-                  <GrFormNextLink />
-                </div>
-              </div>
-              <div className="custom-pagination w-full h-auto flex items-center justify-center gap-2"></div>
-            </div>
-          </Swiper>
-        </div>
-      </div>
+      </div> */}
 
       {recentPosts.length > 0 && (
         <div
-          className="recent w-screen min-h-screen flex flex-col items-center justify-center py-20"
+          className={`recent w-screen min-h-screen flex flex-col items-center justify-center gap-10 py-20`}
           ref={(el) => {
             if (el) scrollWatcherRef.current[4] = el;
           }}
@@ -528,16 +407,16 @@ const Home = () => {
           >
             <SectionHeading>Recent Posts</SectionHeading>
           </div>
-          <div className="w-full max-w-7xl flex flex-wrap items-stretch justify-center gap-6 px-6">
+          <div className="w-full lg:w-[80%] flex flex-wrap items-stretch justify-center gap-5 px-6">
             {recentPosts.map((post, id) => (
               <div
-                className="w-full sm:w-[45%] lg:w-[30%]"
+                className="w-full sm:w-1/3 lg:w-1/4"
                 key={id}
                 ref={(el) => {
                   if (el) recentPostRefs.current[id] = el;
                 }}
               >
-                <PostCard {...post} />
+                <RotatingCard {...post} />
               </div>
             ))}
           </div>
@@ -546,7 +425,7 @@ const Home = () => {
 
       {upcomingEvents.length > 0 && (
         <div
-          className="w-screen flex flex-col items-center justify-start gap-20 py-20 px-6"
+          className={`w-screen flex flex-col items-center justify-start gap-20 px-6 mt-96 pb-10`}
           ref={(el) => {
             if (el) scrollWatcherRef.current[5] = el;
           }}
@@ -564,10 +443,6 @@ const Home = () => {
             style={{
               justifyContent:
                 upcomingEvents.length > 1 ? 'space-between' : 'center',
-              minHeight:
-                upcomingEvents.length > 0
-                  ? `${upcomingEvents.length * 200}px`
-                  : 'auto',
             }}
           >
             <div
@@ -579,18 +454,18 @@ const Home = () => {
             {upcomingEvents.map((item, id) => (
               <div
                 key={id}
-                className="w-1/2 items-center flex justify-end"
+                className={`w-full md:w-1/2 flex flex-col ${
+                  id % 2 === 0
+                    ? 'md:flex-row md:mr-auto'
+                    : 'md:flex-row-reverse md:ml-auto'
+                } items-center justify-center gap-4`}
                 ref={(el) => {
                   if (el) upcomingEventRefs.current[id] = el;
                 }}
-                style={{
-                  flexDirection: id % 2 === 0 ? 'row' : 'row-reverse',
-                  margin: id % 2 === 0 ? '0 auto 0 0' : '0 0 0 auto',
-                }}
               >
-                <div className="w-1/2 flex flex-col items-center justify-center gap-2">
+                <div className="w-full md:w-1/2 flex flex-col items-center justify-center gap-2">
                   <img
-                    className="rounded-lg shadow-xl w-full max-w-50 aspect-square object-cover"
+                    className="rounded-lg shadow-xl w-full aspect-square object-cover"
                     src={`${BASE_URL}${item?.image as string}`}
                     alt="event"
                   />
@@ -598,7 +473,9 @@ const Home = () => {
                     <p className="text-transparent bg-clip-text bg-linear-to-r from-primary to-amber-400 font-bold text-lg">
                       {item.title}
                     </p>
-                    <div className="flex items-center justify-center gap-1.5 text-white/50 text-sm mt-1">
+                    <div
+                      className={`flex items-center justify-center gap-1.5 text-sm mt-1 ${tm.textTertiary}`}
+                    >
                       <FaRegCalendar className="text-primary/60" />
                       <span>
                         {new Date(
@@ -616,7 +493,7 @@ const Home = () => {
                     </div>
                   </div>
                 </div>
-                <div className="h-0.5 w-1/4 bg-linear-to-r from-primary/60 to-primary" />
+                <div className="h-0.5 w-full md:w-1/4 bg-linear-to-r from-primary/60 to-primary" />
               </div>
             ))}
           </div>
@@ -630,7 +507,9 @@ const Home = () => {
         }}
       >
         <div className="sticky top-0 w-full h-screen">
-          <div className={`overlay w-full h-screen absolute top-0 ${theme.overlay}/60 z-10`}></div>
+          <div
+            className={`overlay w-full h-screen absolute top-0 ${tm.overlay}/60 z-10`}
+          ></div>
           <div
             className="w-screen h-1/4 md:w-1/4 md:h-screen top-0 left-0 absolute
               bg-[url('/assets/Home/cta/daivaradhane.jpg')] bg-no-repeat
@@ -665,7 +544,12 @@ const Home = () => {
           ></div>
         </div>
         <div className="sticky top-0 w-full h-screen flex flex-col items-center justify-center gap-6 text-center z-20 p-5">
-          <h1 className={`text-2xl sm:text-3xl md:text-4xl font-bold ${theme.text} drop-shadow-lg`}>
+          <h1
+            className={`text-2xl sm:text-3xl md:text-4xl font-bold text-white drop-shadow-lg`}
+            style={{
+              textShadow: '1px 1px 6px black',
+            }}
+          >
             {state.token
               ? 'Embrace The Land of Faith'
               : 'Fully Experience The World Of Faith'}
@@ -695,7 +579,9 @@ const Home = () => {
         >
           "Tuluva Manna Satyole Chitta"
         </h1>
-        <p className={`md:text-right text-center font-cursive ${theme.textFaint} mt-2`}>
+        <p
+          className={`md:text-right text-center font-cursive ${tm.textFaint} mt-2`}
+        >
           - Vijeth M Shetty Manjanady
         </p>
       </div>

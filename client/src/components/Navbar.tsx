@@ -24,13 +24,14 @@ const AuthLinks = ({
   onCloseMenu: () => void;
 }) => {
   const { state } = useAuth();
-  const theme = useThemeClasses();
+  const { tm } = useThemeClasses();
 
   if (!state.token) {
     return (
       <div
         className={`flex rounded-3xl overflow-hidden cursor-pointer text-sm sm:text-xl
-          ${pathname !== '/' ? theme.textSecondary + ' ' + theme.bg : theme.bg + ' ' + theme.text}
+          ${pathname !== '/' ? tm.text + ' ' + tm.bg : tm.bg + ' ' + tm.text}
+          border ${tm.border}
           ${extraClass}`}
       >
         <NavLink to="/login" className="hover:bg-primary p-1 sm:p-2">
@@ -63,6 +64,15 @@ const NavLinks = ({
   onCloseMenu: () => void;
 }) => {
   const { state } = useAuth();
+  const { theme } = useThemeClasses();
+  const textColor = (path: string) =>
+    pathname === path
+      ? 'text-primary'
+      : pathname === '/' || theme === 'dark'
+        ? 'text-white'
+        : 'text-black';
+
+  const textShadow = pathname === '/' ? '1px 1px 6px black' : '';
 
   return (
     <div
@@ -70,8 +80,10 @@ const NavLinks = ({
        lg:flex-row items-center justify-center h-screen lg:h-auto gap-5`}
     >
       <NavLink
-        style={{ textShadow: '1px 1px 6px black' }}
-        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === '/' ? 'text-primary' : ''}`}
+        style={{
+          textShadow,
+        }}
+        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${textColor('/')}`}
         to="/"
         onClick={onCloseMenu}
       >
@@ -79,8 +91,10 @@ const NavLinks = ({
       </NavLink>
       {state.token && (
         <NavLink
-          style={{ textShadow: '1px 1px 6px black' }}
-          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === '/dashboard' ? 'text-primary' : ''}`}
+          style={{
+            textShadow,
+          }}
+          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${textColor('/dashboard')}`}
           to="/dashboard"
           onClick={onCloseMenu}
         >
@@ -89,8 +103,10 @@ const NavLinks = ({
       )}
       {state.token && (
         <NavLink
-          style={{ textShadow: '1px 1px 6px black' }}
-          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === '/create' ? 'text-primary' : ''}`}
+          style={{
+            textShadow,
+          }}
+          className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${textColor('/create')}`}
           to="/create"
           onClick={onCloseMenu}
         >
@@ -98,16 +114,20 @@ const NavLinks = ({
         </NavLink>
       )}
       <NavLink
-        style={{ textShadow: '1px 1px 6px black' }}
-        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === '/explore' ? 'text-primary' : ''}`}
+        style={{
+          textShadow,
+        }}
+        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${textColor('/explore')}`}
         to="/explore"
         onClick={onCloseMenu}
       >
         Explore
       </NavLink>
       <NavLink
-        style={{ textShadow: '1px 1px 6px black' }}
-        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${pathname === '/map' ? 'text-primary' : ''}`}
+        style={{
+          textShadow,
+        }}
+        className={`link transition-all duration-200 hover:scale-110 hover:text-primary ${textColor('/map')}`}
         to="/map"
         onClick={onCloseMenu}
       >
@@ -123,10 +143,10 @@ const Navbar = () => {
   const navbarRef = useRef<HTMLElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
   const { pathname } = useLocation();
-  const theme = useThemeClasses();
+  const { tm } = useThemeClasses();
   const [navbarStyles, setNavbarStyles] = useState<CSSProperties>({
     position: 'relative',
-    backgroundColor: pathname === '/' ? 'transparent' : '#000',
+    backgroundColor: pathname === '/' ? 'transparent' : '',
   });
 
   useLayoutEffect(() => {
@@ -138,7 +158,7 @@ const Navbar = () => {
     } else {
       setNavbarStyles({
         position: 'relative',
-        backgroundColor: '#000',
+        backgroundColor: '',
       });
     }
   }, [pathname]);
@@ -181,7 +201,7 @@ const Navbar = () => {
     <>
       <nav
         className={`z-9999 text-white w-screen flex p-3 md:p-7 items-center justify-between transition-transform duration-500
-          ${isCollapsed ? '-translate-y-full' : 'translate-y-0'}`}
+          ${isCollapsed ? '-translate-y-full' : 'translate-y-0'} ${tm.navBg}`}
         style={navbarStyles}
         ref={navbarRef}
       >
@@ -232,15 +252,12 @@ const Navbar = () => {
           <AuthLinks
             pathname={pathname}
             onCloseMenu={() => setIsMenuOpen(false)}
-            extraClass={`hidden lg:flex ${
-              pathname !== '/' ? 'bg-white text-black' : 'bg-black text-white'
-            }`}
           />
         </div>
       </nav>
 
       <div
-        className={`links lg:hidden text-xl font-semibold ${theme.text} ${theme.bg} w-screen
+        className={`links lg:hidden text-xl font-semibold ${tm.text} ${tm.bg} w-screen
             overflow-hidden flex flex-col items-center justify-center gap-3 fixed top-0 right-0 z-9998
             transition-all duration-500 ${isMenuOpen ? 'h-screen' : 'h-0'}`}
         ref={menuRef}

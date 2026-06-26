@@ -85,10 +85,10 @@ const Posts = () => {
     }
   }, [displayType]);
 
-  const theme = useThemeClasses();
+  const { tm } = useThemeClasses();
 
   return (
-    <div className={`w-full min-h-screen py-20 ${theme.bg}`}>
+    <div className={`w-full min-h-screen py-20 ${tm.bg}`}>
       <Title title="All Posts" />
       <div className="w-2/3 mx-auto flex items-center justify-end">
         <DropDown

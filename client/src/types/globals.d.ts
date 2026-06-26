@@ -30,6 +30,12 @@ export type BaseCardProps = {
   handleDelete?: (id: string) => {};
 };
 
+export type RotatingCardProps = BaseCardProps & {
+  title: string;
+  description: string;
+  image: string;
+};
+
 export type FeedCardProps = {
   title: string;
   type: 'post' | 'culture' | 'event' | 'blog';

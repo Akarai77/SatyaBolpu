@@ -34,7 +34,7 @@ const FilterGroup = ({
   setSelectedFilters,
   parentRef,
 }: FilterGroupProps) => {
-  const theme = useThemeClasses();
+  const { tm } = useThemeClasses();
   const [dropped, setDropped] = useState<boolean>(false);
 
   useEffect(() => {
@@ -61,9 +61,9 @@ const FilterGroup = ({
   };
 
   return (
-    <div className={theme.text}>
+    <div className={tm.text}>
       <div
-        className={`flex gap-2 items-center justify-center cursor-pointer ${theme.textSecondary} font-medium
+        className={`flex gap-2 items-center justify-center cursor-pointer ${tm.textSecondary} font-medium
           hover:text-primary transition-colors duration-200`}
         onClick={() => setDropped(!dropped)}
       >
@@ -77,14 +77,17 @@ const FilterGroup = ({
         />
       </div>
       <div
-        className={`transition-all ${theme.text} overflow-y-scroll max-h-60 overscroll-none`}
+        className={`transition-all ${tm.text} overflow-y-scroll max-h-60 overscroll-none`}
         style={{
           height: dropped ? 'auto' : '0',
           scrollbarWidth: 'none',
         }}
       >
         {options.map((opt) => (
-          <label key={opt.value} className={`flex items-center gap-2 cursor-pointer py-1.5 px-2 rounded-lg ${theme.bgHover} transition-colors duration-200`}>
+          <label
+            key={opt.value}
+            className={`flex items-center gap-2 cursor-pointer py-1.5 px-2 rounded-lg ${tm.bgHover} transition-colors duration-200`}
+          >
             <input
               type="checkbox"
               checked={selected.some((s) => s.value === opt.value)}

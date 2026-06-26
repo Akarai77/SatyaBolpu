@@ -14,16 +14,16 @@ const Button: React.FC<ButtonProps> = ({
   loadingText,
   theme: themeProp,
 }) => {
-  const theme = useThemeClasses();
+  const { tm } = useThemeClasses();
   const isDark = themeProp === 'dark';
-  
+
   return (
     <button
       className={cn(
         `p-2 rounded-md border transition flex
         items-center justify-center gap-2 text-primary font-semibold cursor-pointer
         text-[0.75rem] md:text-[1rem]
-        ${isDark ? theme.authBtnBg + ' hover:text-black hover:bg-primary' : theme.bg + ' hover:text-white hover:bg-primary'}
+        ${isDark ? tm.authBtnBg + ' hover:text-black hover:bg-primary' : tm.bg + ' hover:text-white hover:bg-primary'}
         disabled:cursor-not-allowed disabled:scale-100 disabled:bg-primary/70 disabled:text-white`,
         className,
       )}

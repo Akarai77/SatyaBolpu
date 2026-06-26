@@ -4,10 +4,12 @@ import { FaXTwitter } from 'react-icons/fa6';
 import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const Footer = () => {
-  const theme = useThemeClasses();
-  
+  const { tm } = useThemeClasses();
+
   return (
-    <div className={`footer relative w-screen flex flex-col gap-10 ${theme.footerBg} ${theme.footerBorder} border-t-2 border-solid p-10 select-none z-9995`}>
+    <div
+      className={`footer relative w-screen flex flex-col gap-10 ${tm.footerBg} ${tm.footerBorder} border-t-2 border-solid p-10 select-none z-9995`}
+    >
       <div className="w-full flex flex-col items-center justify-center gap-5">
         <img
           className="w-20 object-cover"
@@ -20,7 +22,9 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className={`w-full flex flex-col items-center justify-center gap-3 text-center ${theme.text}`}>
+      <div
+        className={`w-full flex flex-col items-center justify-center gap-3 text-center ${tm.text}`}
+      >
         <div className="w-full flex gap-5 justify-center items-center flex-wrap text-[1rem] sm:text-[1.25rem] [font-style:oblique]">
           <Link className="hover:text-primary" to={'/posts'}>
             Posts
@@ -59,7 +63,9 @@ const Footer = () => {
             <FaWhatsapp color="white" />
           </Link>
         </div>
-        <div className={`flex text-[0.85rem] sm:text-[1ren] gap-5 ${theme.textTertiary}`}>
+        <div
+          className={`flex text-[0.85rem] sm:text-[1ren] gap-5 ${tm.textTertiary}`}
+        >
           <Link className="hover:text-primary" to={'/contact'}>
             Contact Us
           </Link>
@@ -74,11 +80,13 @@ const Footer = () => {
         </div>
       </div>
 
-      <div className={`w-full text-center text-[0.75rem] sm:text-[1ren] flex flex-col items-center justify-center gap-3 ${theme.textTertiary}`}>
-        <div className={theme.textFaint}>
+      <div
+        className={`w-full text-center text-[0.75rem] sm:text-[1ren] flex flex-col items-center justify-center gap-3 ${tm.textTertiary}`}
+      >
+        <div className={tm.textFaint}>
           Copyright &#169; 2025 SatyaBolpu. All Rights Reserved TGA
         </div>
-        <div className={`flex ${theme.textFaint} gap-2`}>
+        <div className={`flex ${tm.textFaint} gap-2`}>
           <Link className="hover:underline" to={'/'}>
             Cookies Policy
           </Link>

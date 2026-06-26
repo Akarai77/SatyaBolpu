@@ -48,15 +48,15 @@ const FAQItem = ({
   question: string;
   answer: string;
 }) => {
-  const theme = useThemeClasses();
+  const { tm } = useThemeClasses();
   const [open, setOpen] = useState(false);
 
   return (
-    <div className={`${theme.border} rounded-xl overflow-hidden`}>
+    <div className={`${tm.border} rounded-xl overflow-hidden`}>
       <button
         onClick={() => setOpen(!open)}
-        className={`w-full flex justify-between items-center px-6 py-5 text-left ${theme.text}
-        ${theme.bgHover} transition-colors cursor-pointer`}
+        className={`w-full flex justify-between items-center px-6 py-5 text-left ${tm.text}
+        ${tm.bgHover} transition-colors cursor-pointer`}
       >
         <span className="font-semibold text-lg">{question}</span>
         <FaChevronDown
@@ -67,7 +67,7 @@ const FAQItem = ({
         style={{
           height: open ? 'auto' : '0',
         }}
-        className={`${theme.textSecondary} leading-relaxed transition-all overflow-hidden`}
+        className={`${tm.textSecondary} leading-relaxed transition-all overflow-hidden`}
       >
         <p className="p-5">{answer}</p>
       </div>
@@ -76,10 +76,10 @@ const FAQItem = ({
 };
 
 const FAQ = () => {
-  const theme = useThemeClasses();
-  
+  const { tm } = useThemeClasses();
+
   return (
-    <div className={`w-full min-h-screen ${theme.bg} py-20 px-4`}>
+    <div className={`w-full min-h-screen ${tm.bg} py-20 px-4`}>
       <Title title="FAQs" />
 
       <div className="max-w-3xl mx-auto mt-12 flex flex-col gap-4">

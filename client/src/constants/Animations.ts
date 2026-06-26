@@ -68,8 +68,8 @@ export const buildAnimationProps = (
         scrollTrigger: {
           trigger: ref,
           scrub: true,
-          start: 'center center',
-          end: 'bottom center',
+          start: 'top center',
+          end: 'center center',
         },
       },
     }))
@@ -398,7 +398,7 @@ export const buildAnimationProps = (
         duration: 0.5,
         scrollTrigger: {
           trigger: scrollWatcherRef.current[2],
-          start: '-10% top',
+          start: isMobile ? '30% center' : '40% center',
         },
       },
     },
@@ -413,7 +413,8 @@ export const buildAnimationProps = (
         duration: 0.5,
         scrollTrigger: {
           trigger: scrollWatcherRef.current[2],
-          start: '-10% top',
+          start: '40% center',
+          markers: true,
         },
       },
     },
@@ -458,7 +459,7 @@ export const buildAnimationProps = (
         opacity: 1,
         scrollTrigger: {
           trigger: scrollWatcherRef.current[4],
-          start: '10% top',
+          start: 'top center',
         },
       },
     },
@@ -477,7 +478,7 @@ export const buildAnimationProps = (
               stagger: 0.2,
               scrollTrigger: {
                 trigger: scrollWatcherRef.current[4],
-                start: '15% top',
+                start: 'top top',
               },
             },
           },
@@ -509,7 +510,7 @@ export const buildAnimationProps = (
         scrollTrigger: {
           trigger: scrollWatcherRef.current[5],
           start: 'top center',
-          end: 'bottom center+=10%',
+          end: 'bottom center+=15%',
           scrub: true,
         },
       },

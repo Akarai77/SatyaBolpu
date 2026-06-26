@@ -68,7 +68,7 @@ const Pagination = ({
   handleArrows: (action: '+' | '-') => void;
   handlePageChange: (val: string) => void;
 }) => {
-  const theme = useThemeClasses();
+  const { tm } = useThemeClasses();
   const [inputPageNo, setInputPageNo] = useState(pageNo);
   const isPrevDisabled = Number(pageNo) <= 1;
   const isNextDisabled = Number(pageNo) >= totalPages;
@@ -105,9 +105,11 @@ const Pagination = ({
 
   return (
     <div className="w-full flex items-center justify-center">
-      <div className={`text-[2rem] ${theme.text} flex items-center justify-center gap-3`}>
+      <div
+        className={`text-[2rem] ${tm.text} flex items-center justify-center gap-3`}
+      >
         <GrFormPrevious
-          className={`${theme.bgSubtle} ${theme.border} py-2 rounded-2xl cursor-pointer transition-all duration-200
+          className={`${tm.bgSubtle} ${tm.border} py-2 rounded-2xl cursor-pointer transition-all duration-200
             ${
               isPrevDisabled
                 ? 'opacity-50 cursor-not-allowed'
@@ -120,7 +122,7 @@ const Pagination = ({
             type="number"
             min={1}
             max={totalPages}
-            className={`${theme.bgSubtle} ${theme.border} ${theme.text} text-[1.5rem] w-10 h-10 text-center rounded-full
+            className={`${tm.bgSubtle} ${tm.border} ${tm.text} text-[1.5rem] w-10 h-10 text-center rounded-full
               [appearance:textfield] [&::-webkit-inner-spin-button]:appearance-none [&::-webkit-outer-spin-button]:appearance-none
               hover:border-primary/30 focus:border-primary focus:outline-none cursor-pointer transition-all duration-200`}
             value={inputPageNo}
@@ -131,10 +133,10 @@ const Pagination = ({
               if (e.key === 'Enter') e.currentTarget.blur();
             }}
           />
-          <span className={`${theme.textFaint} text-lg`}>/ {totalPages}</span>
+          <span className={`${tm.textFaint} text-lg`}>/ {totalPages}</span>
         </div>
         <GrFormNext
-          className={`${theme.bgSubtle} ${theme.border} py-2 rounded-2xl cursor-pointer transition-all duration-200
+          className={`${tm.bgSubtle} ${tm.border} py-2 rounded-2xl cursor-pointer transition-all duration-200
             ${
               isNextDisabled
                 ? 'opacity-50 cursor-not-allowed'
@@ -148,17 +150,23 @@ const Pagination = ({
 };
 
 const PaginationSkeleton = () => {
-  const theme = useThemeClasses();
-  
+  const { tm } = useThemeClasses();
+
   return (
     <div className="w-full flex items-center justify-center">
-      <div className={`text-[2rem] ${theme.text} flex items-center justify-center gap-3`}>
-        <GrFormPrevious className={`${theme.bgSkeleton} w-8 h-8 py-2 rounded-2xl`} />
+      <div
+        className={`text-[2rem] ${tm.text} flex items-center justify-center gap-3`}
+      >
+        <GrFormPrevious
+          className={`${tm.bgSkeleton} w-8 h-8 py-2 rounded-2xl`}
+        />
         <div className="flex items-center gap-2">
-          <div className={`w-10 h-10 ${theme.bgSkeleton} animate-pulse rounded-full`}></div>
-          <span className={`${theme.textFaint} text-lg`}>/ ...</span>
+          <div
+            className={`w-10 h-10 ${tm.bgSkeleton} animate-pulse rounded-full`}
+          ></div>
+          <span className={`${tm.textFaint} text-lg`}>/ ...</span>
         </div>
-        <GrFormNext className={`${theme.bgSkeleton} w-8 h-8 py-2 rounded-2xl`} />
+        <GrFormNext className={`${tm.bgSkeleton} w-8 h-8 py-2 rounded-2xl`} />
       </div>
     </div>
   );
@@ -179,7 +187,7 @@ const CardList = <T extends BaseCardProps>({
   filterGroups,
   sortOptions,
 }: CardListProps<T>) => {
-  const theme = useThemeClasses();
+  const { tm } = useThemeClasses();
   const [data, setData] = useState<T[]>([]);
   const [pageNo, setPageNo] = useState<string>('1');
   const [showFilters, setShowFilters] = useState<boolean>(false);
@@ -331,7 +339,7 @@ const CardList = <T extends BaseCardProps>({
         {searchBar && (
           <div className="w-2/3 flex items-center gap-2">
             <input
-              className={`w-full rounded-2xl ${theme.bgSubtle} ${theme.border} ${theme.text} ${theme.placeholder} p-2
+              className={`w-full rounded-2xl ${tm.bgSubtle} ${tm.border} ${tm.text} ${tm.placeholder} p-2
                 focus:border-primary focus:outline-none transition-all duration-200`}
               placeholder="Search..."
               type="text"
@@ -373,7 +381,9 @@ const CardList = <T extends BaseCardProps>({
             height: showFilters ? 'auto' : '0',
           }}
         >
-          <div className={`text-primary text-[1.25rem] text-left ${theme.text}`}>Filters:</div>
+          <div className={`text-primary text-[1.25rem] text-left ${tm.text}`}>
+            Filters:
+          </div>
           <Filters
             filterGroups={filterGroups}
             selectedFilters={selectedFilters}
@@ -390,7 +400,9 @@ const CardList = <T extends BaseCardProps>({
             height: showSortOptions ? 'auto' : '0',
           }}
         >
-          <div className={`text-primary text-[1.25rem] text-left ${theme.text}`}>Sort:</div>
+          <div className={`text-primary text-[1.25rem] text-left ${tm.text}`}>
+            Sort:
+          </div>
           <SortOptions
             sortOptions={sortOptions}
             selectedSortOption={selectedSortOption}
@@ -420,7 +432,7 @@ const CardList = <T extends BaseCardProps>({
         ) : data.length > 0 ? (
           data.map((cardProps) => <Card {...cardProps} key={cardProps.id} />)
         ) : (
-          <p className={`${theme.textFaint} text-lg`}>No Data available</p>
+          <p className={`${tm.textFaint} text-lg`}>No Data available</p>
         )}
       </div>
 

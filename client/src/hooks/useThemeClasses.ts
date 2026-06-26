@@ -42,16 +42,16 @@ const darkClasses: ThemeClasses = {
   bgHover: 'bg-primary',
   bgSkeleton: 'bg-white/10',
   bgSkeletonSubtle: 'bg-white/5',
-  border: 'border-white/10',
+  border: 'border-white/70',
   borderHover: 'hover:border-primary/30',
-  text: 'text-primary',
+  text: 'text-white',
   textSecondary: 'text-black',
   textTertiary: 'text-white/50',
   textFaint: 'text-white/30',
   placeholder: 'placeholder-white/40',
   input: 'bg-white/5 border-white/10 text-white',
   inputFocus: 'focus:border-primary',
-  navBg: 'bg-black',
+  navBg: 'bg-white/10',
   navText: 'text-white',
   authBtnBg: 'bg-black',
   authBtnText: 'text-white',
@@ -78,16 +78,16 @@ const lightClasses: ThemeClasses = {
   bgHover: 'bg-primary',
   bgSkeleton: 'bg-gray-200',
   bgSkeletonSubtle: 'bg-gray-100',
-  border: 'border-gray-200',
+  border: 'border-black/70',
   borderHover: 'hover:border-white',
-  text: 'text-primary',
-  textSecondary: 'text-black',
+  text: 'text-black',
+  textSecondary: 'text-white',
   textTertiary: 'text-gray-500',
   textFaint: 'text-gray-400',
   placeholder: 'placeholder-gray-400',
   input: 'bg-white border-gray-300 text-gray-900',
   inputFocus: 'focus:border-primary',
-  navBg: 'bg-white',
+  navBg: 'bg-white/90',
   navText: 'text-gray-900',
   authBtnBg: 'bg-white',
   authBtnText: 'text-gray-900',
@@ -113,7 +113,7 @@ const themeMap: Record<Theme, ThemeClasses> = {
   light: lightClasses,
 };
 
-export const useThemeClasses = (): ThemeClasses => {
+export const useThemeClasses = (): { tm: ThemeClasses; theme: Theme } => {
   const { theme } = useTheme();
-  return themeMap[theme];
+  return { tm: themeMap[theme], theme };
 };
