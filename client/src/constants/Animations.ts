@@ -414,7 +414,6 @@ export const buildAnimationProps = (
         scrollTrigger: {
           trigger: scrollWatcherRef.current[2],
           start: '40% center',
-          markers: true,
         },
       },
     },

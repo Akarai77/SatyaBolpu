@@ -25,7 +25,7 @@ const Dashboard = () => {
 
   if (!state.token) return <Navigate to="/login" replace />;
 
-  const { tm } = useThemeClasses();
+  const { tm, theme } = useThemeClasses();
 
   return (
     <div
@@ -39,10 +39,10 @@ const Dashboard = () => {
             <div className="text-primary text-lg font-semibold">
               Welcome back
             </div>
-            <div className="text-white text-3xl md:text-4xl font-extrabold tracking-tight">
+            <div className={`${tm.text} text-3xl md:text-4xl font-extrabold tracking-tight`}>
               {state.user?.name ?? 'SatyaBolpu User'}
             </div>
-            <p className={`mt-3 text-sm ${tm.textSecondary} max-w-2xl`}>
+            <p className={`mt-3 text-sm ${tm.textTertiary} max-w-2xl`}>
               Explore contributions, manage content, and discover new cultural
               highlights from Tulunadu. Your dashboard gives a quick launchpad
               for publishing, mapping, and moderation.
@@ -53,7 +53,7 @@ const Dashboard = () => {
             <div
               className={`w-full p-4 rounded-xl ${tm.bgSubtle} border border-primary/20`}
             >
-              <div className={`text-sm ${tm.textSecondary}`}>Membership</div>
+              <div className={`text-sm ${tm.textTertiary}`}>Membership</div>
               <div className="text-primary font-bold text-2xl">
                 {state.user?.role ?? 'member'}
               </div>
@@ -62,7 +62,7 @@ const Dashboard = () => {
               className={`w-full p-4 rounded-xl ${tm.bgSubtle} border border-primary/20 flex items-center justify-between`}
             >
               <div>
-                <div className={`text-sm ${tm.textSecondary}`}>Reputation</div>
+                <div className={`text-sm ${tm.textTertiary}`}>Reputation</div>
                 <div className={`${tm.text} font-bold text-xl`}>42</div>
               </div>
               <div className="text-primary text-3xl font-extrabold">ॐ</div>
@@ -82,7 +82,7 @@ const Dashboard = () => {
               <div
                 className={`${tm.textTertiary} text-xs mt-2 flex items-center gap-1`}
               >
-                <FaArrowUpLong className="text-green-400" /> 8 this week
+                <FaArrowUpLong className={`${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} /> 8 this week
               </div>
             </div>
 
@@ -94,7 +94,7 @@ const Dashboard = () => {
               <div
                 className={`${tm.textTertiary} text-xs mt-2 flex items-center gap-1`}
               >
-                <FaArrowUpLong className="text-green-400" /> 3 upcoming
+                <FaArrowUpLong className={`${theme === 'dark' ? 'text-green-400' : 'text-green-600'}`} /> 3 upcoming
               </div>
             </div>
 

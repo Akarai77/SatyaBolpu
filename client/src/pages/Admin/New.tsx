@@ -22,8 +22,10 @@ import { getFields, getDetails } from '../../utils/fields';
 import useApi from '../../hooks/useApi';
 import Title from '../../components/Title';
 import { kebabToTitleCase } from '../../utils/utils';
+import { useThemeClasses } from '../../hooks/useThemeClasses';
 
 const New = ({ type }: { type: NewType }) => {
+  const { tm } = useThemeClasses();
   const [progress, setProgress] = useState<number>(0);
   const [step, setShowStep] = useState<string>('');
   const draftable =
@@ -157,7 +159,9 @@ const New = ({ type }: { type: NewType }) => {
   if (!state) return;
 
   return (
-    <div className="w-full mt-20 mb-40 flex flex-col gap-20 items-center justify-center">
+    <div
+      className={`w-full pt-20 pb-40 flex flex-col gap-20 items-center justify-center ${tm.bg} ${tm.text}`}
+    >
       <div className="w-full flex flex-col items-center justify-center gap-10">
         {draftable ? (
           <ProgressBar

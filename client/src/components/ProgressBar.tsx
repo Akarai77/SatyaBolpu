@@ -1,6 +1,7 @@
 import { ReactNode, useLayoutEffect, useMemo } from 'react';
 import { MdDone } from 'react-icons/md';
 import { NewState } from '../types/globals';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 type PropsType = {
   steps: Record<string, ReactNode>;
@@ -17,6 +18,7 @@ const ProgressBar: React.FC<PropsType> = ({
   setShowStep,
   state,
 }) => {
+  const { tm, theme } = useThemeClasses();
   const offset = useMemo(() => 100 / (Object.keys(steps).length - 1), [steps]);
 
   const allComplete = useMemo(
@@ -39,8 +41,8 @@ const ProgressBar: React.FC<PropsType> = ({
   return (
     <>
       <div
-        className="w-[80%] sm:w-2/3 md:w-1/3 h-1 bg-white rounded-lg
-          flex itemse-center justify-between relative"
+        className={`w-[80%] sm:w-2/3 md:w-1/3 h-1 ${theme === 'dark' ? 'bg-white/20' : 'bg-gray-300'} rounded-lg
+          flex itemse-center justify-between relative`}
       >
         <div
           className="absolute z-10 rounded-lg bg-primary h-1"
@@ -54,9 +56,10 @@ const ProgressBar: React.FC<PropsType> = ({
           return (
             <div
               className={`w-10 h-10 p-2 rounded-full absolute top-1/2 -translate-y-1/2
-                  border-3 border-primary z-20 flex items-center justify-center text-white
-                  ${isCompleted ? 'bg-primary' : 'bg-black'}
-                  ${!isDisabled ? 'hover:border-white hover:bg-primary ' : 'opacity-50'}`}
+                  border-3 border-primary z-20 flex items-center justify-center
+                  ${tm.text}
+                  ${isCompleted ? 'bg-primary' : tm.bg}
+                  ${!isDisabled ? 'hover:border-primary hover:bg-primary ' : 'opacity-50'}`}
               key={index}
               onClick={isDisabled ? () => {} : () => setShowStep(step)}
               style={{
@@ -65,7 +68,9 @@ const ProgressBar: React.FC<PropsType> = ({
               }}
             >
               {isCompleted ? <MdDone /> : index + 1}
-              <div className="absolute bottom-full text-nowrap mb-2">
+              <div
+                className={`absolute bottom-full text-nowrap mb-2 ${tm.text}`}
+              >
                 {step}
               </div>
             </div>

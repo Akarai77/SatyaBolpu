@@ -58,7 +58,7 @@ const Profile = () => {
     }
   }, [error, loading]);
 
-  const { tm } = useThemeClasses();
+  const { tm, theme } = useThemeClasses();
 
   if (!state.token) return <Navigate to="/login" replace />;
 
@@ -66,11 +66,11 @@ const Profile = () => {
     <div
       className={`relative w-full min-h-screen ${tm.bg} flex items-center justify-center px-4 py-20 overflow-hidden`}
     >
-      <div className="absolute w-150 h-150 rounded-full bg-primary/10 blur-3xl" />
+      <div className={`absolute w-150 h-150 rounded-full ${theme === 'dark' ? 'bg-primary/10' : 'bg-primary/5'} blur-3xl`} />
 
       <div
         ref={profileRef}
-        className={`relative w-full sm:w-[85%] md:w-2/3 lg:w-1/2 xl:w-[42%] max-w-3xl ${tm.border}
+        className={`relative w-full sm:w-[85%] md:w-2/3 lg:w-1/2 xl:w-[42%] max-w-3xl border ${tm.border}
           rounded-3xl px-8 py-14 flex flex-col items-center gap-8 overflow-hidden`}
       >
         <div className="flex flex-col items-center text-center relative">
@@ -96,7 +96,7 @@ const Profile = () => {
               </h1>
 
               {state.user?.verified && (
-                <MdVerified className="text-blue-500 text-2xl" />
+                <MdVerified className={`text-2xl ${theme === 'dark' ? 'text-blue-400' : 'text-blue-600'}`} />
               )}
             </div>
 
@@ -106,8 +106,8 @@ const Profile = () => {
 
             {state.user?.role !== 'user' && (
               <div
-                className="mt-3 inline-flex px-4 py-1 rounded-full text-green-400 
-                  text-xs font-bold tracking-widest uppercase"
+                className={`mt-3 inline-flex px-4 py-1 rounded-full ${theme === 'dark' ? 'bg-green-500/15 text-green-400' : 'bg-green-600/10 text-green-700'}
+                  text-xs font-bold tracking-widest uppercase`}
               >
                 {state.user?.role}
               </div>
@@ -116,11 +116,11 @@ const Profile = () => {
         </div>
 
         <div className="flex items-center justify-center w-full">
-          <div className="flex-1 h-px bg-linear-to-r from-transparent via-primary/60 to-transparent" />
+          <div className={`flex-1 h-px bg-gradient-to-r from-transparent ${theme === 'dark' ? 'via-primary/40' : 'via-primary/30'} to-transparent`} />
         </div>
 
         <div className="w-full grid gap-5">
-          <div className={`${tm.bgSubtle} ${tm.border} rounded-2xl p-5`}>
+          <div className={`${tm.bgSubtle} border ${tm.border} rounded-2xl p-5`}>
             <p
               className={`text-xs uppercase tracking-widest ${tm.textFaint} mb-2`}
             >
@@ -130,7 +130,7 @@ const Profile = () => {
             <p className={`${tm.text} break-all`}>{state.user?.email}</p>
           </div>
 
-          <div className={`${tm.bgSubtle} ${tm.border} rounded-2xl p-5`}>
+          <div className={`${tm.bgSubtle} border ${tm.border} rounded-2xl p-5`}>
             <p
               className={`text-xs uppercase tracking-widest ${tm.textFaint} mb-2`}
             >
@@ -152,8 +152,8 @@ const Profile = () => {
             loading={buttonLoad}
             loadingText="Leaving Portal..."
             onClick={handleLogout}
-            className="w-full py-3.5 rounded-full bg-primary hover:bg-[#d46f2a] text-black
-             font-bold tracking-widest uppercase"
+            className={`w-full py-3.5 rounded-full bg-primary hover:bg-[#d46f2a] ${theme === 'dark' ? 'text-black' : 'text-white'}
+              font-bold tracking-widest uppercase`}
             content="Log Out"
           />
         </div>

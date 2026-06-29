@@ -14,6 +14,7 @@ import useApi from '../hooks/useApi';
 import { toast } from 'react-toastify';
 import { cn } from '../utils/merge';
 import MAP from '../pages/MAP';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const Form = <T extends {}>({
   fields,
@@ -26,6 +27,7 @@ const Form = <T extends {}>({
   loadingText = 'Submitting',
   className = '',
 }: FormProps<T>) => {
+  const { tm, theme } = useThemeClasses();
   const pageSize = 10;
   const formRef = useRef<HTMLFormElement>(null);
   const [formData, setFormData] = useState<T>(state);
@@ -467,7 +469,7 @@ const Form = <T extends {}>({
                 if (el) textAreaRefs.current[field.name] = el;
               }}
               onChange={handleInputChange}
-              className="text-black font-semibold p-2 bg-white overflow-hidden resize-none disabled:bg-gray-400"
+              className={`border ${tm.input} ${tm.inputFocus} font-semibold p-2 overflow-hidden resize-none ${theme === 'dark' ? 'disabled:bg-gray-700' : 'disabled:bg-gray-300'}`}
               placeholder={field.placeholder}
               disabled={field.disabled}
             />
@@ -492,7 +494,7 @@ const Form = <T extends {}>({
               {required && <span className="text-red-500">*</span>}
             </label>
             <input
-              className="text-black w-1/2 font-semibold bg-white p-2 overflow-hidden resize-none disabled:bg-gray-400"
+              className={`border ${tm.input} ${tm.inputFocus} w-1/2 font-semibold p-2 overflow-hidden resize-none ${theme === 'dark' ? 'disabled:bg-gray-700' : 'disabled:bg-gray-300'}`}
               type="text"
               id={field.name}
               disabled={field.disabled}
@@ -517,7 +519,7 @@ const Form = <T extends {}>({
               placeholder={field.placeholder}
             />
             <div
-              className={`bg-white w-1/2 flex flex-col items-center justify-center absolute top-full z-10
+              className={`${tm.bg} border ${tm.border} w-1/2 flex flex-col items-center justify-center absolute top-full z-10
                 ${getValue(showOptions, field.name) ? 'visible' : 'hidden'}`}
             >
               {getValue(allowedOptions, field.name)
@@ -527,8 +529,8 @@ const Form = <T extends {}>({
                   return (
                     <div
                       key={globalIndex}
-                      className={`w-full flex items-center justify-center cursor-pointer hover:bg-primary
-                        ${globalIndex === curActive ? 'bg-primary' : ''}`}
+                      className={`w-full flex items-center justify-center cursor-pointer hover:bg-primary ${tm.text}
+                         ${globalIndex === curActive ? 'bg-primary' : ''}`}
                       onMouseDown={(e) => {
                         e.preventDefault();
                         handleSelectOption(field.name, option, field.type);
@@ -555,7 +557,7 @@ const Form = <T extends {}>({
               {required && <span className="text-red-500">*</span>}
             </label>
             <input
-              className={`text-black font-semibold p-2 cursor-pointer bg-white disabled:bg-gray-400`}
+              className={`border ${tm.input} ${tm.inputFocus} font-semibold p-2 cursor-pointer ${theme === 'dark' ? 'disabled:bg-gray-700' : 'disabled:bg-gray-300'}`}
               type="date"
               id={field.name}
               name={field.name}
@@ -579,9 +581,9 @@ const Form = <T extends {}>({
             </label>
             <label htmlFor={field.name} className="w-fit">
               <div
-                className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
+                className={`${tm.text} w-fit p-5 rounded-lg flex flex-col items-center 
                 justify-center border-3 border-solid border-primary  
-                ${field.disabled ? 'bg-white/70 cursor-not-allowed' : 'bg-white hover:bg-white/70 cursor-pointer'}`}
+                ${field.disabled ? `${tm.bgSubtle} cursor-not-allowed` : `${tm.bgSubtle} hover:opacity-70 cursor-pointer`}`}
               >
                 <FaUpload />
                 <p>Upload File</p>
@@ -597,7 +599,7 @@ const Form = <T extends {}>({
               disabled={field.disabled}
             />
             {singleFileVal && (
-              <div className="w-1/2 border-2 border-solid border-white flex">
+              <div className={`w-1/2 border-2 border-solid ${tm.border} flex`}>
                 <img
                   className="w-full aspect-square object-cover object-center"
                   src={
@@ -622,9 +624,9 @@ const Form = <T extends {}>({
             </label>
             <label htmlFor={field.name} className="w-fit">
               <div
-                className={`text-black w-fit p-5 rounded-lg flex flex-col items-center 
+                className={`${tm.text} w-fit p-5 rounded-lg flex flex-col items-center 
                 justify-center border-3 border-solid border-primary  
-                ${field.disabled ? 'bg-white/70 cursor-not-allowed' : 'bg-white hover:bg-white/70 cursor-pointer'}`}
+                ${field.disabled ? `${tm.bgSubtle} cursor-not-allowed` : `${tm.bgSubtle} hover:opacity-70 cursor-pointer`}`}
               >
                 <FaUpload />
                 <p>Upload Files</p>
@@ -639,7 +641,7 @@ const Form = <T extends {}>({
               multiple
               onChange={handleFileChange}
             />
-            <div className="flex flex-wrap text-white">
+            <div className={`flex flex-wrap ${tm.text}`}>
               {fieldValue?.length > 0 &&
                 fieldValue.map((file: File | string, index: number) => {
                   const isFile = file instanceof File;
@@ -654,7 +656,7 @@ const Form = <T extends {}>({
                       : 'other';
                   return (
                     <div
-                      className="w-1/6 border-2 border-solid border-white flex relative"
+                      className={`w-1/6 border-2 border-solid ${tm.border} flex relative`}
                       key={index}
                     >
                       {fileType.startsWith('image') ? (
@@ -674,7 +676,7 @@ const Form = <T extends {}>({
                       )}
                       {
                         <MdCancel
-                          className="absolute bg-black rounded-full top-2 right-2 cursor-pointer hover:text-primary"
+                          className={`absolute ${tm.bg} rounded-full top-2 right-2 cursor-pointer hover:text-primary`}
                           onClick={() => handleRemoveImage(field.name, index)}
                         />
                       }
@@ -700,7 +702,7 @@ const Form = <T extends {}>({
               {field.options?.map((option) => (
                 <label
                   key={option.value}
-                  className="text-white text-[1.5rem] cursor-pointer"
+                  className={`${tm.text} text-[1.5rem] cursor-pointer`}
                   htmlFor={`${field.name}-${option.value}`}
                 >
                   <input
@@ -740,7 +742,7 @@ const Form = <T extends {}>({
               name={field.name}
               value={fieldValue || ''}
               onChange={handleInputChange}
-              className="text-black font-semibold p-2 disabled:bg-gray-400"
+              className={`border ${tm.input} ${tm.inputFocus} font-semibold p-2 ${theme === 'dark' ? 'disabled:bg-gray-700' : 'disabled:bg-gray-300'}`}
               placeholder={field.placeholder}
               disabled={field.disabled}
               min={field.minValue}
@@ -767,7 +769,7 @@ const Form = <T extends {}>({
                 (fieldValue as (string | number)[]).map((option, index) => (
                   <div
                     key={index}
-                    className="text-white max-w-full flex items-center justify-evenly gap-1 bg-gray-600 px-2 rounded-lg"
+                    className={`${tm.chipText} max-w-full flex items-center justify-evenly gap-1 ${tm.chipBg} border ${tm.chipBorder} px-2 rounded-lg`}
                   >
                     <p className="max-w-full wrap-break-word">
                       {
@@ -777,7 +779,7 @@ const Form = <T extends {}>({
                     </p>
                     {
                       <MdCancel
-                        className="fill-gray-400 cursor-pointer hover:fill-white"
+                        className={`${theme === 'dark' ? 'fill-gray-400 hover:fill-white' : 'fill-gray-500 hover:fill-black'} cursor-pointer`}
                         onClick={() => handleRemoveOption(field.name, index)}
                       />
                     }
@@ -785,7 +787,7 @@ const Form = <T extends {}>({
                 ))}
             </div>
             <input
-              className="text-black w-1/2 font-semibold bg-white p-2 overflow-hidden resize-none disabled:bg-gray-400"
+              className={`border ${tm.input} ${tm.inputFocus} w-1/2 font-semibold p-2 overflow-hidden resize-none ${theme === 'dark' ? 'disabled:bg-gray-700' : 'disabled:bg-gray-300'}`}
               type="text"
               id={field.name}
               disabled={field.disabled}
@@ -805,7 +807,7 @@ const Form = <T extends {}>({
               onChange={(e) => handleOptionChange(e, field.name)}
             />
             <div
-              className={`bg-white w-1/2 flex flex-col items-center justify-center absolute top-full z-10 
+              className={`${tm.bgSubtle} border ${tm.border} w-1/2 flex flex-col items-center justify-center absolute top-full z-10 
                 ${getValue(showOptions, field.name) ? 'visible' : 'hidden'}`}
             >
               {getValue(allowedOptions, field.name)
@@ -815,8 +817,8 @@ const Form = <T extends {}>({
                   return (
                     <div
                       key={globalIndex}
-                      className={`w-full flex items-center justify-center cursor-pointer hover:bg-primary
-                        ${globalIndex === curActive ? 'bg-primary' : ''}`}
+                      className={`w-full flex items-center justify-center cursor-pointer hover:bg-primary ${tm.text}
+                         ${globalIndex === curActive ? 'bg-primary' : ''}`}
                       onMouseDown={(e) => {
                         e.preventDefault();
                         handleSelectOption(field.name, option, field.type);
@@ -869,7 +871,7 @@ const Form = <T extends {}>({
               name={field.name}
               value={fieldValue || ''}
               onChange={handleInputChange}
-              className={`text-black font-semibold bg-white p-2 disabled:bg-gray-400`}
+              className={`border ${tm.input} ${tm.inputFocus} font-semibold p-2 ${theme === 'dark' ? 'disabled:bg-gray-700' : 'disabled:bg-gray-300'}`}
               placeholder={field.placeholder}
               disabled={field.disabled}
             />

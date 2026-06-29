@@ -103,7 +103,7 @@ const Login = () => {
     }
   }, [data, error, loading, dispatch, navigate]);
 
-  const { tm } = useThemeClasses();
+  const { tm, theme } = useThemeClasses();
 
   if (state.token) return <Navigate to={'/profile'} replace />;
 
@@ -129,7 +129,10 @@ const Login = () => {
         </div>
 
         {apiError && (
-          <div className="w-full bg-red-950/40 border border-red-800/50 rounded-xl p-3 text-center">
+          <div
+            className={`w-full border border-red-800/50 rounded-xl p-3 text-center
+            ${theme === 'dark' ? 'bg-red-950/40' : 'bg-red-100'}`}
+          >
             <p className="text-xs tracking-wide text-red-400">{apiError}</p>
           </div>
         )}

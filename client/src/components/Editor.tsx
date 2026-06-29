@@ -36,6 +36,7 @@ import { BlogState, CultureState, PostState } from '../types/globals';
 import { BASE_URL } from '../App';
 import DOMPurify from 'dompurify';
 import { CustomKeyboardExtensions } from './EditorExtensions/CustomKeyboardExtensions';
+import { useThemeClasses } from '../hooks/useThemeClasses';
 
 const Editor = ({
   state,
@@ -352,28 +353,30 @@ const Editor = ({
     });
   }, [editorMode]);
 
+  const { tm, theme } = useThemeClasses();
+
   if (!authState.token || authState.user?.role !== 'admin')
     return <Navigate to={'/404'} replace />;
 
   return (
     <div className="w-full relative">
       <div
-        className={`w-full relative flex-col items-center justify-center py-20 bg-black
+        className={`w-full relative flex-col items-center justify-center py-20 ${tm.bg}
           ${askEmbedUrl ? 'pointer-events-none' : ''} 
           ${editorMode === 'preview' ? 'hidden' : 'flex'}`}
       >
         <div
-          className={`w-full h-full absolute top-0 z-10 bg-white bg-opacity-50 overflow-hidden
+          className={`w-full h-full absolute top-0 z-10 ${theme === 'dark' ? 'bg-white' : 'bg-black'} bg-opacity-50 overflow-hidden
             pointer-events-none ${askEmbedUrl ? '' : 'hidden'}`}
         ></div>
         {askEmbedUrl && (
           <div
-            className="fixed w-2/3 md:w-1/2 lg:w-1/3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
-              flex flex-col gap-5 items-center justify-center bg-black text-primary text-center p-5
-              rounded-xl pointer-events-auto z-50"
+            className={`fixed w-2/3 md:w-1/2 lg:w-1/3 top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 
+              flex flex-col gap-5 items-center justify-center ${tm.bg} text-primary text-center p-5
+              rounded-xl pointer-events-auto z-50`}
           >
             <MdCancel
-              className={`absolute text-[2rem] right-0 top-0 cursor-pointer m-5 bg-black 
+              className={`absolute text-[2rem] right-0 top-0 cursor-pointer m-5 ${tm.bg} 
                 text-primary rounded-full hover:scale-110 z-50`}
               onClick={() => {
                 setAskEmbedUrl(false);
@@ -385,7 +388,7 @@ const Editor = ({
             <input
               type="url"
               name="url"
-              className="w-4/5 p-2 text-black"
+              className="w-4/5 p-2 text-black bg-white"
               onInput={(e) => setEmbedUrl((e.target as HTMLInputElement).value)}
             />
             <Button
@@ -404,10 +407,10 @@ const Editor = ({
               outline: 'none',
               boxSizing: 'content-box',
             }}
-            className="text-4xl sm:text-5xl md:text-6xl text-center font-black tracking-tight
+            className={`text-4xl sm:text-5xl md:text-6xl text-center font-black tracking-tight
               text-transparent bg-clip-text bg-linear-to-r from-primary via-amber-400 to-primary
-              whitespace-pre-wrap wrap-break-word text-wrap leading-tight caret-white focus:outline-none
-              overflow-hidden resize-none"
+              whitespace-pre-wrap wrap-break-word text-wrap leading-tight ${theme === 'dark' ? 'caret-white' : 'caret-black'} focus:outline-none
+              overflow-hidden resize-none`}
             // className="text-primary w-4/5 text-4xl sm:text-6xl text-center font-bold bg-black overflow-hidden
             //   text-wrap focus:outline-none resize-none whitespace-pre-wrap wrap-break-word"
             value={title}
@@ -427,11 +430,11 @@ const Editor = ({
 
         <EditorContent
           editor={editor}
-          className="text-white text-[1.5rem]/[1.75rem] w-[90%] p-5 wrap-break-word text-justify whitespace-pre-wrap"
+          className={`${tm.text} text-[1.5rem]/[1.75rem] w-[90%] p-5 wrap-break-word text-justify whitespace-pre-wrap`}
         />
 
         <div className="flex md:flex-row flex-col gap-5 sticky bottom-10 items-center justify-center">
-          <div className="flex items-center justify-center gap-2 bg-white p-3 rounded-full">
+          <div className={`flex items-center justify-center gap-2 ${theme === 'dark' ? 'bg-white' : 'bg-gray-200'} p-3 rounded-full`}>
             <div
               className="relative flex flex-col items-center justify-center"
               ref={attachmentRef}
@@ -451,7 +454,7 @@ const Editor = ({
                 />
               </button>
               <ul
-                className={`list-none text-nowrap absolute left-0 bg-white text-center bottom-full 
+                className={`list-none text-nowrap absolute left-0 ${theme === 'dark' ? 'bg-white' : 'bg-gray-100'} text-center bottom-full 
                   mb-5 rounded-xl overflow-hidden transition-all duration-200 ${showAttachmentMenu ? 'h-auto' : 'h-0'}`}
               >
                 <li
@@ -476,7 +479,7 @@ const Editor = ({
             </div>
 
             <select
-              className="text-center outline-none cursor-pointer"
+              className={`text-center outline-none cursor-pointer ${theme === 'dark' ? 'text-black' : 'text-gray-700'}`}
               name="size"
               value={fontSize}
               onChange={handleFontSize}
@@ -489,7 +492,7 @@ const Editor = ({
 
             <button
               className={`cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${
-                editorState.bold ? 'text-primary scale-110' : 'text-black'
+                editorState.bold ? 'text-primary scale-110' : theme === 'dark' ? 'text-black' : 'text-gray-700'
               }`}
               onClick={() => handleClick('bold')}
             >
@@ -498,7 +501,7 @@ const Editor = ({
 
             <button
               className={`cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${
-                editorState.italic ? 'text-primary scale-110' : 'text-black'
+                editorState.italic ? 'text-primary scale-110' : theme === 'dark' ? 'text-black' : 'text-gray-700'
               }`}
               onClick={() => handleClick('italic')}
             >
@@ -507,7 +510,7 @@ const Editor = ({
 
             <button
               className={`cursor-pointer hover:scale-110 bg-none p-1 rounded-lg  ${
-                editorState.underline ? 'text-primary scale-110' : 'text-black'
+                editorState.underline ? 'text-primary scale-110' : theme === 'dark' ? 'text-black' : 'text-gray-700'
               }`}
               onClick={() => handleClick('underline')}
             >
@@ -515,30 +518,30 @@ const Editor = ({
             </button>
 
             <button
-              className={`cursor-pointer hover:scale-110 bg-none p-1 rounded-lg `}
+              className={`cursor-pointer hover:scale-110 bg-none p-1 rounded-lg ${theme === 'dark' ? 'text-black' : 'text-gray-700'} `}
               onClick={() => editor?.commands.toggleBlockquote()}
             >
               <GrBlockQuote />
             </button>
 
             <button
-              className="cursor-pointer hover:scale-110 bg-none p-1 rounded-lg text-black "
+              className={`cursor-pointer hover:scale-110 bg-none p-1 rounded-lg ${theme === 'dark' ? 'text-black ' : 'text-gray-700 '}`}
               onClick={() => editor.chain().focus().undo().run()}
             >
               <FaUndo />
             </button>
 
             <button
-              className="cursor-pointer hover:scale-110 bg-none p-1 rounded-lg text-black "
+              className={`cursor-pointer hover:scale-110 bg-none p-1 rounded-lg ${theme === 'dark' ? 'text-black ' : 'text-gray-700 '}`}
               onClick={() => editor.chain().focus().redo().run()}
             >
               <FaRedo />
             </button>
           </div>
 
-          <div className="bg-white p-3 rounded-full flex gap-3 items-center justify-center">
+          <div className={`${theme === 'dark' ? 'bg-white' : 'bg-gray-200'} p-3 rounded-full flex gap-3 items-center justify-center`}>
             <button
-              className={`text-[1.25rem] cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
+              className={`text-[1.25rem] cursor-pointer hover:scale-110 bg-none rounded-lg ${theme === 'dark' ? 'text-black' : 'text-gray-700'} 
                 ${editorMode === 'preview' ? 'text-primary' : ''}`}
               onClick={() => handlePreview()}
             >
@@ -546,7 +549,7 @@ const Editor = ({
             </button>
 
             <button
-              className={`cursor-pointer hover:scale-110 bg-none rounded-lg text-black 
+              className={`cursor-pointer hover:scale-110 bg-none rounded-lg ${theme === 'dark' ? 'text-black' : 'text-gray-700'} 
                 ${editorMode === 'preview' ? 'text-primary' : ''}`}
               onClick={() => handleSave()}
             >
@@ -558,12 +561,12 @@ const Editor = ({
 
       <div
         className={`w-full relative flex-col
-         items-center justify-center bg-black py-20 
+         items-center justify-center ${tm.bg} py-20 
           ${editorMode === 'preview' ? 'flex' : 'hidden'}`}
       >
         {
           <MdCancel
-            className={`absolute text-[2.5rem] right-0 top-0 cursor-pointer m-5 bg-black 
+            className={`absolute text-[2.5rem] right-0 top-0 cursor-pointer m-5 ${tm.bg} 
             text-primary rounded-full hover:scale-110 z-50`}
             id="cancel"
             onClick={() => {
@@ -574,7 +577,7 @@ const Editor = ({
         <Title title={title} />
 
         <div
-          className="text-white text-[1.5rem]/[1.75rem] w-[90%] p-5 wrap-break-word whitespace-pre-wrap text-justify"
+          className={`${tm.text} text-[1.5rem]/[1.75rem] w-[90%] p-5 wrap-break-word whitespace-pre-wrap text-justify`}
           dangerouslySetInnerHTML={{
             __html: DOMPurify.sanitize(cleanHtml(body)),
           }}
